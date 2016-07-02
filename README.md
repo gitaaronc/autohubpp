@@ -29,8 +29,9 @@ Intention of Project
 This is the backend server software only. I currently run it on a Beaglebone Black. The front end used with this project is 
 Home Assistant. 
 
-A very simple python library was written to communicate with this server software. Autohub components were also written to be included 
+A very simple python library was written to communicate with this server software. Autohub components were also written for us with
 with Home Assistant.
+ - Python library for autohub: https://github.com/gitaaronc/pyautohub
 
 This is the initial push to the repo, additional documentation will follow.
 
