@@ -32,9 +32,12 @@ Home Assistant. https://github.com/home-assistant/home-assistant
 A very simple python library was written to communicate with this server software. Autohub components were also written for us with
 with Home Assistant.
  - Python library for autohub: https://github.com/gitaaronc/pyautohub
+Autohubpp has only recently been modified to work with Home Assistant. The python libraries are young and my python skills are limited. If there are any python developers willing to take part, please contact me.
 
 This is the initial push to the repo, additional documentation will follow.
 
 If you are interested in helping with the development of this project please contact me.
+
+More C++ and Python developers required!!
 
 Thanks.
