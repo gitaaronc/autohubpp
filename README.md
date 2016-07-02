@@ -27,7 +27,7 @@ Intention of Project
   - To learn from other C++ developers and help other C++ developers learn.
 
 This is the backend server software only. I currently run it on a Beaglebone Black. The front end used with this project is 
-Home Assistant. 
+Home Assistant. https://github.com/home-assistant/home-assistant 
 
 A very simple python library was written to communicate with this server software. Autohub components were also written for us with
 with Home Assistant.
