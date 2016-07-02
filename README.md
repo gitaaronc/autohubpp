@@ -5,10 +5,12 @@ This is the initial push to github.
 Documentation will be made available.
 
 Intention of Project
+
  To create a fully customizable home automation hub.
  This server software is written in C++. It was designed to provide TCP/IP support to Insteon PLM.
  PLM's supported: Serial / USB
- Additional support for Insteon Hub is available but has not been pushed to my github repo.
+ Additional support for Insteon Hub is available but has not been pushed to my github repo. 
+ <b>NO</b> Insteon accounts are required.
  
  Requirements
  - Boost
