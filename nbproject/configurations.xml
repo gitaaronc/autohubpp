@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="90">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="include" displayName="include" projectFiles="true">
+      <logicalFolder name="insteon" displayName="insteon" projectFiles="true">
+        <logicalFolder name="detail" displayName="detail" projectFiles="true">
+          <itemPath>include/insteon/detail/InsteonController_impl.h</itemPath>
+          <itemPath>include/insteon/detail/InsteonDeviceImpl.cpp</itemPath>
+          <itemPath>include/insteon/detail/InsteonDeviceImpl.hpp</itemPath>
+        </logicalFolder>
+        <itemPath>include/insteon/EchoStatus.hpp</itemPath>
+        <itemPath>include/insteon/InsteonAddress.h</itemPath>
+        <itemPath>include/insteon/InsteonController.h</itemPath>
+        <itemPath>include/insteon/InsteonControllerGroupCommands.h</itemPath>
+        <itemPath>include/insteon/InsteonDevice.hpp</itemPath>
+        <itemPath>include/insteon/InsteonDeviceCommands.hpp</itemPath>
+        <itemPath>include/insteon/InsteonLinkMode.h</itemPath>
+        <itemPath>include/insteon/InsteonMessage.hpp</itemPath>
+        <itemPath>include/insteon/InsteonMessageType.hpp</itemPath>
+        <itemPath>include/insteon/InsteonNetwork.hpp</itemPath>
+        <itemPath>include/insteon/InsteonProtocol.hpp</itemPath>
+        <itemPath>include/insteon/MessageProcessor.hpp</itemPath>
+        <itemPath>include/insteon/PropertyKey.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="io" displayName="io" projectFiles="true">
+        <itemPath>include/io/SerialPort.h</itemPath>
+        <itemPath>include/io/ioport.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="json" displayName="json" projectFiles="true">
+        <itemPath>include/json/json-forwards.h</itemPath>
+        <itemPath>include/json/json.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="system" displayName="system" projectFiles="true">
+        <itemPath>include/system/AutoResetEvent.hpp</itemPath>
+        <itemPath>include/system/Timer.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="utils" displayName="utils" projectFiles="true">
+        <itemPath>include/utils/utils.cpp</itemPath>
+        <itemPath>include/utils/utils.hpp</itemPath>
+      </logicalFolder>
+      <itemPath>include/Autohub.hpp</itemPath>
+      <itemPath>include/DynamicLibrary.hpp</itemPath>
+      <itemPath>include/Logger.h</itemPath>
+      <itemPath>include/autoapi.hpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>AutoResetEvent.cpp</itemPath>
+      <itemPath>Autohub.cpp</itemPath>
+      <itemPath>DynamicLibrary.cpp</itemPath>
+      <itemPath>InsteonController.cpp</itemPath>
+      <itemPath>InsteonDevice.cpp</itemPath>
+      <itemPath>InsteonNetwork.cpp</itemPath>
+      <itemPath>InsteonProtocol.cpp</itemPath>
+      <itemPath>Logger.cpp</itemPath>
+      <itemPath>MessageProcessor.cpp</itemPath>
+      <itemPath>PropertyKeyNames.cpp</itemPath>
+      <itemPath>SerialPort.cpp</itemPath>
+      <itemPath>Timer.cpp</itemPath>
+      <itemPath>autoapi.cpp</itemPath>
+      <itemPath>jsoncpp.cpp</itemPath>
+      <itemPath>main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>source</Elem>
+    <Elem>include</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>true</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>/root/c++/restbed/distribution/include</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>BOOST_FILESYSTEM_NO_DEPRECATED</Elem>
+            <Elem>BOOST_LOG_DYN_LINK</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibLibItem>boost_system</linkerLibLibItem>
+            <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
+            <linkerLibLibItem>boost_log</linkerLibLibItem>
+            <linkerLibLibItem>boost_thread</linkerLibLibItem>
+            <linkerLibLibItem>dl</linkerLibLibItem>
+            <linkerLibLibItem>restbed</linkerLibLibItem>
+            <linkerLibLibItem>crypto</linkerLibLibItem>
+            <linkerLibLibItem>ssl</linkerLibLibItem>
+          </linkerLibItems>
+          <commandLine>-pthread -rdynamic</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="AutoResetEvent.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Autohub.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DynamicLibrary.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonController.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonDevice.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonNetwork.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonProtocol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MessageProcessor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PropertyKeyNames.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="autoapi.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="include/Autohub.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/DynamicLibrary.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/autoapi.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/EchoStatus.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonAddress.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonController.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonControllerGroupCommands.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonDevice.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonDeviceCommands.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonLinkMode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonMessage.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonMessageType.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonNetwork.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonProtocol.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/MessageProcessor.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/PropertyKey.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/detail/InsteonController_impl.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/detail/InsteonDeviceImpl.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/detail/InsteonDeviceImpl.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/io/SerialPort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/io/ioport.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/json/json-forwards.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/json/json.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/system/AutoResetEvent.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/system/Timer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/utils/utils.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="include/utils/utils.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="jsoncpp.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="AutoResetEvent.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Autohub.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DynamicLibrary.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonController.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonDevice.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonNetwork.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InsteonProtocol.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="MessageProcessor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PropertyKeyNames.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="autoapi.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="include/Autohub.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/DynamicLibrary.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/autoapi.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/EchoStatus.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonAddress.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonController.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonControllerGroupCommands.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonDevice.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonDeviceCommands.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonLinkMode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonMessage.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonMessageType.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonNetwork.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/InsteonProtocol.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/MessageProcessor.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/PropertyKey.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/detail/InsteonController_impl.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/detail/InsteonDeviceImpl.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="include/insteon/detail/InsteonDeviceImpl.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="include/io/SerialPort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/io/ioport.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/json/json-forwards.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/json/json.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/system/AutoResetEvent.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/system/Timer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/utils/utils.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="include/utils/utils.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="jsoncpp.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
