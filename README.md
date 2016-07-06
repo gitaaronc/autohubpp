@@ -28,13 +28,18 @@ Intention of Project
 
 This is the backend server software only. I currently run it on a Beaglebone Black. The front end used with this project is 
 Home Assistant. https://github.com/home-assistant/home-assistant 
+Any frontend GUI supporting restapi or websockets will work with this server.
 
-A very simple python library was written to communicate with this server software. Autohub components were also written for us with
-with Home Assistant.
+A very simple python library was written for homeassistant to communicate with this server software. Autohub components were also written for use with with Home Assistant.
  - Python library for autohub: https://github.com/gitaaronc/pyautohub
 Autohubpp has only recently been modified to work with Home Assistant. The python libraries are young and my python skills are limited. If there are any python developers willing to take part, please contact me.
 
 This is the initial push to the repo, additional documentation will follow.
+
+Server supports restapi and websockets. Rest and Websockets are used for controlling devices and receiving updates.
+TODO: 
+ - Documentation
+ - configuration class to hold settings such as serial port, binding ip address, device retries, timeouts, etc. As there is no configuration/settings object in the project you can set your serial port on line 79 of MessageProcessor.cpp
 
 If you are interested in helping with the development of this project please contact me.
 
