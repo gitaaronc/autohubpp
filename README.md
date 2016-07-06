@@ -42,6 +42,7 @@ TODO:
  - configuration class to hold settings such as serial port, binding ip address, device retries, timeouts, etc. As there is no configuration/settings object in the project you can set your serial port on line 79 of MessageProcessor.cpp
 
 Sample json output for a device:
+```json
 {
    "device_address_" : 2608693,
    "device_name_" : "0x0027ce35",
@@ -65,7 +66,7 @@ Sample json output for a device:
       "x10_unit_code" : 32
    }
 }
-
+```
 If you are interested in helping with the development of this project please contact me.
 
 More C++ and Python developers required!!
