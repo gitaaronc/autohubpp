@@ -41,6 +41,31 @@ TODO:
  - Documentation
  - configuration class to hold settings such as serial port, binding ip address, device retries, timeouts, etc. As there is no configuration/settings object in the project you can set your serial port on line 79 of MessageProcessor.cpp
 
+Sample json output for a device:
+{
+   "device_address_" : 2608693,
+   "device_name_" : "0x0027ce35",
+   "event" : "deviceUpdate",
+   "properties_" : {
+      "button_on_level" : 255,
+      "button_on_ramp_rate" : 31,
+      "device_category" : 2,
+      "device_engine_version" : 2,
+      "device_firmware_version" : 70,
+      "device_subcategory" : 55,
+      "enable_blink_on_traffic" : 0,
+      "enable_led" : 0,
+      "enable_load_sense" : 0,
+      "enable_programming_lock" : 1,
+      "enable_resume_dim" : 0,
+      "light_status" : 0,
+      "link_database_delta" : 1,
+      "signal_to_noise_threshold" : 127,
+      "x10_house_code" : 32,
+      "x10_unit_code" : 32
+   }
+}
+
 If you are interested in helping with the development of this project please contact me.
 
 More C++ and Python developers required!!
