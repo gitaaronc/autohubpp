@@ -12,14 +12,6 @@ Intention of Project
  Additional support for Insteon Hub is available but has not been pushed to my github repo. 
  <b>NO</b> Insteon accounts are required.
  
- Requirements
- - Boost
- - websocketpp
- - jsoncpp
- - restbed
-
- Links/Sub repos to required libraries will be added to this repo.
- 
  I have decided to open source this project for various reasons. 
   - To increase support for Insteon hardware in the open source community.
   - Software development is vary time consuming. I simply do not have the spare time to support a project of this size by myself.
@@ -141,6 +133,32 @@ Devicelist sample
    "event" : "deviceList"
 }
 ```
+You must have all the the required dependencies to compile autohubpp.
+First ensure you have at least version 1.60 of the boost libraries installed.
+
+I recommend creating a dev directory and cloning the following repositories into it.
+
+RESTBED
+git clone --recursive https://github.com/gitaaronc/restbed.git
+Follow the instructions for compiling and installing restbed: https://github.com/gitaaronc/restbed
+
+WEBSOCKETPP
+git clone https://github.com/gitaaronc/websocketpp.git
+
+AUTOHUBPP
+Clone this repository.
+
+Compiling
+I compile and run everything in linux. All of this should compile and run under windows but it hasn't been tested.
+I do use Netbeans as an IDE on windows, but all compiling is done remotely on linux.
+
+The compiler must be able to find the header files included with the above dependencies.
+I create a softlink inside of /usr/include
+ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp
+ln -s /{GIT_REPO_ROOT}/restbed restbed
+Once you have the dependencies in place and the symbolic links created you can run make.
+
+If there are any masters of CMake out there, an automated process is needed.
 If you are interested in helping with the development of this project please contact me.
 
 More C++ and Python developers required!!
