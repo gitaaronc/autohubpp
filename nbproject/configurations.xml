@@ -149,6 +149,8 @@
       </item>
       <item path="include/autoapi.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="include/config.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="include/insteon/EchoStatus.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/insteon/InsteonAddress.h" ex="false" tool="3" flavor2="0">
@@ -282,6 +284,8 @@
       <item path="include/Logger.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/autoapi.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/config.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/insteon/EchoStatus.hpp" ex="false" tool="3" flavor2="0">
       </item>
