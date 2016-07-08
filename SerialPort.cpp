@@ -118,7 +118,7 @@ SerialPort::close() {
  * @param msTimeout The amount of time(milliseconds) to wait before canceling
  * @return Returns the number of bytes transferred to the buffer
  */
-unsigned int
+std::size_t
 SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
         int msTimeout) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -127,7 +127,7 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
     std::vector<unsigned char> data;
     data.resize(512);
 
-    std::future<unsigned int> read_result = serial_port_->async_read_some(
+    std::future<std::size_t> read_result = serial_port_->async_read_some(
             boost::asio::buffer(data), boost::asio::use_future);
     std::future_status status;
     do {

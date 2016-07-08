@@ -70,7 +70,7 @@ public:
     }
     void close();
 
-    unsigned int recv_with_timeout(std::vector<unsigned char>& buffer,
+    std::size_t recv_with_timeout(std::vector<unsigned char>& buffer,
             int msTimeout = 50);
     unsigned int recv_buffer(std::vector<unsigned char>& buffer);
     unsigned int send_buffer(std::vector<unsigned char>& buffer);
