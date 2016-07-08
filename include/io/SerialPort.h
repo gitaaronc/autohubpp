@@ -61,7 +61,7 @@ public:
         close();
     }
 
-    bool open(const std::string& com_port_name, int baud_rate = 9600);
+    bool open(const std::string& com_port_name, const int baud_rate = 9600);
     void async_read_some();
 
     void

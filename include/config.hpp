@@ -12,8 +12,8 @@
 
 namespace ace {
 namespace config {
-static std::string serial_port = "/dev/ttyUSB0";
-static int baud_rate = 19200;
+const std::string serial_port = "/dev/ttyUSB0";
+const int baud_rate = 19200;
 }
 }
 
