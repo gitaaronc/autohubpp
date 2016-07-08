@@ -39,7 +39,7 @@ This is the initial push to the repo, additional documentation will follow.
 Server supports restapi and websockets. Rest and Websockets are used for controlling devices and receiving updates.
 TODO: 
  - Documentation
- - configuration class to hold settings such as serial port, binding ip address, device retries, timeouts, etc. As there is no configuration/settings object in the project you can set your serial port on line 79 of MessageProcessor.cpp
+ - configuration class to hold settings such as serial port. Currently settings are stored in "include/config.hpp"
 
 Sample json output for a device:
 ```json
