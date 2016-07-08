@@ -93,6 +93,9 @@
       <compileType>
         <ccTool>
           <standard>8</standard>
+          <incDir>
+            <pElem>/usr/include/restbed</pElem>
+          </incDir>
           <preprocessorList>
             <Elem>BOOST_FILESYSTEM_NO_DEPRECATED</Elem>
             <Elem>BOOST_LOG_DYN_LINK</Elem>
