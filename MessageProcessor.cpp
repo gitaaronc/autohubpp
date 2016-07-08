@@ -29,7 +29,6 @@
 #include "include/utils/utils.hpp"
 #include "include/Logger.h"
 #include "include/system/Timer.hpp"
-#include "include/config.hpp"
 
 #include <iostream>
 #include <iomanip>

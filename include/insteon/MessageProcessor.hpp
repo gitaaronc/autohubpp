@@ -36,6 +36,7 @@
 
 #include <boost/asio.hpp>
 
+#include "../config.hpp"
 #include "EchoStatus.hpp"
 #include "InsteonProtocol.hpp"
 #include "../io/SerialPort.h"
