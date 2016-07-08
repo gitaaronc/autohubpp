@@ -94,7 +94,7 @@
         <ccTool>
           <standard>8</standard>
           <incDir>
-            <pElem>dependency</pElem>
+            <pElem>./dependency</pElem>
             <pElem>/usr/include/restbed</pElem>
           </incDir>
           <preprocessorList>
