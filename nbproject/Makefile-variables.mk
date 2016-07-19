@@ -7,21 +7,21 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=GNU-Linux-x86
-CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
+CND_PLATFORM_Debug=GNU-Linux
+CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
 CND_ARTIFACT_NAME_Debug=autohubpp
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/autohubpp
-CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/autohubpp
+CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
 CND_PACKAGE_NAME_Debug=autohubpp.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/autohubpp.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/autohubpp.tar
 # Release configuration
-CND_PLATFORM_Release=GNU-Linux-x86
-CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
+CND_PLATFORM_Release=None-Windows
+CND_ARTIFACT_DIR_Release=dist/Release/None-Windows
 CND_ARTIFACT_NAME_Release=autohubpp
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/autohubpp
-CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
+CND_ARTIFACT_PATH_Release=dist/Release/None-Windows/autohubpp
+CND_PACKAGE_DIR_Release=dist/Release/None-Windows/package
 CND_PACKAGE_NAME_Release=autohubpp.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/autohubpp.tar
+CND_PACKAGE_PATH_Release=dist/Release/None-Windows/package/autohubpp.tar
 #
 # include compiler specific variables
 #

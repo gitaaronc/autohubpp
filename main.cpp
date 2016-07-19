@@ -28,6 +28,7 @@
 #include "include/Autohub.hpp"
 #include "include/insteon/InsteonNetwork.hpp"
 #include "include/Logger.h"
+#include "include/config.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -40,7 +41,40 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/signal_set.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 int main(int argc, char** argv) {
+    if (argc < 2){
+        std::cout << "No arguments found on the command line.\n";
+        std::cout << "Expecting configuration file on the command line.\n";
+        std::cout << "eg: autohubpp /etc/autohubpp.yaml\n";
+        return 0;
+    }
+    std::string config_file_;
+    config_file_.assign(argv[1]);
+    YAML::Node config;
+    try {
+        config = YAML::LoadFile(config_file_);
+    } catch (const std::exception& e){
+        std::cout << e.what() << "\n";
+        return 0;
+    }
+    
+    YAML::Node node_plm = config["autohub"];
+    std::cout << node_plm;
+    
+    if (config["logging_mode"]){
+        std::cout << "LOGGING MODE: " << config["logging_mode"].as<std::string>() <<std::endl;
+    }
+   
+    if (config["PLM"]["serial_port"])
+        ace::config::serial_port_.assign(config["PLM"]["serial_port"].as<std::string>());
+    
+    if (config["PLM"]["baud_rate"])
+        ace::config::baud_rate_ = config["PLM"]["baud_rate"].as<int>();
+
+    if (config["WEBSOCKET"]["listening_port"])
+        ace::config::wspp_port = config["WEBSOCKET"]["listening_port"].as<int>();
     ace::utils::Logger::Instance().SetLoggingMode(
             ace::utils::Logger::VERBOSE);
 

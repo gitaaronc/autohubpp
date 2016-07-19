@@ -12,8 +12,9 @@
 
 namespace ace {
 namespace config {
-const std::string serial_port = "/dev/ttyUSB0";
-const int baud_rate = 19200;
+extern std::string serial_port_;
+extern int baud_rate_;
+extern int wspp_port;
 }
 }
 

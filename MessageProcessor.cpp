@@ -29,6 +29,7 @@
 #include "include/utils/utils.hpp"
 #include "include/Logger.h"
 #include "include/system/Timer.hpp"
+#include "include/config.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -76,7 +77,7 @@ MessageProcessor::Connect() {
     data_port_ = std::move(port);
     data_port_->set_recv_handler(std::bind(
             &type::ProcessData, this));
-    if (data_port_->open(config::serial_port, config::baud_rate)) {
+    if (data_port_->open(config::serial_port_, config::baud_rate_)) {
         data_port_->async_read_some();
     }
     //    std::vector<unsigned char> temp1 = { 0x60 };

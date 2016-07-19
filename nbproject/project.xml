@@ -12,6 +12,7 @@
             <sourceRootList>
                 <sourceRootElem>source</sourceRootElem>
                 <sourceRootElem>include</sourceRootElem>
+                <sourceRootElem>nbproject</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

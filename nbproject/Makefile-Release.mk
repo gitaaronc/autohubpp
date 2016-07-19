@@ -21,8 +21,8 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
-CND_DLIB_EXT=so
+CND_PLATFORM=None-Windows
+CND_DLIB_EXT=dll
 CND_CONF=Release
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -48,6 +48,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/SerialPort.o \
 	${OBJECTDIR}/Timer.o \
 	${OBJECTDIR}/autoapi.o \
+	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o \
 	${OBJECTDIR}/include/utils/utils.o \
 	${OBJECTDIR}/jsoncpp.o \
@@ -72,9 +73,9 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp.exe
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp ${OBJECTFILES} ${LDLIBSOPTIONS}
 
@@ -143,6 +144,11 @@ ${OBJECTDIR}/autoapi.o: autoapi.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/autoapi.o autoapi.cpp
 
+${OBJECTDIR}/config.o: config.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/config.o config.cpp
+
 ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o: include/insteon/detail/InsteonDeviceImpl.cpp 
 	${MKDIR} -p ${OBJECTDIR}/include/insteon/detail
 	${RM} "$@.d"
@@ -169,7 +175,7 @@ ${OBJECTDIR}/main.o: main.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp.exe
 
 # Subprojects
 .clean-subprojects:

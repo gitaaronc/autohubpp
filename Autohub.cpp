@@ -32,6 +32,7 @@
 
 #include "include/json/json.h"
 #include "include/json/json-forwards.h"
+#include "include/config.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -174,7 +175,7 @@ Autohub::wsppEmit(websocketpp::connection_hdl hdl, const std::string& buf) {
 }
 
 void
-Autohub::TestPlugin() {
+Autohub::TestPlugin() {/*
     std::string fileName = "libauto_plug1.so";
     std::string errorString;
 
@@ -190,7 +191,7 @@ Autohub::TestPlugin() {
     if (obj) {
         d->set_object(obj);
         dynamicLibraryMap_[obj->name()] = d;
-    }
+    }*/
 }
 
 std::shared_ptr<DynamicLibrary>
@@ -234,8 +235,12 @@ Autohub::start() {
     wspp_server_.set_message_handler(bind(&Autohub::wsppOnMessage,
             this, std::placeholders::_1, std::placeholders::_2));
 
-    wspp_server_.listen(8080);
+    try {
+    wspp_server_.listen(ace::config::wspp_port);
     wspp_server_.start_accept();
+    } catch(std::exception& e){
+        std::cout << e.what() << std::endl;
+    }
 
     wspp_server_thread_ = std::move(std::thread(
             std::bind(&wspp_server::run, &wspp_server_)));

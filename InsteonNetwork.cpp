@@ -205,6 +205,12 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
 
 }
 
+/**
+ * Sets the update handler. The update handler will be called by the network
+ * when an update occurs. ie: switch turned on or off.
+ * 
+ * @param callback
+ */
 void
 InsteonNetwork::set_update_handler(
         std::function<void(Json::Value) > callback) {
