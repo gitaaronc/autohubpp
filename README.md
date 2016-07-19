@@ -31,121 +31,34 @@ TODO:
  - Documentation
  - configuration class to hold settings such as serial port. Currently settings are stored in "include/config.hpp"
 
-Sample json output for a device:
-```json
-{
-   "device_address_" : 2608693,
-   "device_name_" : "0x0027ce35",
-   "event" : "deviceUpdate",
-   "properties_" : {
-      "button_on_level" : 255,
-      "button_on_ramp_rate" : 31,
-      "device_category" : 2,
-      "device_engine_version" : 2,
-      "device_firmware_version" : 70,
-      "device_subcategory" : 55,
-      "enable_blink_on_traffic" : 0,
-      "enable_led" : 0,
-      "enable_load_sense" : 0,
-      "enable_programming_lock" : 1,
-      "enable_resume_dim" : 0,
-      "light_status" : 0,
-      "link_database_delta" : 1,
-      "signal_to_noise_threshold" : 127,
-      "x10_house_code" : 32,
-      "x10_unit_code" : 32
-   }
-}
-```
-Devicelist sample
-```
-{
-   "devices" : [
-      {
-         "device_address_" : 2547435,
-         "device_name_" : "0x0026deeb",
-         "properties_" : {
-            "button_on_level" : 127,
-            "button_on_ramp_rate" : 31,
-            "device_category" : 1,
-            "device_engine_version" : 0,
-            "device_firmware_version" : 65,
-            "device_subcategory" : 14,
-            "enable_blink_on_traffic" : 0,
-            "enable_led" : 0,
-            "enable_load_sense" : 0,
-            "enable_programming_lock" : 0,
-            "enable_resume_dim" : 0,
-            "light_status" : 0,
-            "link_database_delta" : 46,
-            "signal_to_noise_threshold" : 32,
-            "x10_house_code" : 32,
-            "x10_unit_code" : 0
-         }
-      },
-      {
-         "device_address_" : 2608693,
-         "device_name_" : "0x0027ce35",
-         "properties_" : {
-            "button_on_level" : 255,
-            "button_on_ramp_rate" : 31,
-            "device_category" : 2,
-            "device_engine_version" : 2,
-            "device_firmware_version" : 70,
-            "device_subcategory" : 55,
-            "enable_blink_on_traffic" : 0,
-            "enable_led" : 0,
-            "enable_load_sense" : 0,
-            "enable_programming_lock" : 1,
-            "enable_resume_dim" : 0,
-            "light_status" : 0,
-            "link_database_delta" : 1,
-            "signal_to_noise_threshold" : 127,
-            "x10_house_code" : 32,
-            "x10_unit_code" : 32
-         }
-      },
-      {
-         "device_address_" : 2746061,
-         "device_name_" : "0x0029e6cd",
-         "properties_" : {
-            "button_on_level" : 25,
-            "button_on_ramp_rate" : 31,
-            "device_category" : 1,
-            "device_engine_version" : 2,
-            "device_firmware_version" : 65,
-            "device_subcategory" : 32,
-            "enable_blink_on_traffic" : 0,
-            "enable_led" : 0,
-            "enable_load_sense" : 0,
-            "enable_programming_lock" : 0,
-            "enable_resume_dim" : 0,
-            "light_status" : 0,
-            "link_database_delta" : 5,
-            "signal_to_noise_threshold" : 32,
-            "x10_house_code" : 32,
-            "x10_unit_code" : 32
-         }
-      }
-   ],
-   "event" : "deviceList"
-}
-```
 You must have all the the required dependencies to compile autohubpp.
-First ensure you have at least version 1.60 of the boost libraries installed.
+First ensure you have at least version 1.55 of the boost libraries installed.
+apt-get install libboost-all-dev<br/>
 
 I recommend creating a dev directory and cloning the following repositories into it.
+
+ie:<br/>
+```
+-dev
+--restbed
+--websocketpp
+--yaml-cpp
+--autohubpp
+```
 
 <b>RESTBED</b><br/>
 git clone --recursive https://github.com/gitaaronc/restbed.git<br/>
 Follow the instructions for compiling and installing restbed: https://github.com/gitaaronc/restbed<br/>
 
 <b>WEBSOCKETPP</b><br/>
-git clone https://github.com/gitaaronc/websocketpp.git
+git clone https://github.com/gitaaronc/websocketpp.git<br/>
+
+<b>YAML-CPP</b><br/>
+https://github.com/gitaaronc/yaml-cpp.git
+Follow the instructions for compiling provided in theyaml-cpp repo.<br/>
 
 <b>AUTOHUBPP</b><br/>
 Clone this repository.
-
 
 <b>Compiling</b><br/>
  I compile and run everything in linux. All of this should compile and run under windows but it hasn't been tested.<br />
@@ -155,11 +68,29 @@ Clone this repository.
  I create a softlink inside of /usr/include<br />
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
  ln -s /{GIT_REPO_ROOT}/restbed restbed<br />
+ ln -s /{GIT_REPO_ROOT}/yaml-cpp yaml-cpp<br />
  Once you have the dependencies in place and the symbolic links created you can run make.<br />
-
+ The libraries created by the above dependencies will require placement into your /usr/lib folder.</br>
+ Rather than moving or copying the required libraries, I create symbolic links using the above method.<br/>
+ 
  If there are any masters of CMake out there, an automated process is needed.<br />
  If you are interested in helping with the development of this project please contact me.<br />
 
+<b>Running/Configuration</b><br/>
+A yaml configuration file must be specified on the command line.
+ex: autohubpp /etc/configuration.yaml</br>
+example yaml configuration file<br/>
+```
+# loggin mode
+logging_mode: VERBOSE
+# INSTEON PLM Information
+PLM:
+  serial_port: /dev/ttyUSB0
+  baud_rate: 19200
+# WEBSOCKET listening information
+WEBSOCKETPP:
+  listening_port: 9100
+```
 More C++ and Python developers required!!
 
 Thanks.
