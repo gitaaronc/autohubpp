@@ -23,6 +23,7 @@ A very simple python library was written for homeassistant to communicate with t
 Autohub components were also written for use with with Home Assistant.
  - Python library for autohub: https://github.com/gitaaronc/pyautohub
  - If there are any python developers willing to take part, please contact me.
+ - HomeAssistant integration can be found in my homeassistant repo, branch autohub.
 
 This is the initial push to the repo, additional documentation will follow.
 
