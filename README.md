@@ -32,13 +32,11 @@ TODO:
  - Documentation
  - configuration class to hold settings such as serial port. Currently settings are stored in "include/config.hpp"
 
-You must have all the the required dependencies to compile autohubpp.
-First ensure you have at least version 1.55 of the boost libraries installed.
-apt-get install libboost-all-dev<br/>
+You must have all the the required dependencies to compile autohubpp.<br/>
+First ensure you have at least version 1.55 of the boost libraries installed.<br/>
+<b>apt-get install libboost-all-dev</b><br/>
 
-I recommend creating a dev directory and cloning the following repositories into it.
-
-ie:<br/>
+It's recommended to create a dev directory and clone the following repositories into it.
 ```
 -dev
 --restbed
@@ -46,7 +44,6 @@ ie:<br/>
 --yaml-cpp
 --autohubpp
 ```
-
 <b>RESTBED</b><br/>
 git clone --recursive https://github.com/gitaaronc/restbed.git<br/>
 Follow the instructions for compiling and installing restbed: https://github.com/gitaaronc/restbed<br/>
