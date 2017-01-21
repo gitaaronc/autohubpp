@@ -36,9 +36,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <corvusoft/restbed/service.hpp>
-#include <corvusoft/restbed/status_code.hpp>
-#include <corvusoft/restbed/session.hpp>
+//#include <corvusoft/restbed/service.hpp>
+//#include <corvusoft/restbed/status_code.hpp>
+//#include <corvusoft/restbed/session.hpp>
 
 namespace ace {
 
@@ -164,9 +164,9 @@ Autohub::OnUpdateDevice(Json::Value json) {
     }
 }
 
-// Emit is a work around. I gave up casting a function pointer of an 
+// wsppEmit is a work around. I gave up casting a function pointer of an 
 // overloaded function (&wspp_server::send) to work with bind
-// TODO: omit Emit!!
+// TODO: omit wsppEmit!!
 
 void
 Autohub::wsppEmit(websocketpp::connection_hdl hdl, const std::string& buf) {

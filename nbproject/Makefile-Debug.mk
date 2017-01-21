@@ -46,10 +46,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/MessageProcessor.o \
 	${OBJECTDIR}/PropertyKeyNames.o \
 	${OBJECTDIR}/SerialPort.o \
-	${OBJECTDIR}/Timer.o \
 	${OBJECTDIR}/autoapi.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o \
+	${OBJECTDIR}/include/system/Timer.o \
 	${OBJECTDIR}/include/utils/utils.o \
 	${OBJECTDIR}/jsoncpp.o \
 	${OBJECTDIR}/main.o
@@ -82,92 +82,92 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/autohubpp: ${OBJECTFILES}
 ${OBJECTDIR}/AutoResetEvent.o: nbproject/Makefile-${CND_CONF}.mk AutoResetEvent.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AutoResetEvent.o AutoResetEvent.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AutoResetEvent.o AutoResetEvent.cpp
 
 ${OBJECTDIR}/Autohub.o: nbproject/Makefile-${CND_CONF}.mk Autohub.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Autohub.o Autohub.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Autohub.o Autohub.cpp
 
 ${OBJECTDIR}/DynamicLibrary.o: nbproject/Makefile-${CND_CONF}.mk DynamicLibrary.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DynamicLibrary.o DynamicLibrary.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DynamicLibrary.o DynamicLibrary.cpp
 
 ${OBJECTDIR}/InsteonController.o: nbproject/Makefile-${CND_CONF}.mk InsteonController.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonController.o InsteonController.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonController.o InsteonController.cpp
 
 ${OBJECTDIR}/InsteonDevice.o: nbproject/Makefile-${CND_CONF}.mk InsteonDevice.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonDevice.o InsteonDevice.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonDevice.o InsteonDevice.cpp
 
 ${OBJECTDIR}/InsteonNetwork.o: nbproject/Makefile-${CND_CONF}.mk InsteonNetwork.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonNetwork.o InsteonNetwork.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonNetwork.o InsteonNetwork.cpp
 
 ${OBJECTDIR}/InsteonProtocol.o: nbproject/Makefile-${CND_CONF}.mk InsteonProtocol.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonProtocol.o InsteonProtocol.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InsteonProtocol.o InsteonProtocol.cpp
 
 ${OBJECTDIR}/Logger.o: nbproject/Makefile-${CND_CONF}.mk Logger.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Logger.o Logger.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Logger.o Logger.cpp
 
 ${OBJECTDIR}/MessageProcessor.o: nbproject/Makefile-${CND_CONF}.mk MessageProcessor.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MessageProcessor.o MessageProcessor.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MessageProcessor.o MessageProcessor.cpp
 
 ${OBJECTDIR}/PropertyKeyNames.o: nbproject/Makefile-${CND_CONF}.mk PropertyKeyNames.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PropertyKeyNames.o PropertyKeyNames.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PropertyKeyNames.o PropertyKeyNames.cpp
 
 ${OBJECTDIR}/SerialPort.o: nbproject/Makefile-${CND_CONF}.mk SerialPort.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SerialPort.o SerialPort.cpp
-
-${OBJECTDIR}/Timer.o: nbproject/Makefile-${CND_CONF}.mk Timer.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Timer.o Timer.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SerialPort.o SerialPort.cpp
 
 ${OBJECTDIR}/autoapi.o: nbproject/Makefile-${CND_CONF}.mk autoapi.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/autoapi.o autoapi.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/autoapi.o autoapi.cpp
 
 ${OBJECTDIR}/config.o: nbproject/Makefile-${CND_CONF}.mk config.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/config.o config.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/config.o config.cpp
 
 ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o: nbproject/Makefile-${CND_CONF}.mk include/insteon/detail/InsteonDeviceImpl.cpp 
 	${MKDIR} -p ${OBJECTDIR}/include/insteon/detail
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o include/insteon/detail/InsteonDeviceImpl.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o include/insteon/detail/InsteonDeviceImpl.cpp
+
+${OBJECTDIR}/include/system/Timer.o: nbproject/Makefile-${CND_CONF}.mk include/system/Timer.cpp 
+	${MKDIR} -p ${OBJECTDIR}/include/system
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/system/Timer.o include/system/Timer.cpp
 
 ${OBJECTDIR}/include/utils/utils.o: nbproject/Makefile-${CND_CONF}.mk include/utils/utils.cpp 
 	${MKDIR} -p ${OBJECTDIR}/include/utils
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/utils/utils.o include/utils/utils.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/utils/utils.o include/utils/utils.cpp
 
 ${OBJECTDIR}/jsoncpp.o: nbproject/Makefile-${CND_CONF}.mk jsoncpp.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/jsoncpp.o jsoncpp.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/jsoncpp.o jsoncpp.cpp
 
 ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/restbed -I/usr/include/websocketpp -I/usr/include/yaml-cpp -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:

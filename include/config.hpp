@@ -12,9 +12,11 @@
 
 namespace ace {
 namespace config {
-extern std::string serial_port_;
-extern int baud_rate_;
-extern int wspp_port;
+extern std::string serial_port_; // port number/name
+extern int baud_rate_; // serial/USB PLM baud rate
+extern int wspp_port; // websocket listening port
+extern int command_delay; // to to wait between sending commands
+extern int worker_threads; // the number of worker threads
 }
 }
 

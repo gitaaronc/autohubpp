@@ -32,7 +32,7 @@
       </logicalFolder>
       <logicalFolder name="system" displayName="system" projectFiles="true">
         <itemPath>include/system/AutoResetEvent.hpp</itemPath>
-        <itemPath>include/system/Timer.hpp</itemPath>
+        <itemPath>include/system/Timer.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="utils" displayName="utils" projectFiles="true">
         <itemPath>include/utils/utils.cpp</itemPath>
@@ -48,10 +48,10 @@
       <logicalFolder name="private" displayName="private" projectFiles="true">
         <itemPath>nbproject/private/Makefile-variables.mk</itemPath>
         <itemPath>nbproject/private/configurations.xml</itemPath>
+        <itemPath>nbproject/private/downloads-192.168.4.128-root-22</itemPath>
         <itemPath>nbproject/private/launcher.properties</itemPath>
         <itemPath>nbproject/private/private.xml</itemPath>
         <itemPath>nbproject/private/timestamps-192.168.4.128-root-22</itemPath>
-        <itemPath>nbproject/private/timestamps-192.168.4.146-aaronc-22</itemPath>
       </logicalFolder>
       <itemPath>nbproject/Makefile-Debug.mk</itemPath>
       <itemPath>nbproject/Makefile-Release.mk</itemPath>
@@ -80,7 +80,6 @@
       <itemPath>MessageProcessor.cpp</itemPath>
       <itemPath>PropertyKeyNames.cpp</itemPath>
       <itemPath>SerialPort.cpp</itemPath>
-      <itemPath>Timer.cpp</itemPath>
       <itemPath>autoapi.cpp</itemPath>
       <itemPath>config.cpp</itemPath>
       <itemPath>jsoncpp.cpp</itemPath>
@@ -115,9 +114,9 @@
         <ccTool>
           <standard>8</standard>
           <incDir>
-            <pElem>/usr/include/restbed</pElem>
-            <pElem>/usr/include/websocketpp</pElem>
             <pElem>/usr/include/yaml-cpp</pElem>
+            <pElem>/usr/include/websocketpp</pElem>
+            <pElem>/usr/include/restbed</pElem>
           </incDir>
           <preprocessorList>
             <Elem>BOOST_FILESYSTEM_NO_DEPRECATED</Elem>
@@ -160,8 +159,6 @@
       <item path="PropertyKeyNames.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Timer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="autoapi.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -246,7 +243,7 @@
       </item>
       <item path="include/system/AutoResetEvent.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="include/system/Timer.hpp" ex="false" tool="3" flavor2="0">
+      <item path="include/system/Timer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="include/utils/utils.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -280,6 +277,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="nbproject/private/downloads-192.168.4.128-root-22"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="nbproject/private/launcher.properties"
             ex="false"
             tool="3"
@@ -288,11 +290,6 @@
       <item path="nbproject/private/private.xml" ex="false" tool="3" flavor2="0">
       </item>
       <item path="nbproject/private/timestamps-192.168.4.128-root-22"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="nbproject/private/timestamps-192.168.4.146-aaronc-22"
             ex="false"
             tool="3"
             flavor2="0">
@@ -342,8 +339,6 @@
       </item>
       <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Timer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="autoapi.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
@@ -427,7 +422,7 @@
       </item>
       <item path="include/system/AutoResetEvent.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="include/system/Timer.hpp" ex="false" tool="3" flavor2="0">
+      <item path="include/system/Timer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="include/utils/utils.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -461,6 +456,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="nbproject/private/downloads-192.168.4.128-root-22"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="nbproject/private/launcher.properties"
             ex="false"
             tool="3"
@@ -469,11 +469,6 @@
       <item path="nbproject/private/private.xml" ex="false" tool="3" flavor2="0">
       </item>
       <item path="nbproject/private/timestamps-192.168.4.128-root-22"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="nbproject/private/timestamps-192.168.4.146-aaronc-22"
             ex="false"
             tool="3"
             flavor2="0">

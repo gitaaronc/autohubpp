@@ -92,12 +92,15 @@ MessageProcessor::ProcessData() {
     std::ostringstream oss;
     oss << FUNCTION_NAME << std::endl;
     std::vector<unsigned char> read_buffer;
-    if (buffer_.size() > 0) {
-        for (const auto& it : buffer_) {
-            read_buffer.push_back(it);
+    {
+        std::lock_guard<std::mutex>_(buffer_lock_);
+        if (buffer_.size() > 0) {
+            for (const auto& it : buffer_) {
+                read_buffer.push_back(it);
+            }
+            buffer_.resize(0);
+            std::vector<unsigned char>().swap(buffer_);
         }
-        buffer_.resize(0);
-        std::vector<unsigned char>().swap(buffer_);
     }
     if (data_port_->recv_buffer(read_buffer) > 0) {
         int count = 0;
@@ -264,7 +267,6 @@ void
 MessageProcessor::ReadData(std::vector<unsigned char>& return_buffer,
         int bytes_expected, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-
     std::vector<unsigned char> read_buffer;
     data_port_->recv_with_timeout(read_buffer, 250);
 
@@ -388,7 +390,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     data_port_->set_recv_handler(nullptr);
 
 
-    auto duration = 1500;
+    auto duration = config::command_delay;
     auto start = std::chrono::system_clock::now();
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();

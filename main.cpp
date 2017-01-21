@@ -44,7 +44,7 @@
 #include <yaml-cpp/yaml.h>
 
 int main(int argc, char** argv) {
-    if (argc < 2){
+    if (argc < 2) {
         std::cout << "No arguments found on the command line.\n";
         std::cout << "Expecting configuration file on the command line.\n";
         std::cout << "eg: autohubpp /etc/autohubpp.yaml\n";
@@ -55,33 +55,44 @@ int main(int argc, char** argv) {
     YAML::Node config;
     try {
         config = YAML::LoadFile(config_file_);
-    } catch (const std::exception& e){
+    } catch (const std::exception& e) {
         std::cout << e.what() << "\n";
         return 0;
     }
-    
-    YAML::Node node_plm = config["autohub"];
-    std::cout << node_plm;
-    
-    if (config["logging_mode"]){
-        std::cout << "LOGGING MODE: " << config["logging_mode"].as<std::string>() <<std::endl;
+
+    // Simple global configuration
+    // TODO Create a configuration class. Most likely a singleton class
+    if (config["logging_mode"]) {
+        std::cout << "LOGGING MODE: " << config["logging_mode"].as<std::string>()
+                << std::endl; // still need to map to enum
     }
-   
+
+    if (config["worker_threads"]) {
+        ace::config::worker_threads = config["worker_threads"].as<int>();
+    }
+
     if (config["PLM"]["serial_port"])
-        ace::config::serial_port_.assign(config["PLM"]["serial_port"].as<std::string>());
-    
+        ace::config::serial_port_.assign(
+            config["PLM"]["serial_port"].as<std::string>());
+
     if (config["PLM"]["baud_rate"])
         ace::config::baud_rate_ = config["PLM"]["baud_rate"].as<int>();
 
     if (config["WEBSOCKET"]["listening_port"])
-        ace::config::wspp_port = config["WEBSOCKET"]["listening_port"].as<int>();
+        ace::config::wspp_port =
+            config["WEBSOCKET"]["listening_port"].as<int>();
+
+    if (config["INSTEON"]["command_delay"])
+        ace::config::command_delay =
+            config["INSTEON"]["command_delay"].as<int>();
+
     ace::utils::Logger::Instance().SetLoggingMode(
             ace::utils::Logger::VERBOSE);
 
-    ace::utils::Logger::Instance().Debug("Using Boost version: %d.%d.%d", 
-            BOOST_VERSION / 100000, (BOOST_VERSION / 100) % 1000, 
+    ace::utils::Logger::Instance().Debug("Using Boost version: %d.%d.%d",
+            BOOST_VERSION / 100000, (BOOST_VERSION / 100) % 1000,
             BOOST_VERSION % 100);
-    
+
     boost::asio::io_service io_service;
     boost::thread_group threadpool;
     boost::asio::io_service::work work(io_service);
@@ -94,7 +105,7 @@ int main(int argc, char** argv) {
         io_service.stop();
     }));
 
-    for (int c = 0; c < 50; c++) {
+    for (int c = 0; c < ace::config::worker_threads; c++) {
         ace::utils::Logger::Instance().Debug("Starting Thread: %d", (c + 1));
         threadpool.create_thread([&io_service]() {
             io_service.run();
@@ -104,7 +115,7 @@ int main(int argc, char** argv) {
     autohub.start();
 
     threadpool.join_all();
-    
+
     return 0;
 }
 

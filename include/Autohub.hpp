@@ -30,13 +30,13 @@
 
 #include <memory>
 
-#include <restbed>
-
 #include <boost/asio/io_service.hpp>
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include <websocketpp/common/thread.hpp>
+
+#include <restbed>
 
 typedef websocketpp::server<websocketpp::config::asio> wspp_server;
 using websocketpp::connection_hdl;

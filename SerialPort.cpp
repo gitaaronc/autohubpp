@@ -137,7 +137,7 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
             utils::Logger::Instance().Debug("Timed out waiting for data, "
                     "%d ms timeout expired.\n"
                     " Canceling async_read_some.", msTimeout);
-            serial_port_->cancel(); // TODO seems to cause a race condition
+            serial_port_->cancel(); 
             break;
         } else if (status == std::future_status::ready) {
             rVal = read_result.get();

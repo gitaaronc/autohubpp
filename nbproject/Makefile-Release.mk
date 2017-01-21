@@ -46,10 +46,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/MessageProcessor.o \
 	${OBJECTDIR}/PropertyKeyNames.o \
 	${OBJECTDIR}/SerialPort.o \
-	${OBJECTDIR}/Timer.o \
 	${OBJECTDIR}/autoapi.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o \
+	${OBJECTDIR}/include/system/Timer.o \
 	${OBJECTDIR}/include/utils/utils.o \
 	${OBJECTDIR}/jsoncpp.o \
 	${OBJECTDIR}/main.o
@@ -134,11 +134,6 @@ ${OBJECTDIR}/SerialPort.o: SerialPort.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SerialPort.o SerialPort.cpp
 
-${OBJECTDIR}/Timer.o: Timer.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Timer.o Timer.cpp
-
 ${OBJECTDIR}/autoapi.o: autoapi.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -153,6 +148,11 @@ ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o: include/insteon/detail/
 	${MKDIR} -p ${OBJECTDIR}/include/insteon/detail
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o include/insteon/detail/InsteonDeviceImpl.cpp
+
+${OBJECTDIR}/include/system/Timer.o: include/system/Timer.cpp 
+	${MKDIR} -p ${OBJECTDIR}/include/system
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/system/Timer.o include/system/Timer.cpp
 
 ${OBJECTDIR}/include/utils/utils.o: include/utils/utils.cpp 
 	${MKDIR} -p ${OBJECTDIR}/include/utils
