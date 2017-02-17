@@ -131,7 +131,6 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
     }
-    SerializeYAML();
 }
 
 void
