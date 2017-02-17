@@ -132,7 +132,6 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
             break;
     }
     SerializeYAML();
-    SerializeJson();
 }
 
 void
