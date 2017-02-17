@@ -37,6 +37,7 @@
 #include <websocketpp/common/thread.hpp>
 
 #include <restbed>
+#include <yaml-cpp/yaml.h>
 
 typedef websocketpp::server<websocketpp::config::asio> wspp_server;
 using websocketpp::connection_hdl;
@@ -72,7 +73,7 @@ class Autohub {
     typedef Autohub type;
 public:
     Autohub() = delete;
-    Autohub(boost::asio::io_service& io_service);
+    Autohub(boost::asio::io_service& io_service, YAML::Node root);
     ~Autohub();
     void burp(std::string burp); // plugin test
     void start();
@@ -92,6 +93,7 @@ private:
 private:
     boost::asio::io_service& io_service_;
     std::unique_ptr<insteon::InsteonNetwork> insteon_network_;
+    YAML::Node root_node_;
     
     wspp_server wspp_server_;
     void wsppEmit(websocketpp::connection_hdl hdl, std::string const& buf);

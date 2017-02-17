@@ -36,6 +36,8 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/strand.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 namespace Json{
 class Value;
 }
@@ -50,7 +52,7 @@ class InsteonNetwork {
     typedef InsteonNetwork type;
 public:
     InsteonNetwork() = delete;
-    InsteonNetwork(boost::asio::io_service& io_service);
+    InsteonNetwork(boost::asio::io_service& io_service, YAML::Node config);
     ~InsteonNetwork();
 
     void
@@ -58,6 +60,7 @@ public:
     };
 
     bool Connect();
+    void LoadDevices();
     Json::Value SerializeJson(int device_id = 0);
     void InternalReceiveCommand(std::string json);
     void set_update_handler(
@@ -66,7 +69,6 @@ protected:
     // adds a device to insteon_device_list
     friend class InsteonController;
     std::shared_ptr<InsteonDevice> AddDevice(int insteon_address);
-
     std::shared_ptr<InsteonDevice> GetDevice(int insteon_address);
 
     void
@@ -85,6 +87,8 @@ private:
     InsteonDeviceMap device_list_;
     std::shared_ptr<MessageProcessor> msg_proc_;
     std::function<void(Json::Value) > OnUpdate;
+    
+    YAML::Node config_;
 };
 } // namespace insteon
 } // namespace ace

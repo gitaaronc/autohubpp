@@ -67,25 +67,6 @@ int main(int argc, char** argv) {
                 << std::endl; // still need to map to enum
     }
 
-    if (config["worker_threads"]) {
-        ace::config::worker_threads = config["worker_threads"].as<int>();
-    }
-
-    if (config["PLM"]["serial_port"])
-        ace::config::serial_port_.assign(
-            config["PLM"]["serial_port"].as<std::string>());
-
-    if (config["PLM"]["baud_rate"])
-        ace::config::baud_rate_ = config["PLM"]["baud_rate"].as<int>();
-
-    if (config["WEBSOCKET"]["listening_port"])
-        ace::config::wspp_port =
-            config["WEBSOCKET"]["listening_port"].as<int>();
-
-    if (config["INSTEON"]["command_delay"])
-        ace::config::command_delay =
-            config["INSTEON"]["command_delay"].as<int>();
-
     ace::utils::Logger::Instance().SetLoggingMode(
             ace::utils::Logger::VERBOSE);
 
@@ -97,7 +78,7 @@ int main(int argc, char** argv) {
     boost::thread_group threadpool;
     boost::asio::io_service::work work(io_service);
 
-    ace::Autohub autohub(io_service);
+    ace::Autohub autohub(io_service, config);
 
     boost::asio::signal_set sig_set(io_service, SIGTERM, SIGINT);
     sig_set.async_wait(std::bind([&io_service, &autohub]() {
@@ -105,7 +86,9 @@ int main(int argc, char** argv) {
         io_service.stop();
     }));
 
-    for (int c = 0; c < ace::config::worker_threads; c++) {
+    int worker_threads = config["worker_threads"].as<int>(50);
+    
+    for (int c = 0; c < worker_threads; c++) {
         ace::utils::Logger::Instance().Debug("Starting Thread: %d", (c + 1));
         threadpool.create_thread([&io_service]() {
             io_service.run();
@@ -116,6 +99,10 @@ int main(int argc, char** argv) {
 
     threadpool.join_all();
 
+    std::ofstream ofs(config_file_);
+    ofs << config;
+    ofs.close();
+    
     return 0;
 }
 

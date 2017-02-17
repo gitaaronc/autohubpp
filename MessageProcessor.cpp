@@ -29,7 +29,6 @@
 #include "include/utils/utils.hpp"
 #include "include/Logger.h"
 #include "include/system/Timer.hpp"
-#include "include/config.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -47,8 +46,9 @@
 namespace ace {
 namespace insteon {
 
-MessageProcessor::MessageProcessor(boost::asio::io_service& io_service)
-: io_service_(io_service) {
+MessageProcessor::MessageProcessor(boost::asio::io_service& io_service,
+        YAML::Node config)
+: io_service_(io_service), config_(config) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
@@ -77,7 +77,8 @@ MessageProcessor::Connect() {
     data_port_ = std::move(port);
     data_port_->set_recv_handler(std::bind(
             &type::ProcessData, this));
-    if (data_port_->open(config::serial_port_, config::baud_rate_)) {
+    if (data_port_->open(config_["PLM"]["serial_port"].as<std::string>(), 
+            config_["PLM"]["baud_rate"].as<int>())) {
         data_port_->async_read_some();
     }
     //    std::vector<unsigned char> temp1 = { 0x60 };
@@ -390,7 +391,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     data_port_->set_recv_handler(nullptr);
 
 
-    auto duration = config::command_delay;
+    auto duration = config_["PLM"]["command_delay"].as<int>(1500);
     auto start = std::chrono::system_clock::now();
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();

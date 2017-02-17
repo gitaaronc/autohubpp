@@ -113,8 +113,11 @@ namespace ace {
          * @param PropertyKey           The Property Key
          * @param unsigned int         The integer value 
          */
+        // TODO get rid of PropertyKeys, favor PropertyKeysS
         typedef std::map<PropertyKey, unsigned int> PropertyKeys;
-
+        // PropertyKeysS string as Key
+        typedef std::map<std::string, unsigned int> PropertyKeysS; 
+        
         class PropertyKeyNames {
         public:
             PropertyKeyNames();

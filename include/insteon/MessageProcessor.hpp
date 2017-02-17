@@ -26,7 +26,7 @@
  */
 
 #ifndef MESSENGER_HPP
-#define	MESSENGER_HPP
+#define MESSENGER_HPP
 
 #include <vector>
 #include <memory>
@@ -35,6 +35,7 @@
 #include <list>
 
 #include <boost/asio.hpp>
+#include <yaml-cpp/yaml.h>
 
 #include "../config.hpp"
 #include "EchoStatus.hpp"
@@ -43,82 +44,85 @@
 #include "../system/AutoResetEvent.hpp"
 
 namespace ace {
-namespace insteon {
-class InsteonMessage;
+    namespace insteon {
+        class InsteonMessage;
 
-struct WaitItem {
+        struct WaitItem {
 
-    WaitItem(unsigned char message_id) :
-    message_id_(message_id), message_received_(false) {
-    }
-    unsigned char message_id_;
-    bool message_received_;
-    system::AutoResetEvent wait_event_;
-    std::shared_ptr<InsteonMessage> insteon_message_;
-};
+            WaitItem(unsigned char message_id) :
+            message_id_(message_id), message_received_(false) {
+            }
+            unsigned char message_id_;
+            bool message_received_;
+            system::AutoResetEvent wait_event_;
+            std::shared_ptr<InsteonMessage> insteon_message_;
+        };
 
-typedef std::shared_ptr<InsteonMessage> msg_ptr;
-typedef std::function<void(msg_ptr) > msg_handler;
+        typedef std::shared_ptr<InsteonMessage> msg_ptr;
+        typedef std::function<void(msg_ptr) > msg_handler;
 
-/*
- * MessageProcessor class is responsible for coordinating
- * Insteon Messages between the IO and InsteonDevice objects
- */
-class MessageProcessor : private boost::noncopyable {
-public:
-    typedef MessageProcessor type;
+        /*
+         * MessageProcessor class is responsible for coordinating
+         * Insteon Messages between the IO and InsteonDevice objects
+         */
+        class MessageProcessor : private boost::noncopyable {
+        public:
+            typedef MessageProcessor type;
 
-    explicit MessageProcessor(boost::asio::io_service& io_service);
-    ~MessageProcessor();
+            explicit MessageProcessor(boost::asio::io_service& io_service,
+                    YAML::Node config);
+            ~MessageProcessor();
 
-    bool Connect();
-    void ProcessData();
-    EchoStatus TrySend(const std::vector<unsigned char>& send_buffer);
-    EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
-            bool retry_on_nak);
-    EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
-            bool retry_on_nak, int echo_length);
-    EchoStatus TrySendReceive(const std::vector<unsigned char>&
-            send_buffer, bool retry_on_nak, unsigned char receive_message_id,
-            PropertyKeys& properties);
+            bool Connect();
+            void ProcessData();
+            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer);
+            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
+                    bool retry_on_nak);
+            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
+                    bool retry_on_nak, int echo_length);
+            EchoStatus TrySendReceive(const std::vector<unsigned char>&
+                    send_buffer, bool retry_on_nak, unsigned char receive_message_id,
+                    PropertyKeys& properties);
 
-    void set_message_handler(msg_handler handler);
-protected:
-private:
-    std::string ByteArrayToStringStream(const std::vector<unsigned char>&
-            data,
-            int offset, int count);
+            void set_message_handler(msg_handler handler);
+        protected:
+        private:
+            std::string ByteArrayToStringStream(const std::vector<unsigned char>&
+                    data,
+                    int offset, int count);
 
-    EchoStatus ProcessEcho(int echo_length);
-    bool ProcessEcho(const std::vector<unsigned char>& message_buffer,
-            int offset, int& count);
-    bool ProcessMessage(const std::vector<unsigned char>& read_buffer,
-            int offset,
-            int& count);
+            EchoStatus ProcessEcho(int echo_length);
+            bool ProcessEcho(const std::vector<unsigned char>& message_buffer,
+                    int offset, int& count);
+            bool ProcessMessage(const std::vector<unsigned char>& read_buffer,
+                    int offset,
+                    int& count);
 
-    void ReadData(std::vector<unsigned char>& return_buffer,
-            int bytes_expected,
-            bool is_echo);
+            void ReadData(std::vector<unsigned char>& return_buffer,
+                    int bytes_expected,
+                    bool is_echo);
 
-    EchoStatus Send(std::vector<unsigned char> send_buffer,
-            bool retry_on_nak, int echo_length);
-    void UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
+            EchoStatus Send(std::vector<unsigned char> send_buffer,
+                    bool retry_on_nak, int echo_length);
+            void UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 
-    std::unique_ptr<io::SerialPort> data_port_;
-    boost::asio::io_service& io_service_;
-    msg_handler msg_handler_;
-    InsteonProtocol insteon_protocol_;
+            std::unique_ptr<io::SerialPort> data_port_;
+            boost::asio::io_service& io_service_;
+            msg_handler msg_handler_;
+            InsteonProtocol insteon_protocol_;
 
-    std::mutex io_lock_;
-    std::list<std::shared_ptr<WaitItem>> wait_list_;
-    std::mutex mutex_wait_list_;
-    std::vector<unsigned char> sent_message_;
-    std::mutex buffer_lock_;
-    std::vector<unsigned char> buffer_;
-    
-    std::chrono::system_clock::time_point time_of_last_command_;
-};
-} // namespace insteon
+            std::mutex io_lock_;
+            std::list<std::shared_ptr<WaitItem>> wait_list_;
+            std::mutex mutex_wait_list_;
+            std::vector<unsigned char> sent_message_;
+            std::mutex buffer_lock_;
+            std::vector<unsigned char> buffer_;
+
+            std::chrono::system_clock::time_point time_of_last_command_;
+            
+            YAML::Node config_;
+        };
+    } // namespace insteon
 } // namespace ace
-#endif	/* MESSENGER_HPP */
+#endif /* MESSENGER_HPP */
 
