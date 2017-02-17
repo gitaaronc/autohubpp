@@ -79,15 +79,46 @@ A yaml configuration file must be specified on the command line.
 ex: autohubpp /etc/configuration.yaml</br>
 example yaml configuration file<br/>
 ```
-# loggin mode
+worker_threads: 20
 logging_mode: VERBOSE
-# INSTEON PLM Information
-PLM:
-  serial_port: /dev/ttyUSB0
-  baud_rate: 19200
-# WEBSOCKET listening information
-WEBSOCKETPP:
-  listening_port: 9100
+RESTBED:
+  listening_port: 8000
+INSTEON:
+  command_delay: 1500
+  DEVICES:
+    0x0026deeb:
+      properties_:
+        button_on_level: 255
+        button_on_ramp_rate: 31
+        device_category: 1
+        device_engine_version: 2
+        device_firmware_version: 65
+        device_subcategory: 14
+        light_status: 255
+        link_database_delta: 0
+        signal_to_noise_threshold: 32
+        x10_house_code: 32
+        x10_unit_code: 0
+      device_name_: Office Lamp
+    0x0029e6cd:
+      properties_:
+        device_engine_version: 2
+        device_category: 1
+        device_firmware_version: 65
+        device_subcategory: 32
+        enable_blink_on_traffic: 0
+        enable_led: 0
+        enable_load_sense: 0
+        enable_programming_lock: 0
+        enable_resume_dim: 0
+        light_status: 0
+        link_database_delta: 46
+      device_name_: Bedroom Room - Ceiling
+  PLM:
+    baud_rate: 19200
+    serial_port: /dev/ttyUSB0
+WEBSOCKET:
+  listening_port: 9000
 ```
 More C++ and Python developers required!!
 
