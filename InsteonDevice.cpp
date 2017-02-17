@@ -28,6 +28,7 @@
 #include "include/insteon/InsteonMessage.hpp"
 #include "include/insteon/detail/InsteonDeviceImpl.hpp"
 #include "include/Logger.h"
+#include "include/utils/utils.hpp"
 
 #include "include/json/json.h"
 #include "include/json/json-forwards.h"
@@ -38,10 +39,11 @@ namespace ace {
 namespace insteon {
 
 InsteonDevice::InsteonDevice(int insteon_address,
-        boost::asio::io_service& io_service) :
+        boost::asio::io_service& io_service, YAML::Node config) :
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
-io_service_(io_service),
+io_service_(io_service), config_(config),
 last_action_(InsteonMessageType::Other){
+    LoadProperties();
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
     command_map_["on"] = InsteonDeviceCommand::On;
@@ -56,7 +58,6 @@ last_action_(InsteonMessageType::Other){
 }
 
 InsteonDevice::~InsteonDevice() {
-
 }
 
 void
@@ -107,19 +108,15 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
     InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
-            device_properties_[PropertyKey::DevEngineVersion] = recvCmdTwo;
+            device_properties_["device_engine_version"] = recvCmdTwo;
             break;
         case InsteonDeviceCommand::GetOperatingFlags:
-            device_properties_[PropertyKey::EnableProgrammingLock]
-                    = recvCmdTwo & 0x01;
-            device_properties_[PropertyKey::EnableBlinkOnTraffic]
-                    = recvCmdTwo & 0x02;
-            device_properties_[PropertyKey::EnableResumeDim]
-                    = recvCmdTwo & 0x04;
-            device_properties_[PropertyKey::EnableLED]
-                    = recvCmdTwo & 0x08;
-            device_properties_[PropertyKey::EnableLoadSense]
-                    = recvCmdTwo & 0x0A;
+            device_properties_["enable_programming_lock"] = recvCmdTwo & 0x01;
+            device_properties_["enable_blink_on_traffic"] = recvCmdTwo & 0x02;
+            device_properties_["enable_resume_dim"] = recvCmdTwo & 0x04;
+            device_properties_["enable_led"] = recvCmdTwo & 0x08;
+            device_properties_["enable_load_sense"] = recvCmdTwo & 0x0a;
+            
             break;
         case InsteonDeviceCommand::Off:
         case InsteonDeviceCommand::On:
@@ -130,9 +127,22 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         case InsteonDeviceCommand::LightStatusRequest:
             // Do we care about the database delta?
             // why do they include it in the lightStatusRequest response?
-            device_properties_[PropertyKey::LinkDatabaseDelta] = recvCmdOne;
+            device_properties_["link_database_delta"] = recvCmdOne;
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
+    }
+    SerializeYAML();
+    SerializeJson();
+}
+
+void
+InsteonDevice::LoadProperties(){
+    device_name(config_["device_name_"].as<std::string>(device_name()));
+    config_["device_name_"] = device_name();
+    YAML::Node node = config_["properties_"];
+    for (auto it = node.begin(); it != node.end(); ++it){
+        device_properties_[it->first.as<std::string>()] 
+                = it->second.as<unsigned int>();
     }
 }
 
@@ -196,12 +206,12 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
             }
             break;
         case InsteonMessageType::SetButtonPressed:
-            device_properties_[PropertyKey::DevCat] =
-                    keys[PropertyKey::DevCat];
-            device_properties_[PropertyKey::DevSubCat] =
+            device_properties_["device_category"] = keys[PropertyKey::DevCat];
+            device_properties_["device_subcategory"] = 
                     keys[PropertyKey::DevSubCat];
-            device_properties_[PropertyKey::DevFirmwareVersion] =
+            device_properties_["device_firmware_version"] = 
                     keys[PropertyKey::DevFirmwareVersion];
+            
             break;
     }
 }
@@ -214,10 +224,18 @@ InsteonDevice::SerializeJson() {
     root["device_name_"] = device_name();
     
     for (const auto& it : device_properties_) {
-        properties[PropertyKeyNames().GetPropertyName(it.first)] = it.second;
+        properties[it.first] = it.second;
     }
     root["properties_"] = properties;
     return root;
+}
+
+void InsteonDevice::SerializeYAML(){
+    YAML::Node properties;
+    for (const auto& it : device_properties_) {
+        properties[it.first] = it.second;
+    }
+    config_[ace::utils::int_to_hex(insteon_address())]["properties_"] = properties;
 }
 /**
  * Command
@@ -261,8 +279,8 @@ InsteonDevice::GetExtendedMessage(std::vector<unsigned char>& send_buffer,
 
 bool
 InsteonDevice::GetPropertyValue(const PropertyKey key, unsigned char& val){
-    auto it = device_properties_.find(key);
-    if (it != device_properties_.end()){
+    auto it = device_properties_old_.find(key);
+    if (it != device_properties_old_.end()){
         val = it->second;
         return true;
     }
@@ -289,15 +307,13 @@ InsteonDevice::TryGetExtendedInformation(){
     pImpl->WaitAndSetPendingCommand(0x2E, 0x00);
     EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x51, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())){
-        device_properties_[PropertyKey::X10HouseCode] 
-                = properties[PropertyKey::Data5];
-        device_properties_[PropertyKey::X10UnitCode] 
-                = properties[PropertyKey::Data6];
-        device_properties_[PropertyKey::ButtonRampRate] 
+        device_properties_["x10_house_code"] = properties[PropertyKey::Data5];
+        device_properties_["x10_unit_code"] = properties[PropertyKey::Data6];
+        device_properties_["button_on_ramp_rate"] 
                 = properties[PropertyKey::Data7] & 0x1F;
-        device_properties_[PropertyKey::ButtonOnLevel] 
+        device_properties_["button_on_level"]
                 = properties[PropertyKey::Data8];
-        device_properties_[PropertyKey::SignalToNoiseThreshold] 
+        device_properties_["signal_to_noise_threshold"]
                 = properties[PropertyKey::Data9];
         return true;
     } else {
@@ -309,7 +325,7 @@ InsteonDevice::TryGetExtendedInformation(){
 void
 InsteonDevice::StatusUpdate(unsigned char status){
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    device_properties_[PropertyKey::LightStatus] = status;
+    device_properties_["light_status"] = status;
     if (OnStatusUpdate)
         OnStatusUpdate(SerializeJson());
 }
