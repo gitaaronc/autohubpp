@@ -80,8 +80,8 @@ InsteonDeviceImpl::GetStandardMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    if (device_properties_.count(PropertyKey::MessageFlagsMaxHops)) {
-        max_hops = device_properties_[PropertyKey::MessageFlagsMaxHops];
+    if (device_properties_.count("message_flags_max_hops")) {
+        max_hops = device_properties_["message_flags_max_hops"];
     }
     message_flags = (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
@@ -99,8 +99,8 @@ InsteonDeviceImpl::GetExtendedMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    if (device_properties_.count(PropertyKey::MessageFlagsMaxHops)) {
-        max_hops = device_properties_[PropertyKey::MessageFlagsMaxHops];
+    if (device_properties_.count("message_flags_max_hops")) {
+        max_hops = device_properties_["message_flags_max_hops"];
     }
     message_flags = 16 | (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
@@ -122,9 +122,9 @@ InsteonDeviceImpl::CommandAckProcessor(
         const std::shared_ptr<InsteonMessage>& insteon_message) {
 
     unsigned char recvCmdOne = static_cast<unsigned char> (
-            insteon_message->properties_[PropertyKey::Cmd1]);
+            insteon_message->properties_["command_one"]);
     unsigned char recvCmdTwo = static_cast<unsigned char> (
-            insteon_message->properties_[PropertyKey::Cmd2]);
+            insteon_message->properties_["command_two"]);
     unsigned char sentCmdOne;
     {
         std::lock_guard<std::mutex>_(command_mutex_);

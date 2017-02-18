@@ -34,6 +34,7 @@
 namespace ace {
     namespace insteon {
 
+        // TODO - REMOVE DEPRECATED in favor of map<string,int> vs map<int,int>
         enum class PropertyKey_ : int {
             Address = 1,
                     ButtonRampRate,
@@ -104,7 +105,7 @@ namespace ace {
                     X10UnitCode//
         };
 
-        typedef PropertyKey_ PropertyKey;
+        typedef PropertyKey_ PropertyKey_deprecated; // TODO - REMOVE DEPRECATED
         /**
          * mapPropertyKeyInt
          * 
@@ -113,17 +114,19 @@ namespace ace {
          * @param PropertyKey           The Property Key
          * @param unsigned int         The integer value 
          */
-        // TODO get rid of PropertyKeys, favor PropertyKeysS
-        typedef std::map<PropertyKey, unsigned int> PropertyKeys;
-        // PropertyKeysS string as Key
-        typedef std::map<std::string, unsigned int> PropertyKeysS; 
+        // TODO - REMOVE DEPRECATED
+        typedef std::map<PropertyKey_deprecated, unsigned int> PropertyKeys_deprecated;
         
-        class PropertyKeyNames {
+        // PropertyKeys string as Key, more room for error vs int
+        typedef std::map<std::string, unsigned int> PropertyKeys; 
+        
+        // TODO - REMOVE DEPRECATED
+        class PropertyKeyNames_deprecated {
         public:
-            PropertyKeyNames();
-            std::string GetPropertyName(PropertyKey key);
+            PropertyKeyNames_deprecated();
+            std::string GetPropertyName(PropertyKey_deprecated key);
         private:
-            std::map<PropertyKey, std::string> property_name_;
+            std::map<PropertyKey_deprecated, std::string> property_name_;
         };
     } // namespace insteon
 } // namespace ace

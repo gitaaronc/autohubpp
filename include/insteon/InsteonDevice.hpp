@@ -87,15 +87,14 @@ namespace ace {
         protected:
             void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
                     unsigned char cmd1, unsigned char cmd2);
-            bool GetPropertyValue(const PropertyKey key, unsigned char& val);
+            bool GetPropertyValue(const std::string key, unsigned char& val);
             bool TryCommand(InsteonDeviceCommand command, unsigned char value);
             bool TryGetExtendedInformation();
             void StatusUpdate(unsigned char status);
             boost::asio::io_service& io_service_;
 
             std::map<std::string, InsteonDeviceCommand> command_map_;
-            PropertyKeys device_properties_old_;
-            PropertyKeysS device_properties_;
+            PropertyKeys device_properties_;
 
         private:
             friend class detail::InsteonDeviceImpl;

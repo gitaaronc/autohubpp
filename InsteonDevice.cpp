@@ -148,8 +148,8 @@ void
 InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     PropertyKeys keys = insteon_message->properties_;
-    unsigned char command_one = keys[PropertyKey::Cmd1];
-    unsigned char command_two = keys[PropertyKey::Cmd2];
+    unsigned char command_one = keys["command_one"];
+    unsigned char command_two = keys["command_two"];
     
     // TODO verify broadcast message cleanup events & to/from process
     bool actioned = ((unsigned char) insteon_message->message_type_
@@ -165,7 +165,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
             // device goes to set level at set ramp rate
             if (!actioned){
                 unsigned char val = 0xFF;
-                if (GetPropertyValue(PropertyKey::ButtonOnLevel, val)){
+                if (GetPropertyValue("button_on_level", val)){
                     StatusUpdate(val);
                 } else {
                     StatusUpdate(val);
@@ -204,11 +204,11 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
             }
             break;
         case InsteonMessageType::SetButtonPressed:
-            device_properties_["device_category"] = keys[PropertyKey::DevCat];
+            device_properties_["device_category"] = keys["device_category"];
             device_properties_["device_subcategory"] = 
-                    keys[PropertyKey::DevSubCat];
+                    keys["device_subcategory"];
             device_properties_["device_firmware_version"] = 
-                    keys[PropertyKey::DevFirmwareVersion];
+                    keys["device_firmware_version"];
             
             break;
     }
@@ -258,7 +258,7 @@ InsteonDevice::Command(InsteonDeviceCommand command,
             } 
             unsigned char val = 0x00;
             return TryCommand(command, GetPropertyValue(
-                    PropertyKey::ButtonOnLevel, val) ? val : 0xFF);
+                    "button_on_level", val) ? val : 0xFF);
         }
             break;
         case InsteonDeviceCommand::ExtendedGetSet:
@@ -278,9 +278,9 @@ InsteonDevice::GetExtendedMessage(std::vector<unsigned char>& send_buffer,
 }
 
 bool
-InsteonDevice::GetPropertyValue(const PropertyKey key, unsigned char& val){
-    auto it = device_properties_old_.find(key);
-    if (it != device_properties_old_.end()){
+InsteonDevice::GetPropertyValue(const std::string key, unsigned char& val){
+    auto it = device_properties_.find(key);
+    if (it != device_properties_.end()){
         val = it->second;
         return true;
     }
@@ -307,14 +307,14 @@ InsteonDevice::TryGetExtendedInformation(){
     pImpl->WaitAndSetPendingCommand(0x2E, 0x00);
     EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x51, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())){
-        device_properties_["x10_house_code"] = properties[PropertyKey::Data5];
-        device_properties_["x10_unit_code"] = properties[PropertyKey::Data6];
+        device_properties_["x10_house_code"] = properties["data_five"];
+        device_properties_["x10_unit_code"] = properties["data_six"];
         device_properties_["button_on_ramp_rate"] 
-                = properties[PropertyKey::Data7] & 0x1F;
+                = properties["data_seven"] & 0x1F;
         device_properties_["button_on_level"]
-                = properties[PropertyKey::Data8];
+                = properties["data_eight"];
         device_properties_["signal_to_noise_threshold"]
-                = properties[PropertyKey::Data9];
+                = properties["data_nine"];
         return true;
     } else {
         pImpl->ClearPendingCommand();

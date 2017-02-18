@@ -171,8 +171,7 @@ InsteonController::OnMessage(std::shared_ptr<insteon::InsteonMessage> insteon_me
     if (insteon_message->message_type_ == insteon::InsteonMessageType::DeviceLink) {
         utils::Logger::Instance().Info("DEVICE LINK");
 
-        insteon_address = insteon_message->properties_.find(insteon::PropertyKey
-                ::Address)->second;
+        insteon_address = insteon_message->properties_.find("address")->second;
 
         std::shared_ptr<InsteonDevice> device;
         if (!insteon_network_->DeviceExists(insteon_address)) {
@@ -191,14 +190,13 @@ InsteonController::OnMessage(std::shared_ptr<insteon::InsteonMessage> insteon_me
     } else if (insteon_message->message_type_ ==
             insteon::InsteonMessageType::GetIMInfo) {
         pImpl_->insteon_identity_.category =
-                insteon_message->properties_[insteon::PropertyKey::DevCat];
+                insteon_message->properties_["device_category"];
 
         pImpl_->insteon_identity_.sub_category =
-                insteon_message->properties_[insteon::PropertyKey::DevSubCat];
+                insteon_message->properties_["device_subcategory"];
 
         pImpl_->insteon_identity_.firmware_version =
-                insteon_message->properties_[insteon::PropertyKey
-                ::DevFirmwareVersion];
+                insteon_message->properties_["device_firmware_version"];
 
     } else if (insteon_message->message_type_ ==
             insteon::InsteonMessageType::GetIMConfiguration) {

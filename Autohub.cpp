@@ -150,7 +150,6 @@ namespace ace
     void
     Autohub::OnUpdateDevice(Json::Value json) {
         utils::Logger::Instance().Trace(FUNCTION_NAME);
-        std::ostringstream buf;
         json["event"] = "deviceUpdate";
         for (const auto& it : wspp_connections_) {
             // Emit is a work around. I gave up casting a function pointer of an 

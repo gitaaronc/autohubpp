@@ -93,6 +93,8 @@ private:
 private:
     boost::asio::io_service& io_service_;
     std::unique_ptr<insteon::InsteonNetwork> insteon_network_;
+    
+    std::string yaml_config_file_;
     YAML::Node root_node_;
     
     wspp_server wspp_server_;

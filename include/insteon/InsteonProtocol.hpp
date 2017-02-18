@@ -68,7 +68,7 @@ private:
     bool GetIMInfo(const std::vector<unsigned char>& data, int offset,
             int &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-    bool GetAddressProperty(PropertyKey key, const std::vector<unsigned char>& data, int offset, int& count, PropertyKeys& properties);
+    bool GetAddressProperty(std::string key, const std::vector<unsigned char>& data, int offset, int& count, PropertyKeys& properties);
 
     bool GetMessageFlagProperty(const std::vector<unsigned char>& data,
             int offset, int &count, PropertyKeys& properties);

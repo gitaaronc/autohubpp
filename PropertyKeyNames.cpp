@@ -29,93 +29,93 @@
 namespace ace {
     namespace insteon {
 
-        PropertyKeyNames::PropertyKeyNames() {
-            property_name_[PropertyKey::Address] = "address";
-            property_name_[PropertyKey::ButtonOnLevel] = "button_on_level";
-            property_name_[PropertyKey::ButtonRampRate] = "button_on_ramp_rate";
-            property_name_[PropertyKey::Cmd1] = "command_one";
-            property_name_[PropertyKey::Cmd2] = "command_two";
-            property_name_[PropertyKey::Data1] = "data_one";
-            property_name_[PropertyKey::Data10] = "data_ten";
-            property_name_[PropertyKey::Data11] = "data_eleven";
-            property_name_[PropertyKey::Data12] = "data_twelve";
-            property_name_[PropertyKey::Data13] = "data_thirteen";
-            property_name_[PropertyKey::Data14] = "data_fourteen";
-            property_name_[PropertyKey::Data2] = "data_two";
-            property_name_[PropertyKey::Data3] = "data_three";
-            property_name_[PropertyKey::Data4] = "data_four";
-            property_name_[PropertyKey::Data5] = "data_five";
-            property_name_[PropertyKey::Data6] = "data_six";
-            property_name_[PropertyKey::Data7] = "data_seven";
-            property_name_[PropertyKey::Data8] = "data_eight";
-            property_name_[PropertyKey::Data9] = "data_nine";
-            property_name_[PropertyKey::DevCat] = "device_category";
-            property_name_[PropertyKey::DevEngineVersion] 
+        PropertyKeyNames_deprecated::PropertyKeyNames_deprecated() {
+            property_name_[PropertyKey_deprecated::Address] = "address";
+            property_name_[PropertyKey_deprecated::ButtonOnLevel] = "button_on_level";
+            property_name_[PropertyKey_deprecated::ButtonRampRate] = "button_on_ramp_rate";
+            property_name_[PropertyKey_deprecated::Cmd1] = "command_one";
+            property_name_[PropertyKey_deprecated::Cmd2] = "command_two";
+            property_name_[PropertyKey_deprecated::Data1] = "data_one";
+            property_name_[PropertyKey_deprecated::Data10] = "data_ten";
+            property_name_[PropertyKey_deprecated::Data11] = "data_eleven";
+            property_name_[PropertyKey_deprecated::Data12] = "data_twelve";
+            property_name_[PropertyKey_deprecated::Data13] = "data_thirteen";
+            property_name_[PropertyKey_deprecated::Data14] = "data_fourteen";
+            property_name_[PropertyKey_deprecated::Data2] = "data_two";
+            property_name_[PropertyKey_deprecated::Data3] = "data_three";
+            property_name_[PropertyKey_deprecated::Data4] = "data_four";
+            property_name_[PropertyKey_deprecated::Data5] = "data_five";
+            property_name_[PropertyKey_deprecated::Data6] = "data_six";
+            property_name_[PropertyKey_deprecated::Data7] = "data_seven";
+            property_name_[PropertyKey_deprecated::Data8] = "data_eight";
+            property_name_[PropertyKey_deprecated::Data9] = "data_nine";
+            property_name_[PropertyKey_deprecated::DevCat] = "device_category";
+            property_name_[PropertyKey_deprecated::DevEngineVersion] 
                     = "device_engine_version";
-            property_name_[PropertyKey::DevFirmwareVersion] 
+            property_name_[PropertyKey_deprecated::DevFirmwareVersion] 
                     = "device_firmware_version";
-            property_name_[PropertyKey::DevSubCat] = "device_subcategory";
-            property_name_[PropertyKey::EnableBeepOnButtonPress] 
+            property_name_[PropertyKey_deprecated::DevSubCat] = "device_subcategory";
+            property_name_[PropertyKey_deprecated::EnableBeepOnButtonPress] 
                     = "enable_beep_on_button_press";
-            property_name_[PropertyKey::EnableBlinkOnError] 
+            property_name_[PropertyKey_deprecated::EnableBlinkOnError] 
                     = "enable_blink_on_error";
-            property_name_[PropertyKey::EnableBlinkOnTraffic] 
+            property_name_[PropertyKey_deprecated::EnableBlinkOnTraffic] 
                     = "enable_blink_on_traffic";
-            property_name_[PropertyKey::EnableLED] = "enable_led";
-            property_name_[PropertyKey::EnableProgrammingLock] 
+            property_name_[PropertyKey_deprecated::EnableLED] = "enable_led";
+            property_name_[PropertyKey_deprecated::EnableProgrammingLock] 
                     = "enable_programming_lock";
-            property_name_[PropertyKey::EnableResumeDim] 
+            property_name_[PropertyKey_deprecated::EnableResumeDim] 
                     = "enable_resume_dim";
-            property_name_[PropertyKey::EnableLoadSense] 
+            property_name_[PropertyKey_deprecated::EnableLoadSense] 
                     = "enable_load_sense";
-            property_name_[PropertyKey::FromAddress] = "from_address";
-            property_name_[PropertyKey::GlobalLedBrightness] 
+            property_name_[PropertyKey_deprecated::FromAddress] = "from_address";
+            property_name_[PropertyKey_deprecated::GlobalLedBrightness] 
                     = "global_led_brightness";
-            property_name_[PropertyKey::Group] = "group";
-            property_name_[PropertyKey::IMConfigurationFlags] 
+            property_name_[PropertyKey_deprecated::Group] = "group";
+            property_name_[PropertyKey_deprecated::IMConfigurationFlags] 
                     = "im_configuration_flags";
-            property_name_[PropertyKey::IMSetButtonEvent]
-                    = "im_setbutton_event";
-            property_name_[PropertyKey::IncrementDirection] 
+            property_name_[PropertyKey_deprecated::IMSetButtonEvent]
+                    = "im_set_button_event";
+            property_name_[PropertyKey_deprecated::IncrementDirection] 
                     = "increment_direction";
-            property_name_[PropertyKey::LightStatus] = "light_status";
-            property_name_[PropertyKey::LinkAddress] = "link_address";
-            property_name_[PropertyKey::LinkData1] = "link_data_one";
-            property_name_[PropertyKey::LinkData2] = "link_data_two";
-            property_name_[PropertyKey::LinkData3] = "link_data_three";
-            property_name_[PropertyKey::LinkDatabaseDelta] 
+            property_name_[PropertyKey_deprecated::LightStatus] = "light_status";
+            property_name_[PropertyKey_deprecated::LinkAddress] = "link_address";
+            property_name_[PropertyKey_deprecated::LinkData1] = "link_data_one";
+            property_name_[PropertyKey_deprecated::LinkData2] = "link_data_two";
+            property_name_[PropertyKey_deprecated::LinkData3] = "link_data_three";
+            property_name_[PropertyKey_deprecated::LinkDatabaseDelta] 
                     = "link_database_delta";
-            property_name_[PropertyKey::LinkGroup] = "link_group";
-            property_name_[PropertyKey::LinkRecordFlags] = "link_record_flags";
-            property_name_[PropertyKey::LinkStatus] = "link_status";
-            property_name_[PropertyKey::LinkType] = "link_type";
-            property_name_[PropertyKey::MessageFlagsAcknowledge] 
-                    = "message_flags_acknowledge";
-            property_name_[PropertyKey::MessageFlagsGroup] 
+            property_name_[PropertyKey_deprecated::LinkGroup] = "link_group";
+            property_name_[PropertyKey_deprecated::LinkRecordFlags] = "link_record_flags";
+            property_name_[PropertyKey_deprecated::LinkStatus] = "link_status";
+            property_name_[PropertyKey_deprecated::LinkType] = "link_type";
+            property_name_[PropertyKey_deprecated::MessageFlagsAcknowledge] 
+                    = "message_flags_ack";
+            property_name_[PropertyKey_deprecated::MessageFlagsGroup] 
                     = "message_flags_group";
-            property_name_[PropertyKey::MessageFlagsBroadcast] 
+            property_name_[PropertyKey_deprecated::MessageFlagsBroadcast] 
                     = "message_flags_broadcast";
-            property_name_[PropertyKey::MessageFlagsExtendedFlag] 
+            property_name_[PropertyKey_deprecated::MessageFlagsExtendedFlag] 
                     = "message_flags_extended";
-            property_name_[PropertyKey::MessageFlagsMaxHops] = "max_hops";
-            property_name_[PropertyKey::MessageFlagsRemainingHops] 
-                    = "remaining_hops";
-            property_name_[PropertyKey::ResponderCmd1] = "responder_command_one";
-            property_name_[PropertyKey::ResponderCount] = "responder_count";
-            property_name_[PropertyKey::ResponderErrorCount] 
+            property_name_[PropertyKey_deprecated::MessageFlagsMaxHops] = "message_flags_max_hops";
+            property_name_[PropertyKey_deprecated::MessageFlagsRemainingHops] 
+                    = "message_Flags_remaining_hops";
+            property_name_[PropertyKey_deprecated::ResponderCmd1] = "responder_command_one";
+            property_name_[PropertyKey_deprecated::ResponderCount] = "responder_count";
+            property_name_[PropertyKey_deprecated::ResponderErrorCount] 
                     = "responder_error_count";
-            property_name_[PropertyKey::ResponderGroup] = "responder_group";
-            property_name_[PropertyKey::Spare1] = "spare_one";
-            property_name_[PropertyKey::Spare2] = "spare_two";
-            property_name_[PropertyKey::ToAddress] = "to_address";
-            property_name_[PropertyKey::SentCommandOne] = 
+            property_name_[PropertyKey_deprecated::ResponderGroup] = "responder_group";
+            property_name_[PropertyKey_deprecated::Spare1] = "spare_one";
+            property_name_[PropertyKey_deprecated::Spare2] = "spare_two";
+            property_name_[PropertyKey_deprecated::ToAddress] = "to_address";
+            property_name_[PropertyKey_deprecated::SentCommandOne] = 
                     "sent_command_one"; 
-            property_name_[PropertyKey::SentCommandTwo] = 
+            property_name_[PropertyKey_deprecated::SentCommandTwo] = 
                     "sent_command_two"; 
-            property_name_[PropertyKey::SignalToNoiseThreshold] = 
+            property_name_[PropertyKey_deprecated::SignalToNoiseThreshold] = 
                     "signal_to_noise_threshold";
-            property_name_[PropertyKey::X10HouseCode] = "x10_house_code";
-            property_name_[PropertyKey::X10UnitCode] = "x10_unit_code";
+            property_name_[PropertyKey_deprecated::X10HouseCode] = "x10_house_code";
+            property_name_[PropertyKey_deprecated::X10UnitCode] = "x10_unit_code";
 
         }
 
@@ -127,7 +127,7 @@ namespace ace {
          * @param key   PropertyKey to get the description of
          * @return      returns a std::string containing the description
          */
-        std::string PropertyKeyNames::GetPropertyName(PropertyKey key) {
+        std::string PropertyKeyNames_deprecated::GetPropertyName(PropertyKey_deprecated key) {
             auto it = property_name_.find(key);
             if (it != property_name_.end())
                 return it->second;

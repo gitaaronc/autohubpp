@@ -192,8 +192,8 @@ namespace ace
             int insteon_address = 0;
             std::shared_ptr<InsteonDevice>device;
             // TODO verify broadcast message cleanup events & to/from process
-            if (iMsg->properties_.count(PropertyKey::FromAddress)) {
-                insteon_address = iMsg->properties_[PropertyKey::FromAddress];
+            if (iMsg->properties_.count("from_address")) {
+                insteon_address = iMsg->properties_["from_address"];
                 if (DeviceExists(insteon_address)) {
                     device = GetDevice(insteon_address);
 
