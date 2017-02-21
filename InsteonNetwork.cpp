@@ -179,9 +179,6 @@ namespace ace
 
         void
         InsteonNetwork::OnUpdateDevice(Json::Value json) {
-            Json::Value root;
-            root["command"] = "update_device";
-            root["devices"] = json;
             if (OnUpdate)
                 io_service_.post([ = ]{OnUpdate(json);});
         }

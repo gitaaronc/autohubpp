@@ -40,7 +40,9 @@
 #include "../config.hpp"
 #include "EchoStatus.hpp"
 #include "InsteonProtocol.hpp"
+#include "../io/ioport.hpp"
 #include "../io/SerialPort.h"
+#include "../io/SocketPort.h"
 #include "../system/AutoResetEvent.hpp"
 
 namespace ace {
@@ -106,7 +108,7 @@ namespace ace {
                     bool retry_on_nak, int echo_length);
             void UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 
-            std::unique_ptr<io::SerialPort> data_port_;
+            std::unique_ptr<io::IOPort> data_port_;
             boost::asio::io_service& io_service_;
             msg_handler msg_handler_;
             InsteonProtocol insteon_protocol_;

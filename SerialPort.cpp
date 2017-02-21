@@ -68,7 +68,7 @@ SerialPort::on_async_receive_some(const boost::system::error_code& ec,
 }
 
 bool
-SerialPort::open(const std::string& com_port_name, const int baud_rate) {
+SerialPort::open(const std::string com_port_name, int baud_rate) {
     bool retVal = false;
 
     boost::system::error_code ec;

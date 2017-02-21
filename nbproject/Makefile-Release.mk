@@ -46,6 +46,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/MessageProcessor.o \
 	${OBJECTDIR}/PropertyKeyNames.o \
 	${OBJECTDIR}/SerialPort.o \
+	${OBJECTDIR}/SocketPort.o \
 	${OBJECTDIR}/autoapi.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o \
@@ -133,6 +134,11 @@ ${OBJECTDIR}/SerialPort.o: SerialPort.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SerialPort.o SerialPort.cpp
+
+${OBJECTDIR}/SocketPort.o: SocketPort.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SocketPort.o SocketPort.cpp
 
 ${OBJECTDIR}/autoapi.o: autoapi.cpp 
 	${MKDIR} -p ${OBJECTDIR}

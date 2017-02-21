@@ -61,19 +61,19 @@ public:
         close();
     }
 
-    bool open(const std::string& com_port_name, const int baud_rate = 9600);
-    void async_read_some();
+    bool open(const std::string com_port_name, int baud_rate = 9600) override;
+    void async_read_some() override;
 
     void
-    set_recv_handler(std::function<void() > fp) {
+    set_recv_handler(std::function<void() > fp) override{
         m_recv_handler = fp;
     }
     void close();
 
     std::size_t recv_with_timeout(std::vector<unsigned char>& buffer,
-            int msTimeout = 50);
-    unsigned int recv_buffer(std::vector<unsigned char>& buffer);
-    unsigned int send_buffer(std::vector<unsigned char>& buffer);
+            int msTimeout = 50) override;
+    unsigned int recv_buffer(std::vector<unsigned char>& buffer) override;
+    unsigned int send_buffer(std::vector<unsigned char>& buffer) override;
 protected:
     void on_async_receive_some(const boost::system::error_code& ec,
             size_t bytes_transferred);

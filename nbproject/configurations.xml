@@ -24,6 +24,7 @@
       </logicalFolder>
       <logicalFolder name="io" displayName="io" projectFiles="true">
         <itemPath>include/io/SerialPort.h</itemPath>
+        <itemPath>include/io/SocketPort.h</itemPath>
         <itemPath>include/io/ioport.hpp</itemPath>
       </logicalFolder>
       <logicalFolder name="json" displayName="json" projectFiles="true">
@@ -80,6 +81,7 @@
       <itemPath>MessageProcessor.cpp</itemPath>
       <itemPath>PropertyKeyNames.cpp</itemPath>
       <itemPath>SerialPort.cpp</itemPath>
+      <itemPath>SocketPort.cpp</itemPath>
       <itemPath>autoapi.cpp</itemPath>
       <itemPath>config.cpp</itemPath>
       <itemPath>jsoncpp.cpp</itemPath>
@@ -111,6 +113,9 @@
         <rebuildPropChanged>true</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <cTool>
+          <standard>10</standard>
+        </cTool>
         <ccTool>
           <standard>8</standard>
           <incDir>
@@ -162,6 +167,8 @@
       <item path="PropertyKeyNames.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="SocketPort.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="autoapi.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -237,6 +244,8 @@
             flavor2="0">
       </item>
       <item path="include/io/SerialPort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/io/SocketPort.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/io/ioport.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -342,6 +351,8 @@
       </item>
       <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="SocketPort.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="autoapi.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="config.cpp" ex="false" tool="1" flavor2="0">
@@ -416,6 +427,8 @@
             flavor2="0">
       </item>
       <item path="include/io/SerialPort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/io/SocketPort.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/io/ioport.hpp" ex="false" tool="3" flavor2="0">
       </item>

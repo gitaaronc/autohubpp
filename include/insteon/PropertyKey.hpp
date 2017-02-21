@@ -117,6 +117,7 @@ namespace ace {
         // TODO - REMOVE DEPRECATED
         typedef std::map<PropertyKey_deprecated, unsigned int> PropertyKeys_deprecated;
         
+        // TODO consider replacing with YAML::Node
         // PropertyKeys string as Key, more room for error vs int
         typedef std::map<std::string, unsigned int> PropertyKeys; 
         

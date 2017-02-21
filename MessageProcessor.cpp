@@ -35,6 +35,7 @@
 #include <sstream>
 #include <future>
 #include <chrono>
+#include <algorithm>
 
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
@@ -73,12 +74,32 @@ MessageProcessor::ByteArrayToStringStream(
 bool
 MessageProcessor::Connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    std::unique_ptr<io::SerialPort> port(new io::SerialPort(io_service_));
-    data_port_ = std::move(port);
+
+    std::string plm_type = config_["PLM"]["type"].as<std::string>("serial"); 
+    std::string host;
+    int port = 0;
+    std::unique_ptr<io::IOPort> io;
+
+    std::transform(plm_type.begin(), plm_type.end(), 
+            plm_type.begin(), ::tolower);
+    
+    if (plm_type.compare("hub") == 0){
+        io = std::move(std::unique_ptr<io::IOPort>(
+                new io::SocketPort(io_service_)));
+        host = config_["PLM"]["hub_ip"].as<std::string>("127.0.0.1");
+        port = config_["PLM"]["hub_port"].as<int>(9761);
+    } else {
+        io = std::move(std::unique_ptr<io::IOPort>(
+                new io::SerialPort(io_service_)));
+        host = config_["PLM"]["serial_port"].as<std::string>("/dev/ttyUSB0");
+        port = config_["PLM"]["baud_rate"].as<int>(9600);
+    }
+    
+    data_port_ = std::move(io);
     data_port_->set_recv_handler(std::bind(
             &type::ProcessData, this));
-    if (data_port_->open(config_["PLM"]["serial_port"].as<std::string>(), 
-            config_["PLM"]["baud_rate"].as<int>())) {
+    
+    if (data_port_->open(host, port)) {
         data_port_->async_read_some();
     }
     //    std::vector<unsigned char> temp1 = { 0x60 };

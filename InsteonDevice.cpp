@@ -55,6 +55,7 @@ last_action_(InsteonMessageType::Other){
     command_map_["dimming_start"] = InsteonDeviceCommand::StartDimming;
     command_map_["dimming_stop"] = InsteonDeviceCommand::StopDimming;
     command_map_["status"] = InsteonDeviceCommand::LightStatusRequest;
+    command_map_["beep"] = InsteonDeviceCommand::Beep;
 }
 
 InsteonDevice::~InsteonDevice() {

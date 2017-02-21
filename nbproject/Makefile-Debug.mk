@@ -46,6 +46,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/MessageProcessor.o \
 	${OBJECTDIR}/PropertyKeyNames.o \
 	${OBJECTDIR}/SerialPort.o \
+	${OBJECTDIR}/SocketPort.o \
 	${OBJECTDIR}/autoapi.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o \
@@ -133,6 +134,11 @@ ${OBJECTDIR}/SerialPort.o: nbproject/Makefile-${CND_CONF}.mk SerialPort.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SerialPort.o SerialPort.cpp
+
+${OBJECTDIR}/SocketPort.o: nbproject/Makefile-${CND_CONF}.mk SocketPort.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/yaml-cpp -I/usr/include/websocketpp -I/usr/include/restbed -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SocketPort.o SocketPort.cpp
 
 ${OBJECTDIR}/autoapi.o: nbproject/Makefile-${CND_CONF}.mk autoapi.cpp 
 	${MKDIR} -p ${OBJECTDIR}
