@@ -115,8 +115,11 @@ INSTEON:
         link_database_delta: 46
       device_name_: Bedroom Room - Ceiling
   PLM:
-    baud_rate: 19200
-    serial_port: /dev/ttyUSB0
+    type: hub #options are hub or serial ,hub must have open port 9761
+    hub_ip: 127.0.0.1 # IP Address of your Insteon Hub
+    hub_port: 9761 # you can use any port set on the hub accepting RAW insteon commands/connections
+    baud_rate: 19200 # baud rate of serial port
+    serial_port: /dev/ttyUSB0 # linux filesystem folder
 WEBSOCKET:
   listening_port: 9000
 ```
