@@ -5,8 +5,8 @@ C++ Home Automation Hub - Insteon PLM Support
 
  To create a fully customizable home automation hub.<br/>
  This server software is written in C++. It was designed to provide TCP/IP support to Insteon PLM.<br/>
- <b>PLM's supported:</b> Serial / USB<br/>
- Additional support for Insteon Hub is available but has not been pushed to my github repo. <br/>
+ <b>PLM's supported:</b> Serial / USB and HUB<br/>
+ If using a HUB it must support RAW Insteon Commands via TCP/IP. My hub is version 4.8A<br/>
  <b>NO</b> Insteon accounts are required.<br/>
  
  I have decided to open source this project for various reasons. <br/>
