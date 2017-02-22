@@ -125,7 +125,7 @@ InsteonDeviceImpl::CommandAckProcessor(
             insteon_message->properties_["command_one"]);
     unsigned char recvCmdTwo = static_cast<unsigned char> (
             insteon_message->properties_["command_two"]);
-    unsigned char sentCmdOne;
+    unsigned char sentCmdOne = 0x00;
     {
         std::lock_guard<std::mutex>_(command_mutex_);
         sentCmdOne = pending_command_;

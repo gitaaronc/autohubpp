@@ -106,7 +106,13 @@ InsteonDevice::device_name() {
 void
 InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne, 
         unsigned char recvCmdOne, unsigned char recvCmdTwo) {
-    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
+    unsigned char cmd = 0;
+    cmd = sentCmdOne > 0 ? sentCmdOne : recvCmdOne;
+    
+    if (sentCmdOne == 0)
+        utils::Logger::Instance().Info("Received unexpected ACK");
+    
+    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (cmd);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
             device_properties_["device_engine_version"] = recvCmdTwo;

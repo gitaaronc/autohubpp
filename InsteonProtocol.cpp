@@ -58,6 +58,11 @@ InsteonProtocol::ProcessMessage(const std::vector<unsigned char>& data,
             return DeviceLinkCleanupMessage(data, offset, count, insteon_message);
         case 0x60: // get insteon modem info
             return GetIMInfo(data, offset, count, insteon_message);
+        case 0x62:
+            if (data.size() < offset + 9)
+                return false;
+            count = 8;
+            return true;
         case 0x73: // get insteon modem configuration
             return GetIMConfiguration(data, offset, count, insteon_message);
     }
