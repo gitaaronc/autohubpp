@@ -85,7 +85,7 @@ RESTBED:
   listening_port: 8000
 INSTEON:
   command_delay: 1500
-  DEVICES:
+  DEVICES: # devices will self populate as they are discovered. Simply walk around your house and press the on/off button.
     0x0026deeb:
       properties_:
         button_on_level: 255
