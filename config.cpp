@@ -5,13 +5,6 @@
 
 namespace ace
 {
-    namespace config
-    {
-
-        int worker_threads = 10;
-        int command_delay = 1500; // delay to wait between sending commands
-
-    } // namespace config
     namespace utils
     {
 

@@ -37,12 +37,14 @@
 
 #include <memory>
 
-namespace ace {
-namespace insteon {
+namespace ace
+{
+namespace insteon
+{
 
-InsteonController::InsteonController(InsteonNetwork *network, 
+InsteonController::InsteonController(InsteonNetwork *network,
         boost::asio::io_service& io_service)
-: insteon_network_(network),
+: insteon_network_(network), is_loading_database_(false),
 pImpl_(new detail::InsteonController_impl) {
 
     pImpl_->timer_ = std::move(
@@ -72,9 +74,34 @@ InsteonController::GetAddress() {
 }
 
 void
+InsteonController::GetDatabaseRecord(unsigned char one, unsigned char two) {
+    is_loading_database_ = true;
+    if ((one == 0x1C) && (two == 0x00)) {
+        is_loading_database_ = false;
+        insteon_network_->cv_load_db_.notify_one();
+        return;
+    }
+    std::vector<unsigned char> send_buffer = {0x75};
+    send_buffer.push_back(one);
+    send_buffer.push_back(two);
+
+    //std::vector<unsigned char> send_buffer = {0x69};
+    //insteon_network_->io_service_.post(std::bind(
+    //        &type::InternalSend, this, send_buffer));
+    insteon_network_->msg_proc_->TrySend(send_buffer, false);
+}
+
+void
 InsteonController::GetIMConfiguration() {
     std::vector<unsigned char> send_buffer = {0x73};
     insteon_network_->msg_proc_->TrySend(send_buffer);
+}
+
+bool InsteonController::EnableMonitorMode(){
+    std::vector<unsigned char> send_buffer = {0x6B, 0x20};
+    if (insteon_network_->msg_proc_->TrySend(send_buffer) == EchoStatus::ACK)
+        return true;
+    return false;
 }
 
 void
@@ -82,6 +109,11 @@ InsteonController::EnterLinkMode(InsteonLinkMode mode, unsigned char group) {
     if (!TryEnterLinkMode(mode, group)) {
         return; // TODO add exception handling
     }
+}
+
+void
+InsteonController::InternalSend(const std::vector<unsigned char>& buffer) {
+    insteon_network_->msg_proc_->TrySend(buffer);
 }
 
 bool
@@ -165,7 +197,8 @@ InsteonController::OnDeviceUnlinked(std::shared_ptr<
 }
 
 void
-InsteonController::OnMessage(std::shared_ptr<insteon::InsteonMessage> insteon_message) {
+InsteonController::OnMessage(
+        std::shared_ptr<insteon::InsteonMessage> insteon_message) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
     if (insteon_message->message_type_ == insteon::InsteonMessageType::DeviceLink) {
@@ -174,11 +207,11 @@ InsteonController::OnMessage(std::shared_ptr<insteon::InsteonMessage> insteon_me
         insteon_address = insteon_message->properties_.find("address")->second;
 
         std::shared_ptr<InsteonDevice> device;
-        if (!insteon_network_->DeviceExists(insteon_address)) {
-            device = insteon_network_->AddDevice(insteon_address);
-        } else {
+        //if (!insteon_network_->DeviceExists(insteon_address)) {
+        device = insteon_network_->AddDevice(insteon_address);
+        /*} else {
             device = insteon_network_->GetDevice(insteon_address);
-        }
+        }*/
 
         pImpl_->timer_->Stop();
         pImpl_->IsInLinkingMode_ = false;
@@ -202,9 +235,40 @@ InsteonController::OnMessage(std::shared_ptr<insteon::InsteonMessage> insteon_me
             insteon::InsteonMessageType::GetIMConfiguration) {
         utils::Logger::Instance().Info("IM Configuration flags, "
                 "do something with them");
-    } else {
+    } else if ((insteon_message->message_type_ ==
+            insteon::InsteonMessageType::DeviceLinkRecord) ||
+            (insteon_message->message_type_ ==
+            insteon::InsteonMessageType::DatabaseRecordFound)) {
+        utils::Logger::Instance().Info("ALDB record received");
+
+    } else { // TODO ADD DeviceLinkRecord processing
         utils::Logger::Instance().Warning("Unknown Message received");
     }
 }
+
+void
+InsteonController::ProcessDatabaseRecord(
+        std::shared_ptr<insteon::InsteonMessage> insteon_message) {
+    int address = 0;
+    address = insteon_message->properties_["link_address"];
+    if (address > 0)
+        insteon_network_->AddDevice(address);
+    bool get_next = false;
+    int has_flags = insteon_message->properties_["link_record_flags"];
+    get_next =  has_flags > 0;
+    if (get_next){
+        unsigned int temp = 0;
+        unsigned char one = insteon_message->properties_["db_address_MSB"];
+        unsigned char two = insteon_message->properties_["db_address_LSB"];
+        temp = (one << 8) | (two);
+        temp -= 8;
+        one = (temp >> 8) & 0xFF;
+        two = temp & 0xFF;
+        GetDatabaseRecord(one, two);
+    } else {
+        is_loading_database_ = false;
+        insteon_network_->cv_load_db_.notify_one();
+    }
 }
-}
+} // namespace insteon
+} // namespace ace

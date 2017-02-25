@@ -43,6 +43,7 @@ InsteonDevice::InsteonDevice(int insteon_address,
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_service_(io_service), config_(config),
 last_action_(InsteonMessageType::Other){
+    device_properties_["light_status"] = 0;    
     LoadProperties();
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
@@ -157,7 +158,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
     PropertyKeys keys = insteon_message->properties_;
     unsigned char command_one = keys["command_one"];
     unsigned char command_two = keys["command_two"];
-    
+    device_properties_["device_disabled"] = 0;
     // TODO verify broadcast message cleanup events & to/from process
     bool actioned = ((unsigned char) insteon_message->message_type_
             == (unsigned char) last_action_);
@@ -218,6 +219,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
                     keys["device_firmware_version"];
             
             break;
+        case InsteonMessageType::DeviceLinkRecord:
+            utils::Logger::Instance().Info("DEVICE received all link record");
+            break;
     }
     SerializeYAML();
 }
@@ -256,7 +260,12 @@ void InsteonDevice::SerializeYAML(){
 bool
 InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
-    //std::lock_guard<std::mutex>_(command_lock_);
+    if (device_properties_.count("device_disabled")){
+        if(device_properties_["device_disabled"] != 0){
+            io_service_.post(std::bind(&type::StatusUpdate, this, 0));
+            return false;
+        }
+    }
     switch (command) {
         case InsteonDeviceCommand::On:
         {

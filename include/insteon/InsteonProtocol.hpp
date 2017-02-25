@@ -55,6 +55,8 @@ private:
             int &count, std::shared_ptr<InsteonMessage>& insteon_message);
     bool ExtendedMessage(const std::vector<unsigned char>& data, int offset,
             int &count, std::shared_ptr<InsteonMessage>& insteon_message);
+    bool DatabaseRecordFound(const std::vector<unsigned char>& data, int offset,
+            int &count, std::shared_ptr<InsteonMessage>& insteon_message);
     bool DeviceLinkMessage(const std::vector<unsigned char>& data, int offset,
             int &count, std::shared_ptr<InsteonMessage>& insteon_message);
     bool DeviceLinkRecordMessage(const std::vector<unsigned char>& data,

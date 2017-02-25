@@ -58,6 +58,7 @@ namespace ace {
             class InsteonDeviceImpl;
         }
 
+        // Implements Insteon Device functions and stores attributes
         class InsteonDevice {
             typedef InsteonDevice type;
         public:

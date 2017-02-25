@@ -102,10 +102,16 @@ MessageProcessor::Connect() {
     if (data_port_->open(host, port)) {
         data_port_->async_read_some();
     }
-    //    std::vector<unsigned char> temp1 = { 0x60 };
-    //    io_service_.post(std::bind(&InsteonNetwork::Send, this, temp1));
-    //    std::vector<unsigned char> temp2 = { 0x6B, 0x48 };
-    //    io_service_.post(std::bind(&InsteonNetwork::Send, this, temp2));
+    /*
+    //TODO Add function to send internal commands
+    std::vector<unsigned char> temp1 = { 0x60 };
+    TrySend(temp1);
+    //io_service_.post(std::bind(&type::Send, this, temp1));
+    std::vector<unsigned char> temp2 = { 0x6B, 0x48 };
+    //io_service_.post(std::bind(&type::Send, this, temp2));
+    TrySend(temp2);*/
+    return true;
+
 }
 
 void
@@ -124,7 +130,7 @@ MessageProcessor::ProcessData() {
             std::vector<unsigned char>().swap(buffer_);
         }
     }
-    if (data_port_->recv_buffer(read_buffer) > 0) {
+    if ((data_port_->recv_buffer(read_buffer) > 0) || (read_buffer.size() > 0)) {
         int count = 0;
         int offset = 0;
         int last = 0;
@@ -189,11 +195,11 @@ MessageProcessor::ProcessEcho(
     std::shared_ptr<InsteonMessage> insteon_message(
             std::make_shared<InsteonMessage>());
 
-    if (insteon_protocol_.ProcessMessage(message_buffer, offset, count,
-            insteon_message)) {
-        return true;
-    } else if (ace::utils::VectorsEqual(sent_message_, message)) {
+    if (ace::utils::VectorsEqual(sent_message_, message)) {
         count = sent_message_.size();
+        return true;
+    } else if (insteon_protocol_.ProcessMessage(message_buffer, offset, count,
+            insteon_message)) {
         return true;
     }
     return false;
@@ -276,7 +282,7 @@ MessageProcessor::ProcessMessage(const std::vector<unsigned char>& read_buffer,
         time_of_last_command_ = std::chrono::system_clock::now();
         auto it = read_buffer.begin() + offset - 1;
         for (; it != read_buffer.begin() + offset + count; ++it)
-            insteon_message->raw_message.push_back(*it); // copy the message
+            insteon_message->raw_message.push_back(*it); // copy the buffer
         UpdateWaitItems(insteon_message);
         if (msg_handler_)
             io_service_.post(std::bind(msg_handler_, insteon_message));

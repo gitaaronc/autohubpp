@@ -220,10 +220,6 @@ namespace ace
     void
     Autohub::start() {
         utils::Logger::Instance().Trace(FUNCTION_NAME);
-        insteon_network_->set_update_handler(bind(&type::OnUpdateDevice, this,
-                std::placeholders::_1));
-        insteon_network_->Connect();
-        // wspp_server_.init_asio(); << self managed io_service
 
         wspp_server_.clear_access_channels(websocketpp::log::alevel::all);
         wspp_server_.clear_error_channels(websocketpp::log::elevel::all);
@@ -252,6 +248,9 @@ namespace ace
                 std::bind(&wspp_server::run,
                 &wspp_server_)));
 
+        insteon_network_->set_update_handler(bind(&type::OnUpdateDevice, this,
+                std::placeholders::_1));
+        insteon_network_->Connect();
         TestPlugin();
         startRestbed(); // running in this thread
     }

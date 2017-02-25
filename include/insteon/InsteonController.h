@@ -25,7 +25,7 @@
  *
  */
 #ifndef INSTEONCONTROLLER_H
-#define	INSTEONCONTROLLER_H
+#define INSTEONCONTROLLER_H
 
 #include "InsteonLinkMode.h"
 #include "InsteonControllerGroupCommands.h"
@@ -37,65 +37,73 @@
 #include <boost/asio/io_service.hpp>
 
 namespace ace {
-namespace insteon {
-class InsteonDevice;
-class InsteonNetwork;
-class InsteonMessage;
-namespace detail {
-class InsteonController_impl;
-}
+    namespace insteon {
+        class InsteonDevice;
+        class InsteonNetwork;
+        class InsteonMessage;
+        namespace detail {
+            class InsteonController_impl;
+        }
 
-class InsteonController {
-public:
-    InsteonController() = delete;
-    InsteonController(InsteonNetwork *network,
-            boost::asio::io_service& io_service);
-    ~InsteonController();
-public:
+        class InsteonController {
+            typedef InsteonController type;
+        public:
+            InsteonController() = delete;
+            InsteonController(InsteonNetwork *network,
+                    boost::asio::io_service& io_service);
+            ~InsteonController();
+        public:
 
-    int GetAddress(); 
+            int GetAddress();
 
-    void EnterLinkMode(InsteonLinkMode mode, unsigned char group);
-    
-    void CancelLinkMode();
+            void EnterLinkMode(InsteonLinkMode mode, unsigned char group);
 
-    void GroupCommand(InsteonControllerGroupCommands command,
-            unsigned char group);
+            void CancelLinkMode();
 
-    void GroupCommand(InsteonControllerGroupCommands command,
-            unsigned char group, unsigned char value);
-    
-    void GetIMConfiguration();
-    
-    void OnMessage(std::shared_ptr<InsteonMessage>
-            insteon_message);
-    
-private:
-    void OnTimerEvent(); 
+            void GroupCommand(InsteonControllerGroupCommands command,
+                    unsigned char group);
 
-    void OnDeviceLinked(std::shared_ptr<InsteonDevice>& device); 
+            void GroupCommand(InsteonControllerGroupCommands command,
+                    unsigned char group, unsigned char value);
+            void GetDatabaseRecord(unsigned char one, unsigned char two);
+            void GetIMConfiguration();
 
-    void OnDeviceUnlinked(std::shared_ptr<InsteonDevice>& device); 
+            bool EnableMonitorMode();
 
-    void SetAddress(int address); 
+            void OnMessage(std::shared_ptr<InsteonMessage>
+                    insteon_message);
+            bool is_loading_database_;
+        private:
+            void InternalSend(const std::vector<unsigned char>& buffer);
 
-    bool TryEnterLinkMode(InsteonLinkMode mode, unsigned char group); 
+            void OnTimerEvent();
 
-    bool TryCancelLinkMode(); 
+            void OnDeviceLinked(std::shared_ptr<InsteonDevice>& device);
 
-    bool TryGroupCommand(InsteonControllerGroupCommands command,
-            unsigned char group);
+            void OnDeviceUnlinked(std::shared_ptr<InsteonDevice>& device);
 
-    bool TryGroupCommand(InsteonControllerGroupCommands command,
-            unsigned char group, unsigned char value);
+            void ProcessDatabaseRecord(
+                    std::shared_ptr<insteon::InsteonMessage> insteon_message);
 
-    std::unique_ptr<detail::InsteonController_impl> pImpl_;
+            void SetAddress(int address);
 
-    InsteonNetwork *insteon_network_;
-    PropertyKeys controller_properties_;
-};
-} // namespace network
+            bool TryEnterLinkMode(InsteonLinkMode mode, unsigned char group);
+
+            bool TryCancelLinkMode();
+
+            bool TryGroupCommand(InsteonControllerGroupCommands command,
+                    unsigned char group);
+
+            bool TryGroupCommand(InsteonControllerGroupCommands command,
+                    unsigned char group, unsigned char value);
+
+            std::unique_ptr<detail::InsteonController_impl> pImpl_;
+
+            InsteonNetwork *insteon_network_;
+            PropertyKeys controller_properties_;
+        };
+    } // namespace network
 } // namespace ace
 
-#endif	/* INSTEONCONTROLLER_H */
+#endif /* INSTEONCONTROLLER_H */
 

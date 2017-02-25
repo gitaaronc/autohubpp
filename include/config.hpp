@@ -13,11 +13,6 @@
 #include <yaml-cpp/yaml.h>
 
 namespace ace {
-namespace config {
-    
-extern int command_delay; // to to wait between sending commands
-extern int worker_threads; // the number of worker threads
-}
 namespace utils {
     class Config {
     public:

@@ -102,7 +102,6 @@ public:
     system::AutoResetEvent ack_event_;
     std::unique_ptr<system::Timer> ack_timer_;
 
-    PropertyKeys device_properties_; // INSTEON device properties
     std::mutex command_mutex_;
     unsigned char pending_command_;
     unsigned char pending_command_two_;

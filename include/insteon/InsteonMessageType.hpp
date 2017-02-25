@@ -34,6 +34,7 @@ namespace ace {
         enum class InsteonMessageType : int {
             Other = 0,
                     Ack,
+                    DatabaseRecordFound,
                     DeviceLink,
                     DeviceLinkCleanup,
                     DeviceLinkRecord,

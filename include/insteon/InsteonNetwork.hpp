@@ -32,6 +32,7 @@
 #include "../io/SerialPort.h"
 
 #include <memory>
+#include <condition_variable>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/strand.hpp>
@@ -66,8 +67,8 @@ public:
     void set_update_handler(
             std::function<void(Json::Value json) > callback);
 protected:
-    // adds a device to insteon_device_list
     friend class InsteonController;
+    // adds a device to insteon_device_list
     std::shared_ptr<InsteonDevice> AddDevice(int insteon_address);
     std::shared_ptr<InsteonDevice> GetDevice(int insteon_address);
 
@@ -81,6 +82,8 @@ protected:
     void OnMessage(std::shared_ptr<InsteonMessage> iMessage);
     void OnUpdateDevice(Json::Value json);
 
+    std::mutex mx_load_db_;
+    std::condition_variable cv_load_db_;
 private:
     boost::asio::io_service& io_service_;
     std::unique_ptr<InsteonController> insteon_controller_;

@@ -80,9 +80,7 @@ InsteonDeviceImpl::GetStandardMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    if (device_properties_.count("message_flags_max_hops")) {
-        max_hops = device_properties_["message_flags_max_hops"];
-    }
+    insteon_device_->GetPropertyValue("message_flags_max_hops", max_hops);
     message_flags = (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
         message_flags, cmd1, cmd2};
@@ -99,9 +97,7 @@ InsteonDeviceImpl::GetExtendedMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    if (device_properties_.count("message_flags_max_hops")) {
-        max_hops = device_properties_["message_flags_max_hops"];
-    }
+    insteon_device_->GetPropertyValue("message_flags_max_hops", max_hops);
     message_flags = 16 | (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
         message_flags, cmd1, cmd2, d1, d2, d3, d4, d5, d6, d7, d8,
@@ -232,6 +228,7 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
         max_retries_ = max_retries_ - 1 > 0 ? max_retries_ -= 1 : 0;
         utils::Logger::Instance().Info("Max retries exceeded - devices is not"
                 " responding\n");
+        insteon_device_->device_properties_["device_disabled"] = 1;
         ClearPendingCommand();
     }
 }
