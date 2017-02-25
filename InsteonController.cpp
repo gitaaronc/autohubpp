@@ -74,7 +74,7 @@ InsteonController::GetAddress() {
 }
 
 void
-InsteonController::GetDatabaseRecord(unsigned char one, unsigned char two) {
+InsteonController::GetDatabaseRecords(unsigned char one, unsigned char two) {
     is_loading_database_ = true;
     if ((one == 0x1C) && (two == 0x00)) {
         is_loading_database_ = false;
@@ -240,7 +240,7 @@ InsteonController::OnMessage(
             (insteon_message->message_type_ ==
             insteon::InsteonMessageType::DatabaseRecordFound)) {
         utils::Logger::Instance().Info("ALDB record received");
-
+        ProcessDatabaseRecord(insteon_message);
     } else { // TODO ADD DeviceLinkRecord processing
         utils::Logger::Instance().Warning("Unknown Message received");
     }
@@ -264,7 +264,7 @@ InsteonController::ProcessDatabaseRecord(
         temp -= 8;
         one = (temp >> 8) & 0xFF;
         two = temp & 0xFF;
-        GetDatabaseRecord(one, two);
+        GetDatabaseRecords(one, two);
     } else {
         is_loading_database_ = false;
         insteon_network_->cv_load_db_.notify_one();

@@ -111,8 +111,7 @@ InsteonNetwork::Connect() {
         utils::Logger::Instance().Info("PLM monitor mode enabled successfully!");
     
     // start loading the ALDB from PLM
-    insteon_controller_->GetDatabaseRecord(0x1F, 0xF8);
-    
+    insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
     // wait here until the database is loaded
     std::unique_lock<std::mutex> lk(mx_load_db_);
     cv_load_db_.wait(lk, [this] {

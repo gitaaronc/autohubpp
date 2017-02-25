@@ -65,7 +65,7 @@ namespace ace {
 
             void GroupCommand(InsteonControllerGroupCommands command,
                     unsigned char group, unsigned char value);
-            void GetDatabaseRecord(unsigned char one, unsigned char two);
+            void GetDatabaseRecords(unsigned char one, unsigned char two);
             void GetIMConfiguration();
 
             bool EnableMonitorMode();
