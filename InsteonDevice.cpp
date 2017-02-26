@@ -222,6 +222,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
         case InsteonMessageType::DeviceLinkRecord:
             utils::Logger::Instance().Info("DEVICE received all link record");
             break;
+        default:
+            utils::Logger::Instance().Info("Unknown message type received");
+            break;
     }
     SerializeYAML();
 }

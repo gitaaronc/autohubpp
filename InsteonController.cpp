@@ -201,48 +201,49 @@ InsteonController::OnMessage(
         std::shared_ptr<insteon::InsteonMessage> insteon_message) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
-    if (insteon_message->message_type_ == insteon::InsteonMessageType::DeviceLink) {
-        utils::Logger::Instance().Info("DEVICE LINK");
+    switch (insteon_message->message_type_){
+        case insteon::InsteonMessageType::DeviceLink:
+        {
+            utils::Logger::Instance().Info("DEVICE LINK");
 
-        insteon_address = insteon_message->properties_.find("address")->second;
+            insteon_address = insteon_message->properties_.find("address")->second;
 
-        std::shared_ptr<InsteonDevice> device;
-        //if (!insteon_network_->DeviceExists(insteon_address)) {
-        device = insteon_network_->AddDevice(insteon_address);
-        /*} else {
-            device = insteon_network_->GetDevice(insteon_address);
-        }*/
+            std::shared_ptr<InsteonDevice> device;
+            device = insteon_network_->AddDevice(insteon_address);
 
-        pImpl_->timer_->Stop();
-        pImpl_->IsInLinkingMode_ = false;
+            pImpl_->timer_->Stop();
+            pImpl_->IsInLinkingMode_ = false;
 
-        if (pImpl_->LinkingMode_ != InsteonLinkMode::Delete)
-            OnDeviceLinked(device);
-        else
-            OnDeviceUnlinked(device);
-    } else if (insteon_message->message_type_ ==
-            insteon::InsteonMessageType::GetIMInfo) {
-        pImpl_->insteon_identity_.category =
-                insteon_message->properties_["device_category"];
+            if (pImpl_->LinkingMode_ != InsteonLinkMode::Delete)
+                OnDeviceLinked(device);
+            else
+                OnDeviceUnlinked(device);
+        }
+            break;
+        case insteon::InsteonMessageType::GetIMInfo:
+            pImpl_->insteon_identity_.category =
+                    insteon_message->properties_["device_category"];
 
-        pImpl_->insteon_identity_.sub_category =
-                insteon_message->properties_["device_subcategory"];
+            pImpl_->insteon_identity_.sub_category =
+                    insteon_message->properties_["device_subcategory"];
 
-        pImpl_->insteon_identity_.firmware_version =
-                insteon_message->properties_["device_firmware_version"];
+            pImpl_->insteon_identity_.firmware_version =
+                    insteon_message->properties_["device_firmware_version"];
 
-    } else if (insteon_message->message_type_ ==
-            insteon::InsteonMessageType::GetIMConfiguration) {
-        utils::Logger::Instance().Info("IM Configuration flags, "
-                "do something with them");
-    } else if ((insteon_message->message_type_ ==
-            insteon::InsteonMessageType::DeviceLinkRecord) ||
-            (insteon_message->message_type_ ==
-            insteon::InsteonMessageType::DatabaseRecordFound)) {
-        utils::Logger::Instance().Info("ALDB record received");
-        ProcessDatabaseRecord(insteon_message);
-    } else { // TODO ADD DeviceLinkRecord processing
-        utils::Logger::Instance().Warning("Unknown Message received");
+            break;
+        case insteon::InsteonMessageType::GetIMConfiguration:
+            utils::Logger::Instance().Info("IM Configuration flags, "
+                    "do something with them");
+            break;
+        case insteon::InsteonMessageType::DeviceLinkRecord:
+        case insteon::InsteonMessageType::DatabaseRecordFound:
+            utils::Logger::Instance().Info("ALDB record received");
+            ProcessDatabaseRecord(insteon_message);
+            break;
+        default:
+            utils::Logger::Instance().Info("Unknown Message received");
+            break;
+            
     }
 }
 

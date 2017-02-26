@@ -85,7 +85,6 @@ InsteonNetwork::AddDevice(int insteon_address) {
             this, std::placeholders::_1));
     device_list_.insert(InsteonDeviceMapPair(insteon_address, device));
     return device;
-
 }
 
 /**
@@ -107,9 +106,11 @@ InsteonNetwork::Connect() {
     if (!msg_proc_->Connect())
         return false;
 
-    if (insteon_controller_->EnableMonitorMode())
-        utils::Logger::Instance().Info("PLM monitor mode enabled successfully!");
-    
+    if (config_["PLM"]["enable_monitor_mode"].as<bool>(false))
+        if (insteon_controller_->EnableMonitorMode())
+            utils::Logger::Instance().Info("PLM monitor mode enabled "
+                "successfully!");
+
     // start loading the ALDB from PLM
     insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
     // wait here until the database is loaded
@@ -118,13 +119,9 @@ InsteonNetwork::Connect() {
         return insteon_controller_->is_loading_database_ == false;
     });
 
+    // get status of each device in the list
     for (const auto& it : device_list_) {
-        if (it.second->Command(InsteonDeviceCommand::LightStatusRequest, 0x00)){
-            it.second->Command(InsteonDeviceCommand::GetOperatingFlags, 0x00);
-            it.second->Command(InsteonDeviceCommand::GetInsteonEngineVersion, 
-                    0x00);
-            it.second->Command(InsteonDeviceCommand::IDRequest, 0x00);
-        }
+        it.second->Command(InsteonDeviceCommand::LightStatusRequest, 0x00);
     }
     return true;
 }
