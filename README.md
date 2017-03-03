@@ -27,11 +27,10 @@ Autohub components were also written for use with with Home Assistant.
 
 This is the initial push to the repo, additional documentation will follow.
 
-Server supports restapi and websockets. Rest and Websockets are used for controlling devices and receiving updates.
+This server supports restapi and websockets. Rest and Websockets are used for controlling devices and receiving updates.
 TODO: 
  - Documentation
- - configuration class to hold settings such as serial port. Currently settings are stored in "include/config.hpp"
-
+ 
 You must have all the the required dependencies to compile autohubpp.<br/>
 First ensure you have at least version 1.55 of the boost libraries installed.<br/>
 <b>apt-get install libboost-all-dev</b><br/>
@@ -59,7 +58,8 @@ Follow the instructions for compiling provided in theyaml-cpp repo.<br/>
 Clone this repository.
 
 <b>Compiling</b><br/>
- I compile and run everything in linux. All of this should compile and run under windows but it hasn't been tested.<br />
+ I compile and run everything in linux on a Beaglebone. <br/>
+ All of this should compile and run under windows but it hasn't been tested.<br />
  I do use Netbeans as an IDE on windows, but all compiling is done remotely on linux.<br />
 
  The compiler must be able to find the header files included with the above dependencies.<br />
@@ -80,49 +80,171 @@ ex: autohubpp /etc/configuration.yaml</br>
 example yaml configuration file<br/>
 ```
 worker_threads: 20
-logging_mode: VERBOSE
 RESTBED:
   listening_port: 8000
 INSTEON:
   command_delay: 1500
-  DEVICES: # devices will self populate as they are discovered. Simply walk around your house and press the on/off button.
+  DEVICES: # You don't need to populate the device section, it will autopopulate on discovery. You can modify/customize it.
     0x0026deeb:
       properties_:
-        button_on_level: 255
         button_on_ramp_rate: 31
+        button_on_level: 255
         device_category: 1
+        device_disabled: 0
         device_engine_version: 2
         device_firmware_version: 65
         device_subcategory: 14
-        light_status: 255
-        link_database_delta: 0
-        signal_to_noise_threshold: 32
-        x10_house_code: 32
-        x10_unit_code: 0
-      device_name_: Office Lamp
-    0x0029e6cd:
-      properties_:
-        device_engine_version: 2
-        device_category: 1
-        device_firmware_version: 65
-        device_subcategory: 32
         enable_blink_on_traffic: 0
         enable_led: 0
         enable_load_sense: 0
         enable_programming_lock: 0
         enable_resume_dim: 0
         light_status: 0
-        link_database_delta: 46
-      device_name_: Bedroom Room - Ceiling
+        link_database_delta: 2
+        signal_to_noise_threshold: 32
+        x10_house_code: 32
+        x10_unit_code: 0
+      device_name_: Desk Lamp
+    0x0029e6cd:
+      properties_:
+        device_engine_version: 2
+        device_category: 1
+        device_subcategory: 32
+        device_firmware_version: 65
+        device_disabled: 0
+        enable_blink_on_traffic: 0
+        enable_led: 0
+        enable_load_sense: 0
+        enable_programming_lock: 0
+        enable_resume_dim: 0
+        light_status: 0
+        link_database_delta: 24
+      device_name_: Ceiling Light
+    0x002035f6:
+      device_name_: 0x002035f6
+      device_disabled: 1
+    0x0027ce35:
+      device_name_: 0x0027ce35
+      device_disabled: 1
   PLM:
-    type: hub #options are hub or serial ,hub must have open port 9761
-    hub_ip: 127.0.0.1 # IP Address of your Insteon Hub
-    hub_port: 9761 # you can use any port set on the hub accepting RAW insteon commands/connections
-    baud_rate: 19200 # baud rate of serial port
-    serial_port: /dev/ttyUSB0 # linux filesystem folder
+    enable_monitor_mode: false
+    serial_port: /dev/ttyUSB0
+    type: hub #can be hub or serial, only the older hub is support at this time.
+    sync_device_status: true
+    hub_ip: 192.168.4.147
+    baud_rate: 19200
+    load_aldb: false
+    hub_port: 9761
 WEBSOCKET:
   listening_port: 9000
+logging_mode: VERBOSE
+
 ```
-More C++ and Python developers required!!
+
+Websocket requests are expected by the server in a json format. Responses are delivered in a json format.<br/>
+A sample request:<br/>
+```
+{
+   "event" : "getDeviceList"
+}
+```
+The sampled response:<br/>
+```
+{
+   "devices" : [
+      {
+         "device_address_" : 2110966,
+         "device_name_" : "0x002035f6",
+         "properties_" : {
+            "light_status" : 0
+            "device_disabled" : 1
+         }
+      },
+      {
+         "device_address_" : 2547435,
+         "device_name_" : "Desk Lamp",
+         "properties_" : {
+            "button_on_level" : 255,
+            "button_on_ramp_rate" : 31,
+            "device_category" : 1,
+            "device_disabled" : 0,
+            "device_engine_version" : 2,
+            "device_firmware_version" : 65,
+            "device_subcategory" : 14,
+            "enable_blink_on_traffic" : 0,
+            "enable_led" : 0,
+            "enable_load_sense" : 0,
+            "enable_programming_lock" : 0,
+            "enable_resume_dim" : 0,
+            "light_status" : 0,
+            "link_database_delta" : 2,
+            "signal_to_noise_threshold" : 32,
+            "x10_house_code" : 32,
+            "x10_unit_code" : 0
+         }
+      },
+      {
+         "device_address_" : 2548930,
+         "device_name_" : "Bedside Lamp",
+         "properties_" : {
+            "device_category" : 1,
+            "device_disabled" : 0,
+            "device_engine_version" : 2,
+            "device_firmware_version" : 65,
+            "device_subcategory" : 14,
+            "enable_blink_on_traffic" : 0,
+            "enable_led" : 0,
+            "enable_load_sense" : 0,
+            "enable_programming_lock" : 0,
+            "enable_resume_dim" : 0,
+            "light_status" : 255,
+            "link_database_delta" : 3
+         }
+      }
+   ],
+   "event" : "deviceList"
+}
+```
+Sample request:<br/>
+```
+{
+   "command" : "on",
+   "command_two" : 255,
+   "device_id" : 2547435,
+   "event" : "device"
+}
+```
+Sampled Response:<br/>
+```
+ {
+   "device_address_" : 2547435,
+   "device_name_" : "Desk Lamp",
+   "event" : "deviceUpdate",
+   "properties_" : {
+      "button_on_level" : 255,
+      "button_on_ramp_rate" : 31,
+      "device_category" : 1,
+      "device_disabled" : 0,
+      "device_engine_version" : 2,
+      "device_firmware_version" : 65,
+      "device_subcategory" : 14,
+      "enable_blink_on_traffic" : 0,
+      "enable_led" : 0,
+      "enable_load_sense" : 0,
+      "enable_programming_lock" : 0,
+      "enable_resume_dim" : 0,
+      "light_status" : 255,
+      "link_database_delta" : 2,
+      "signal_to_noise_threshold" : 32,
+      "x10_house_code" : 32,
+      "x10_unit_code" : 0
+   }
+}
+
+```
+There is also a rest API with an events service to deliver realtime updates to your application. No polling of status required.<br/>
+Documenation is still required.<br/>
+
+More C++ and Python developers required!!<br/>
 
 Thanks.
