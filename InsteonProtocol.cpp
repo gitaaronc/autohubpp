@@ -133,6 +133,8 @@ InsteonProtocol::GetMessageType(const std::vector<unsigned char>& data,
         properties["device_category"] = data[offset + 4];
         properties["device_subcategory"] = data[offset + 5];
         properties["device_firmware_version"] = data[offset + 6];
+    } else if (!broadcast && !group && !ack) {
+        message_type = InsteonMessageType::DirectMessage;
     }
     return message_type;
 }
@@ -158,13 +160,22 @@ InsteonProtocol::ProcessMessage(const std::vector<unsigned char>& data,
         case 0x58: // receive all link cleanup response
             return DeviceLinkCleanupMessage(data, offset, count, insteon_message);
         case 0x59: // receive database record found
-            return DatabaseRecordFound(data, offset, count, insteon_message);
+            return ALDBRecord(data, offset, count, insteon_message);
         case 0x60: // get insteon modem info
             return GetIMInfo(data, offset, count, insteon_message);
+        case 0x61:
+            if (data.size() < offset + count + 3)
+                return false;
+            count += 3;
+            return true;
         case 0x62:
             if (data.size() < offset + count + 6)
                 return false;
             count += 6;
+            return true;
+        case 0x65:
+            if (data.size() < offset + count)
+                return false;
             return true;
         case 0x73: // get insteon modem configuration
             return GetIMConfiguration(data, offset, count, insteon_message);
@@ -229,18 +240,26 @@ InsteonProtocol::ExtendedMessage(const std::vector<unsigned char>& data,
     insteon_message->properties_["data_one"] = data[offset + 10];
     insteon_message->properties_["data_two"] = data[offset + 11];
     insteon_message->properties_["data_three"] = data[offset + 12];
-    insteon_message->properties_["data_Four"] = data[offset + 13];
+    insteon_message->properties_["data_four"] = data[offset + 13];
     insteon_message->properties_["data_five"] = data[offset + 14];
     insteon_message->properties_["data_six"] = data[offset + 15];
     insteon_message->properties_["data_seven"] = data[offset + 16];
-    insteon_message->properties_["data_eight"] = data[offset + 17];
-    insteon_message->properties_["data_nine"] = data[offset + 18];
-    insteon_message->properties_["data_ten"] = data[offset + 19];
+    count += 7;
+    if (insteon_message->message_type_ == InsteonMessageType::DirectMessage
+            && insteon_message->properties_["command_one"] == 0x2F){
+        GetAddressProperty("ext_link_address", data, offset + 17, count, 
+                insteon_message->properties_ );
+    } else {
+        insteon_message->properties_["data_eight"] = data[offset + 17];
+        insteon_message->properties_["data_nine"] = data[offset + 18];
+        insteon_message->properties_["data_ten"] = data[offset + 19];
+        count += 3;
+    }
     insteon_message->properties_["data_eleven"] = data[offset + 20];
     insteon_message->properties_["data_twelve"] = data[offset + 21];
     insteon_message->properties_["data_thirteen"] = data[offset + 22];
     insteon_message->properties_["data_fourteen"] = data[offset + 23];
-    count += 14;
+    count += 4;
 
     return true;
 }
@@ -369,7 +388,7 @@ InsteonProtocol::DeviceLinkCleanupMessage(const std::vector<unsigned char>& data
  * @param insteon_message
  * @return 
  */
-bool InsteonProtocol::DatabaseRecordFound(const std::vector<unsigned char>& data,
+bool InsteonProtocol::ALDBRecord(const std::vector<unsigned char>& data,
         int offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 2)
@@ -385,7 +404,7 @@ bool InsteonProtocol::DatabaseRecordFound(const std::vector<unsigned char>& data
     for (const auto& it : insteon_message->properties_){
         properties[it.first] = it.second;
     }
-    InsteonMessageType message_type = InsteonMessageType::DatabaseRecordFound;
+    InsteonMessageType message_type = InsteonMessageType::ALDBRecord;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
     return true;
 }

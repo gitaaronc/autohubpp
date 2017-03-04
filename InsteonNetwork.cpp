@@ -55,10 +55,11 @@ msg_proc_(new MessageProcessor(io_service, config)) {
             new InsteonController(this, io_service)));
     if (config_.IsNull() || !config_.IsDefined())
         throw; // TODO remove throw for something better
-    LoadDevices();
 }
 
 InsteonNetwork::~InsteonNetwork() {
+    for (const auto& it : device_list_)
+        it.second->SerializeYAML();
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
@@ -80,10 +81,23 @@ InsteonNetwork::AddDevice(int insteon_address) {
     std::shared_ptr<InsteonDevice>device =
             std::make_shared<InsteonDevice>(insteon_address, io_service_,
             config_["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
+    
     device->set_message_proc(msg_proc_);
     device->set_update_handler(std::bind(&type::OnUpdateDevice,
             this, std::placeholders::_1));
     device_list_.insert(InsteonDeviceMapPair(insteon_address, device));
+    
+    io_service_.post(std::bind(&InsteonDevice::Command, device,
+            InsteonDeviceCommand::GetOperatingFlags, 0x00));
+    io_service_.post(std::bind(&InsteonDevice::Command, device,
+            InsteonDeviceCommand::GetInsteonEngineVersion, 0x00));
+    io_service_.post(std::bind(&InsteonDevice::Command, device,
+            InsteonDeviceCommand::IDRequest, 0x00));
+    io_service_.post(std::bind(&InsteonDevice::Command, device,
+            InsteonDeviceCommand::ExtendedGetSet, 0x00));
+    io_service_.post(std::bind(&InsteonDevice::Command, device,
+            InsteonDeviceCommand::LightStatusRequest, 0x00));
+    
     return device;
 }
 
@@ -106,23 +120,45 @@ InsteonNetwork::Connect() {
     if (!msg_proc_->Connect())
         return false;
 
+    LoadDevices();
+
     if (config_["PLM"]["enable_monitor_mode"].as<bool>(false))
         if (insteon_controller_->EnableMonitorMode())
             utils::Logger::Instance().Info("PLM monitor mode enabled "
                 "successfully!");
 
     // start loading the ALDB from PLM
-    insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
+    if (config_["PLM"]["load_aldb"].as<bool>(true))
+        insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
+
     // wait here until the database is loaded
     std::unique_lock<std::mutex> lk(mx_load_db_);
     cv_load_db_.wait(lk, [this] {
         return insteon_controller_->is_loading_database_ == false;
     });
 
-    // get status of each device in the list
-    for (const auto& it : device_list_) {
-        it.second->Command(InsteonDeviceCommand::LightStatusRequest, 0x00);
+    // get status of each enabled device in the list
+    if (config_["PLM"]["load_aldb"].as<bool>(true)) {
+        for (const auto& it : device_list_) {
+            if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
+                    ["device_disabled"].as<int>(0) == 0){
+                io_service_.post(std::bind(&InsteonDevice::Command, it.second,
+                        InsteonDeviceCommand::ALDBReadWrite, 0x00));
+            }
+        }
     }
+    
+    // get status of each enabled device in the list
+    if (config_["PLM"]["sync_device_status"].as<bool>(true)) {
+        for (const auto& it : device_list_) {
+            if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
+                    ["device_disabled"].as<int>(0) == 0){
+                io_service_.post(std::bind(&InsteonDevice::Command, it.second,
+                        InsteonDeviceCommand::LightStatusRequest, 0x00));
+            }
+        }
+    }
+    
     return true;
 }
 
@@ -207,19 +243,41 @@ InsteonNetwork::InternalReceiveCommand(std::string json) {
     }
 }
 
+/**
+ * OnUpdateDevice
+ * callback handler to receive device updates from InsteonDevice objects.
+ * updates are then routed to out owner, autohub.
+ * @param json
+ */
 void
 InsteonNetwork::OnUpdateDevice(Json::Value json) {
     if (OnUpdate)
         io_service_.post([ = ]{OnUpdate(json);});
 }
-
+/**
+ * OnMessage
+ * Invoked by the Message Processor when a fully formed message is ready.
+ * Responsible for routing fully formed messages to devices and controllers
+ * @param iMsg
+ */
 void
 InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
     std::shared_ptr<InsteonDevice>device;
-    // TODO verify broadcast message cleanup events & to/from process
-    if (iMsg->properties_.count("from_address")) {
+
+    // automatically add devices found in other device databases
+    // or devices found by linking.
+    if (iMsg->properties_.count("ext_link_address")) {
+        insteon_address = iMsg->properties_["ext_link_address"];
+        if (!DeviceExists(insteon_address)){
+            AddDevice(insteon_address);
+        }
+    }
+
+    // route messages to appropriate device or controller
+    // automatically add new/discovered devices.
+    if (iMsg->properties_.count("from_address")) { // route to device
         insteon_address = iMsg->properties_["from_address"];
         if (DeviceExists(insteon_address)) {
             device = GetDevice(insteon_address);
@@ -229,24 +287,8 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
         } else {
             device = AddDevice(insteon_address);
             device->OnMessage(iMsg);
-
-            io_service_.post(std::bind(&InsteonDevice::Command, device,
-                    InsteonDeviceCommand::GetOperatingFlags, 0x00));
-
-            io_service_.post(std::bind(&InsteonDevice::Command, device,
-                    InsteonDeviceCommand::GetInsteonEngineVersion, 0x00));
-
-            io_service_.post(std::bind(&InsteonDevice::Command, device,
-                    InsteonDeviceCommand::IDRequest, 0x00));
-
-            io_service_.post(std::bind(&InsteonDevice::Command, device,
-                    InsteonDeviceCommand::ExtendedGetSet, 0x00));
-
-            io_service_.post(std::bind(&InsteonDevice::Command, device,
-                    InsteonDeviceCommand::LightStatusRequest, 0x00));
-
         }
-    } else {
+    } else { // route to controller/PLM
         insteon_controller_->OnMessage(iMsg);
     }
 

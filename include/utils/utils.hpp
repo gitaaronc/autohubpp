@@ -26,7 +26,7 @@
  */
 
 #ifndef MYUTILS_H
-#define	MYUTILS_H
+#define MYUTILS_H
 
 #include <sstream>
 #include <string>
@@ -35,9 +35,11 @@
 
 namespace ace {
     namespace utils {
-        std::vector<unsigned char> ArraySubset(const std::vector<unsigned char>& data, int offset, int count);
-        
-        bool VectorsEqual(const std::vector<unsigned char>& source_one, const std::vector<unsigned char>& source_two);
+        std::vector<unsigned char> ArraySubset(
+                const std::vector<unsigned char>& data, int offset, int count);
+
+        bool VectorsEqual(const std::vector<unsigned char>& source_one,
+                const std::vector<unsigned char>& source_two);
 
         // Thanks to: http://stackoverflow.com/questions/5100718/int-to-hex-string-in-c
         template< typename T >
@@ -48,10 +50,14 @@ namespace ace {
                     << std::hex << i;
             return stream.str();
         }
-        
-        unsigned char GetI2CS(const std::vector<unsigned char>& data, unsigned int first_byte, unsigned int last_byte);
+
+        unsigned char GetI2CS(const std::vector<unsigned char>& data,
+                unsigned int first_byte, unsigned int last_byte);
+
+        std::string ByteArrayToStringStream(
+                const std::vector<unsigned char>& data, int offset, int count);
     }
 }
 
-#endif	/* UTILS_H */
+#endif /* UTILS_H */
 

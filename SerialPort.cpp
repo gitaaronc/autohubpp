@@ -134,7 +134,7 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
         status = read_result.wait_for(std::chrono::milliseconds(msTimeout));
         if (status == std::future_status::timeout) {
             utils::Logger::Instance().Trace(FUNCTION_NAME);
-            utils::Logger::Instance().Debug("Timed out waiting for data, "
+            utils::Logger::Instance().Warning("Timed out waiting for data, "
                     "%d ms timeout expired.\n"
                     " Canceling async_read_some.", msTimeout);
             serial_port_->cancel(); 

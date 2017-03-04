@@ -57,20 +57,6 @@ MessageProcessor::~MessageProcessor() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
-std::string
-MessageProcessor::ByteArrayToStringStream(
-        const std::vector<unsigned char>& data, int offset, int count) {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
-    std::stringstream strStream;
-    for (int i = offset; i < offset + count; ++i) {
-        if (i < data.size()) {
-            strStream << std::hex << std::setw(2) << std::setfill('0')
-                    << (unsigned int) data[i];
-        }
-    }
-    return strStream.str();
-}
-
 bool
 MessageProcessor::Connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -101,16 +87,9 @@ MessageProcessor::Connect() {
     
     if (data_port_->open(host, port)) {
         data_port_->async_read_some();
+        return true;
     }
-    /*
-    //TODO Add function to send internal commands
-    std::vector<unsigned char> temp1 = { 0x60 };
-    TrySend(temp1);
-    //io_service_.post(std::bind(&type::Send, this, temp1));
-    std::vector<unsigned char> temp2 = { 0x6B, 0x48 };
-    //io_service_.post(std::bind(&type::Send, this, temp2));
-    TrySend(temp2);*/
-    return true;
+    return false;
 
 }
 
@@ -138,15 +117,15 @@ MessageProcessor::ProcessData() {
             if (read_buffer[offset++] == 0x02) { // got start of text
                 if (last != offset - 1) {
                     oss << boost::format(
-                            "Skipping Bytes: [last:offset][%d:%d] {%s}\n")
+                            "Skipping Bytes between: [last:offset][%d:%d] {%s}\n")
                             % last % offset
-                            % ByteArrayToStringStream(
-                            read_buffer, last, offset - last);
+                            % utils::ByteArrayToStringStream(
+                            read_buffer, last, offset - 1 - last);
                 }
                 do {
                     if (ProcessMessage(read_buffer, offset, count)) {
                         oss << boost::format("Message: {%s}\n")
-                                % ByteArrayToStringStream(read_buffer,
+                                % utils::ByteArrayToStringStream(read_buffer,
                                 offset - 1, offset + count);
 
                         offset += count;
@@ -158,7 +137,7 @@ MessageProcessor::ProcessData() {
                         oss << boost::format("We have %d bytes: (%d:%d) "
                                 "{%s}\n") % (read_buffer.size()) % last
                                 % (read_buffer.size() - last - 1)
-                                % ByteArrayToStringStream(read_buffer, last,
+                                % utils::ByteArrayToStringStream(read_buffer, last,
                                 read_buffer.size() - last);
 
                         ReadData(more_data, 1, false);
@@ -176,7 +155,7 @@ MessageProcessor::ProcessData() {
         if (last != offset) {
             oss << boost::format("Discarding %d bytes: (%d:%d) {%s}\n")
                     % (offset - last) % last % (offset - 1)
-                    % ByteArrayToStringStream(read_buffer, last, offset);
+                    % utils::ByteArrayToStringStream(read_buffer, last, offset);
         }
     } else {
     }
@@ -241,7 +220,7 @@ MessageProcessor::ProcessEcho(int echo_length) {
         oss << boost::format(
                 "Skipping Bytes: [last:offset][%d:%d] {%s}\n")
                 % offset
-                % ByteArrayToStringStream(
+                % utils::ByteArrayToStringStream(
                 read_buffer, 0, offset - 1);
         utils::Logger::Instance().Info(oss.str().c_str());
     }
@@ -347,12 +326,12 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
         if (retry == 0) {
             oss << boost::format("Sending %d bytes: "
                     "{%s}\n") % (send_buffer.size())
-                    % ByteArrayToStringStream(send_buffer, 0,
+                    % utils::ByteArrayToStringStream(send_buffer, 0,
                     send_buffer.size());
         } else {
             oss << boost::format("Retrying %d bytes: "
                     "{%s}\n") % (send_buffer.size())
-                    % ByteArrayToStringStream(send_buffer, 0,
+                    % utils::ByteArrayToStringStream(send_buffer, 0,
                     send_buffer.size());
         }
         time_of_last_command_ = std::chrono::system_clock::now();
@@ -423,7 +402,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();
     while (difference < duration) {
-        utils::Logger::Instance().Debug("Sleeping for %d ms before sending",
+        utils::Logger::Instance().Info("Sleeping for %d ms before sending",
                 duration - difference);
         std::this_thread::sleep_for(
                 std::chrono::milliseconds(duration - difference));

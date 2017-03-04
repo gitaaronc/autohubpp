@@ -37,10 +37,30 @@
 
 #include <memory>
 
+#include <iostream>
+#include <iomanip>
+#include <boost/format.hpp>
+
 namespace ace
 {
 namespace insteon
 {
+
+// TODO Move to utils
+
+std::string
+ByteArrayToStringStream(
+        const std::vector<unsigned char>& data, int offset, int count) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
+    std::stringstream strStream;
+    for (int i = offset; i < offset + count; ++i) {
+        if (i < data.size()) {
+            strStream << std::hex << std::setw(2) << std::setfill('0')
+                    << (unsigned int) data[i];
+        }
+    }
+    return strStream.str();
+}
 
 InsteonController::InsteonController(InsteonNetwork *network,
         boost::asio::io_service& io_service)
@@ -97,7 +117,7 @@ InsteonController::GetIMConfiguration() {
     insteon_network_->msg_proc_->TrySend(send_buffer);
 }
 
-bool InsteonController::EnableMonitorMode(){
+bool InsteonController::EnableMonitorMode() {
     std::vector<unsigned char> send_buffer = {0x6B, 0x20};
     if (insteon_network_->msg_proc_->TrySend(send_buffer) == EchoStatus::ACK)
         return true;
@@ -201,10 +221,10 @@ InsteonController::OnMessage(
         std::shared_ptr<insteon::InsteonMessage> insteon_message) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
-    switch (insteon_message->message_type_){
+    switch (insteon_message->message_type_) {
         case insteon::InsteonMessageType::DeviceLink:
         {
-            utils::Logger::Instance().Info("DEVICE LINK");
+            utils::Logger::Instance().Debug("DEVICE LINK");
 
             insteon_address = insteon_message->properties_.find("address")->second;
 
@@ -236,14 +256,19 @@ InsteonController::OnMessage(
                     "do something with them");
             break;
         case insteon::InsteonMessageType::DeviceLinkRecord:
-        case insteon::InsteonMessageType::DatabaseRecordFound:
+        case insteon::InsteonMessageType::ALDBRecord:
             utils::Logger::Instance().Info("ALDB record received");
             ProcessDatabaseRecord(insteon_message);
             break;
         default:
-            utils::Logger::Instance().Info("Unknown Message received");
+            std::ostringstream oss;
+            oss << boost::format("Unexpected Message Received: {%s}\n")
+                    % ByteArrayToStringStream(insteon_message->raw_message,
+                    0, insteon_message->raw_message.size());
+            utils::Logger::Instance().Info(oss.str().c_str());
+
             break;
-            
+
     }
 }
 
@@ -256,8 +281,8 @@ InsteonController::ProcessDatabaseRecord(
         insteon_network_->AddDevice(address);
     bool get_next = false;
     int has_flags = insteon_message->properties_["link_record_flags"];
-    get_next =  has_flags > 0;
-    if (get_next){
+    get_next = has_flags > 0;
+    if (get_next) {
         unsigned int temp = 0;
         unsigned char one = insteon_message->properties_["db_address_MSB"];
         unsigned char two = insteon_message->properties_["db_address_LSB"];
@@ -266,6 +291,15 @@ InsteonController::ProcessDatabaseRecord(
         one = (temp >> 8) & 0xFF;
         two = temp & 0xFF;
         GetDatabaseRecords(one, two);
+        utils::Logger::Instance().Info("Database record found.\n"
+                "\t    Memory location MSB: %d\n"
+                "\t    Memory location LSB: %d\n"
+                "\t    Link Group: %d\n"
+                "\t    Device Address: %i",
+                insteon_message->properties_["db_address_MSB"],
+                insteon_message->properties_["db_address_LSB"],
+                insteon_message->properties_["link_group"],
+                insteon_message->properties_["link_address"]);
     } else {
         is_loading_database_ = false;
         insteon_network_->cv_load_db_.notify_one();

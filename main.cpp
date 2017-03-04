@@ -60,17 +60,31 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    // Simple global configuration
-    // TODO Create a configuration class. Most likely a singleton class
-    if (config["logging_mode"]) {
-        std::cout << "LOGGING MODE: " << config["logging_mode"].as<std::string>()
-                << std::endl; // still need to map to enum
+    // get and set logging mode, default is NONE, no logging
+    std::string logging_mode = config["logging_mode"].as<std::string>("NONE"); 
+    std::transform(logging_mode.begin(), logging_mode.end(), 
+            logging_mode.begin(), ::tolower);
+    if (logging_mode.compare("none") == 0){
+        ace::utils::Logger::Instance().SetLoggingMode(
+                ace::utils::Logger::NONE);
+    } else if (logging_mode.compare("info") == 0){
+        ace::utils::Logger::Instance().SetLoggingMode(
+                ace::utils::Logger::INFO);
+    } else if (logging_mode.compare("warning") == 0){
+        ace::utils::Logger::Instance().SetLoggingMode(
+                ace::utils::Logger::WARNING);
+    } else if (logging_mode.compare("debug") == 0){
+        ace::utils::Logger::Instance().SetLoggingMode(
+                ace::utils::Logger::DEBUG);
+    } else if (logging_mode.compare("trace") == 0){
+        ace::utils::Logger::Instance().SetLoggingMode(
+                ace::utils::Logger::TRACE);
+    } else if (logging_mode.compare("verbose") == 0){
+        ace::utils::Logger::Instance().SetLoggingMode(
+                ace::utils::Logger::VERBOSE);
     }
-
-    ace::utils::Logger::Instance().SetLoggingMode(
-            ace::utils::Logger::VERBOSE);
-
-    ace::utils::Logger::Instance().Debug("Using Boost version: %d.%d.%d",
+    
+    ace::utils::Logger::Instance().Info("Using Boost version: %d.%d.%d",
             BOOST_VERSION / 100000, (BOOST_VERSION / 100) % 1000,
             BOOST_VERSION % 100);
 

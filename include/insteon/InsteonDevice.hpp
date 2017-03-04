@@ -91,6 +91,7 @@ namespace ace {
             bool GetPropertyValue(const std::string key, unsigned char& val);
             bool TryCommand(InsteonDeviceCommand command, unsigned char value);
             bool TryGetExtendedInformation();
+            bool TryReadWriteALDB();
             void StatusUpdate(unsigned char status);
             boost::asio::io_service& io_service_;
 

@@ -96,7 +96,7 @@ public:
         return insteon_address_ & 0xFF;
     }
 
-    InsteonDevice* insteon_device_;
+    InsteonDevice* device_;
     std::shared_ptr<MessageProcessor> msgProc_;
 
     system::AutoResetEvent ack_event_;

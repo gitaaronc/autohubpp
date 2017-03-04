@@ -30,15 +30,18 @@
 
 #include "../../utils/utils.hpp"
 
-namespace ace {
-namespace insteon {
-namespace detail {
+namespace ace
+{
+namespace insteon
+{
+namespace detail
+{
 
 InsteonDeviceImpl::InsteonDeviceImpl(InsteonDevice* pDevice,
         int insteon_address)
 : ack_timer_(new system::Timer(pDevice->io_service_)), pending_command_(0),
 pending_command_two_(0), pending_retry_(0), max_retries_(0),
-insteon_device_(pDevice), insteon_address_(insteon_address) {
+device_(pDevice), insteon_address_(insteon_address) {
 
     device_name_ = ace::utils::int_to_hex<int>(insteon_address);
     ack_timer_->SetTimerCallback(
@@ -80,7 +83,7 @@ InsteonDeviceImpl::GetStandardMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    insteon_device_->GetPropertyValue("message_flags_max_hops", max_hops);
+    device_->GetPropertyValue("message_flags_max_hops", max_hops);
     message_flags = (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
         message_flags, cmd1, cmd2};
@@ -97,7 +100,7 @@ InsteonDeviceImpl::GetExtendedMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    insteon_device_->GetPropertyValue("message_flags_max_hops", max_hops);
+    device_->GetPropertyValue("message_flags_max_hops", max_hops);
     message_flags = 16 | (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
         message_flags, cmd1, cmd2, d1, d2, d3, d4, d5, d6, d7, d8,
@@ -127,7 +130,7 @@ InsteonDeviceImpl::CommandAckProcessor(
         sentCmdOne = pending_command_;
     }
     max_retries_ = 3;
-    insteon_device_->AckOfDirectCommand(sentCmdOne, recvCmdOne, recvCmdTwo);
+    device_->AckOfDirectCommand(sentCmdOne, recvCmdOne, recvCmdTwo);
     ClearPendingCommand();
 }
 
@@ -139,13 +142,13 @@ InsteonDeviceImpl::TryCommandInternal(unsigned char command_one,
     GetStandardMessage(send_buffer, command_one, command_two);
     EchoStatus status = msgProc_->TrySend(send_buffer);
     if (status == EchoStatus::ACK) { // got the echo
-        utils::Logger::Instance().Info("Set ACK timer");
+        utils::Logger::Instance().Warning("Set ACK timer");
         ack_timer_->Reset(4583); // now we wait for the ack
         return true;
     } else if (status == EchoStatus::NAK) { // NAK or NONE received
-        utils::Logger::Instance().Debug("Got NAK from PLM");
+        utils::Logger::Instance().Warning("Got NAK from PLM");
     } else {
-        utils::Logger::Instance().Debug("Got Nothing from PLM");
+        utils::Logger::Instance().Warning("Got Nothing from PLM");
     }
     ClearPendingCommand(); // clear the command and move on
     return false;
@@ -199,10 +202,11 @@ InsteonDeviceImpl::WaitAndSetPendingCommand(unsigned char command_one,
 
     // We sit here until the previous command completes
     if (ack_event_.WaitOne()) {
-        utils::Logger::Instance().Debug("Previous command cleared. Waiting OVER!!");
+        utils::Logger::Instance().Warning("Previous command cleared. Waiting OVER!!");
     }
     WaitAndSetPendingCommand(command_one, command_two);
 }
+
 /**
  * OnPendingCommandTimeOut
  * 
@@ -222,13 +226,16 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
     }
     if (++pending_retry_ <= max_retries_) {
         //pending_retry_ += 1;
-        utils::Logger::Instance().Info("Command failed - Retrying\n");
+        utils::Logger::Instance().Info("Command failed - Retrying");
         TryCommandInternal(command_one, command_two);
     } else {
         max_retries_ = max_retries_ - 1 > 0 ? max_retries_ -= 1 : 0;
-        utils::Logger::Instance().Info("Max retries exceeded - devices is not"
-                " responding\n");
-        insteon_device_->device_properties_["device_disabled"] = 1;
+
+        utils::Logger::Instance().Info("%s{%s} is not responding "
+                "- max retries exceeded", device_name_.c_str(), 
+                utils::int_to_hex(insteon_address_).c_str());
+
+        device_->device_properties_["device_disabled"] = 1;
         ClearPendingCommand();
     }
 }

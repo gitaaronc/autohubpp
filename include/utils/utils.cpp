@@ -26,15 +26,17 @@
  */
 #include "utils.hpp"
 
-namespace ace {
-namespace utils {
+namespace ace
+{
+namespace utils
+{
 
 std::vector<unsigned char>
 ArraySubset(const std::vector<unsigned char>& data, int offset, int count) {
     std::vector<unsigned char> return_buffer;
     if (count > data.size() - offset)
         count = data.size() - offset;
-    return_buffer.insert(return_buffer.end(), data.begin() + offset, 
+    return_buffer.insert(return_buffer.end(), data.begin() + offset,
             data.begin() + offset + count);
     return return_buffer;
 }
@@ -47,14 +49,14 @@ ArraySubset(const std::vector<unsigned char>& data, int offset, int count) {
  * @return true if contents are the same
  */
 bool
-VectorsEqual(const std::vector<unsigned char>& source_one, 
+VectorsEqual(const std::vector<unsigned char>& source_one,
         const std::vector<unsigned char>& source_two) {
     if (source_one.size() != source_two.size()) return false;
     return std::equal(source_one.begin(), source_one.end(), source_two.begin());
 }
 
 unsigned char
-GetI2CS(const std::vector<unsigned char>& data, unsigned int first_byte, 
+GetI2CS(const std::vector<unsigned char>& data, unsigned int first_byte,
         unsigned int last_byte) {
     unsigned char count = last_byte - first_byte;
     unsigned char i2cs = 0;
@@ -65,6 +67,20 @@ GetI2CS(const std::vector<unsigned char>& data, unsigned int first_byte,
     i2cs = (~(i2cs) + 1) & 0xFF;
     return i2cs;
 }
+
+std::string
+ByteArrayToStringStream(
+        const std::vector<unsigned char>& data, int offset, int count) {
+    std::stringstream strStream;
+    for (int i = offset; i < offset + count; ++i) {
+        if (i < data.size()) {
+            strStream << std::hex << std::setw(2) << std::setfill('0')
+                    << (unsigned int) data[i];
+        }
+    }
+    return strStream.str();
+}
+
 }
 }
 

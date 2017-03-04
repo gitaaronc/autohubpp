@@ -59,12 +59,13 @@ namespace ace
 
     void
     Autohub::wsppOnOpen(connection_hdl hdl) {
+        utils::Logger::Instance().Trace(FUNCTION_NAME);
         wspp_server::connection_ptr con = wspp_server_.get_con_from_hdl(hdl);
         websocketpp::uri_ptr u = con->get_uri();
-        utils::Logger::Instance().Debug("CONNECTION URI: %s",
+        utils::Logger::Instance().Info("wspp connection from: %s",
                 con->get_uri()->str().c_str());
 
-        utils::Logger::Instance().Debug("REQUESTED RESOURCE: %s",
+        utils::Logger::Instance().Info("wspp request resource: %s",
                 u->get_resource().c_str());
 
         connection_data data;
@@ -101,11 +102,12 @@ namespace ace
         Json::Value root;
         Json::Reader reader;
         reader.parse(ss.str(), root);
+
         std::string event;
         event = root.get("event", "").asString();
-        utils::Logger::Instance().Debug("String Stream: %s", ss.str().c_str());
-        utils::Logger::Instance().Debug("===================\n The required path is:"
-                " %s", event.c_str());
+
+        utils::Logger::Instance().Info("wspp received: %s", 
+                root.toStyledString().c_str());
 
         if (event.compare("getDeviceList") == 0) {
             Json::Value root;
@@ -250,7 +252,10 @@ namespace ace
 
         insteon_network_->set_update_handler(bind(&type::OnUpdateDevice, this,
                 std::placeholders::_1));
-        insteon_network_->Connect();
+        if (!insteon_network_->Connect()){
+            stop();
+            return;
+        }
         TestPlugin();
         startRestbed(); // running in this thread
     }

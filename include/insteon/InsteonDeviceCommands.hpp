@@ -52,6 +52,7 @@ enum class InsteonDeviceCommand_ : unsigned char {
             Beep = 0x30,
             GetOperatingFlags = 0x1F,
             ExtendedGetSet = 0x2E,
+            ALDBReadWrite = 0x2F,
             GetAllProperties = 0xFF,
 };
 

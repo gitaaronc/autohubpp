@@ -44,7 +44,6 @@ pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_service_(io_service), config_(config),
 last_action_(InsteonMessageType::Other){
     device_properties_["light_status"] = 0;    
-    LoadProperties();
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
     command_map_["on"] = InsteonDeviceCommand::On;
@@ -57,9 +56,11 @@ last_action_(InsteonMessageType::Other){
     command_map_["dimming_stop"] = InsteonDeviceCommand::StopDimming;
     command_map_["status"] = InsteonDeviceCommand::LightStatusRequest;
     command_map_["beep"] = InsteonDeviceCommand::Beep;
+    LoadProperties();
 }
 
 InsteonDevice::~InsteonDevice() {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
 void
@@ -107,13 +108,10 @@ InsteonDevice::device_name() {
 void
 InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne, 
         unsigned char recvCmdOne, unsigned char recvCmdTwo) {
-    unsigned char cmd = 0;
-    cmd = sentCmdOne > 0 ? sentCmdOne : recvCmdOne;
-    
-    if (sentCmdOne == 0)
+    if (!sentCmdOne)
         utils::Logger::Instance().Info("Received unexpected ACK");
     
-    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (cmd);
+    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
             device_properties_["device_engine_version"] = recvCmdTwo;
@@ -136,6 +134,9 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
             // Do we care about the database delta?
             // why do they include it in the lightStatusRequest response?
             device_properties_["link_database_delta"] = recvCmdOne;
+            io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            break;
+        default:
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
     }
@@ -219,8 +220,17 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
                     keys["device_firmware_version"];
             
             break;
+        case InsteonMessageType::DirectMessage:
+        {
+            utils::Logger::Instance().Info("Direct message received");
+            int address = 0;
+            address = insteon_message->properties_["data_eight"] << 16
+                    & insteon_message->properties_["data_nine"] << 8
+                    & insteon_message->properties_["data_ten"];
+        }
+            break;
         case InsteonMessageType::DeviceLinkRecord:
-            utils::Logger::Instance().Info("DEVICE received all link record");
+            utils::Logger::Instance().Info("Link record received");
             break;
         default:
             utils::Logger::Instance().Info("Unknown message type received");
@@ -244,6 +254,7 @@ InsteonDevice::SerializeJson() {
 }
 
 void InsteonDevice::SerializeYAML(){
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     YAML::Node properties;
     for (const auto& it : device_properties_) {
         properties[it.first] = it.second;
@@ -282,6 +293,9 @@ InsteonDevice::Command(InsteonDeviceCommand command,
             break;
         case InsteonDeviceCommand::ExtendedGetSet:
             return TryGetExtendedInformation();
+            break;
+        case InsteonDeviceCommand::ALDBReadWrite:
+            return TryReadWriteALDB();
             break;
         default:
             return TryCommand(command, command_two);
@@ -334,6 +348,21 @@ InsteonDevice::TryGetExtendedInformation(){
                 = properties["data_eight"];
         device_properties_["signal_to_noise_threshold"]
                 = properties["data_nine"];
+        return true;
+    } else {
+        pImpl->ClearPendingCommand();
+        return false;
+    }
+}
+
+bool
+InsteonDevice::TryReadWriteALDB(){
+    std::vector<unsigned char> send_buffer;
+    pImpl->GetExtendedMessage(send_buffer, 0x2F, 0x00, 0x00,0x00,0x00,0x00,0x00);
+    PropertyKeys properties;
+    pImpl->WaitAndSetPendingCommand(0x2F, 0x00);
+    EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x50, properties);
+    if ((status == EchoStatus::ACK) && (!properties.empty())){
         return true;
     } else {
         pImpl->ClearPendingCommand();

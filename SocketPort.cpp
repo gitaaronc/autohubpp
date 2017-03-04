@@ -129,7 +129,7 @@ namespace ace
                 status = read_result.wait_for(std::chrono::milliseconds(msTimeout));
                 if (status == std::future_status::timeout) {
                     utils::Logger::Instance().Trace(FUNCTION_NAME);
-                    utils::Logger::Instance().Debug("Timed out waiting for data, "
+                    utils::Logger::Instance().Warning("Timed out waiting for data, "
                             "%d ms timeout expired.\n"
                             " Canceling async_read_some.", msTimeout);
                     socket_port_->cancel();
