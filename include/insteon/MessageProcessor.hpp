@@ -77,11 +77,8 @@ namespace ace {
 
             bool Connect();
             void ProcessData();
-            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer);
             EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
-                    bool retry_on_nak);
-            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
-                    bool retry_on_nak, int echo_length);
+                    bool retry_on_nak = true);
             EchoStatus TrySendReceive(const std::vector<unsigned char>&
                     send_buffer, bool retry_on_nak, unsigned char receive_message_id,
                     PropertyKeys& properties);
@@ -105,6 +102,8 @@ namespace ace {
                     bool is_echo);
 
             EchoStatus Send(std::vector<unsigned char> send_buffer,
+                    bool retry_on_nak, int echo_length);
+            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
                     bool retry_on_nak, int echo_length);
             void UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 

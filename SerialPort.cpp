@@ -133,7 +133,6 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
     do {
         status = read_result.wait_for(std::chrono::milliseconds(msTimeout));
         if (status == std::future_status::timeout) {
-            utils::Logger::Instance().Trace(FUNCTION_NAME);
             utils::Logger::Instance().Warning("Timed out waiting for data, "
                     "%d ms timeout expired.\n"
                     " Canceling async_read_some.", msTimeout);
@@ -144,15 +143,11 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
             data.resize(rVal);
             for (const auto& it : data)
                 buffer.push_back(it);
-            utils::Logger::Instance().Trace(FUNCTION_NAME);
-            utils::Logger::Instance().Debug("Received %d bytes.", rVal);
             break;
         } else if (status == std::future_status::deferred) {
-            utils::Logger::Instance().Trace(FUNCTION_NAME);
             utils::Logger::Instance().Debug("Deferred waiting for async_read_some");
         } else {
-            utils::Logger::Instance().Trace(FUNCTION_NAME);
-            utils::Logger::Instance().Debug("Unkown state while waiting for"
+            utils::Logger::Instance().Debug("Unknown state while waiting for"
                     " future of async_read_some");
         }
     } while (status != std::future_status::ready);
@@ -195,7 +190,6 @@ SerialPort::send_buffer(std::vector<unsigned char>& buffer) {
         sent += serial_port_->write_some(boost::asio::buffer(
                 temp, temp.size()));
     }
-    utils::Logger::Instance().Debug("Sent %d bytes", sent);
 }
 } // namespace io
 } // namespace ace

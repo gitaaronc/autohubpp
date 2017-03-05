@@ -96,8 +96,6 @@ MessageProcessor::Connect() {
 void
 MessageProcessor::ProcessData() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    std::ostringstream oss;
-    oss << FUNCTION_NAME << std::endl;
     std::vector<unsigned char> read_buffer;
     {
         std::lock_guard<std::mutex>_(buffer_lock_);
@@ -116,30 +114,39 @@ MessageProcessor::ProcessData() {
         while (offset < read_buffer.size()) {
             if (read_buffer[offset++] == 0x02) { // got start of text
                 if (last != offset - 1) {
+                    std::ostringstream oss;
                     oss << boost::format(
-                            "Skipping Bytes between: [last:offset][%d:%d] {%s}\n")
+                            "%s\n\t  Skipping Bytes between: "
+                            "[last:offset][%d:%d] {%s}\n")
+                            % FUNCTION_NAME_CSTR
                             % last % offset
                             % utils::ByteArrayToStringStream(
                             read_buffer, last, offset - 1 - last);
+                    utils::Logger::Instance().Info(oss.str().c_str());
                 }
                 do {
                     if (ProcessMessage(read_buffer, offset, count)) {
-                        oss << boost::format("Message: {%s}\n")
+                        std::ostringstream oss;
+                        oss << boost::format("%s\n\t  Message: {%s}\n")
+                                % FUNCTION_NAME_CSTR
                                 % utils::ByteArrayToStringStream(read_buffer,
                                 offset - 1, offset + count);
-
+                        utils::Logger::Instance().Info(oss.str().c_str());
                         offset += count;
                         last = offset;
 
                         break;
                     } else {
                         std::vector<unsigned char> more_data{};
-                        oss << boost::format("We have %d bytes: (%d:%d) "
-                                "{%s}\n") % (read_buffer.size()) % last
+                        std::ostringstream oss;
+                        oss << boost::format("%s\n\t  We have %d bytes: (%d:%d) "
+                                "{%s}\n") 
+                                % FUNCTION_NAME_CSTR
+                                % (read_buffer.size()) % last
                                 % (read_buffer.size() - last - 1)
                                 % utils::ByteArrayToStringStream(read_buffer, last,
                                 read_buffer.size() - last);
-
+                        utils::Logger::Instance().Info(oss.str().c_str());
                         ReadData(more_data, 1, false);
                         if (more_data.size() == 0) {
                         } else {
@@ -153,13 +160,17 @@ MessageProcessor::ProcessData() {
         }
         //offset = offset > read_buffer.size() ? read_buffer.size() : offset;
         if (last != offset) {
-            oss << boost::format("Discarding %d bytes: (%d:%d) {%s}\n")
+            std::ostringstream oss;
+            oss << boost::format("%s\n\t  Discarding %d bytes: (%d:%d) {%s}\n")
+                    % FUNCTION_NAME_CSTR
                     % (offset - last) % last % (offset - 1)
                     % utils::ByteArrayToStringStream(read_buffer, last, offset);
+            utils::Logger::Instance().Info(oss.str().c_str());
         }
     } else {
+        ace::utils::Logger::Instance().Warning("%s\n \t  - %s", 
+                FUNCTION_NAME_CSTR, "nothing to do");
     }
-    utils::Logger::Instance().Info(oss.str().c_str());
 }
 
 bool
@@ -324,13 +335,16 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
     int retry = 0;
     do {
         if (retry == 0) {
-            oss << boost::format("Sending %d bytes: "
-                    "{%s}\n") % (send_buffer.size())
+            oss << boost::format("%s\n\t  - sending %d bytes: "
+                    "{%s}\n") 
+                    % FUNCTION_NAME_CSTR
+                    % (send_buffer.size())
                     % utils::ByteArrayToStringStream(send_buffer, 0,
                     send_buffer.size());
         } else {
-            oss << boost::format("Retrying %d bytes: "
-                    "{%s}\n") % (send_buffer.size())
+            oss << boost::format("%s\n\t  - retrying %d bytes: {%s}\n") 
+                    % FUNCTION_NAME_CSTR
+                    % (send_buffer.size())
                     % utils::ByteArrayToStringStream(send_buffer, 0,
                     send_buffer.size());
         }
@@ -357,16 +371,6 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
     utils::Logger::Instance().Info(oss.str().c_str());
     time_of_last_command_ = std::chrono::system_clock::now();
     return status;
-}
-
-/**
- * TrySend
- * @param send_buffer The data to send
- * @return 
- */
-EchoStatus
-MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer) {
-    return TrySend(send_buffer, true);
 }
 
 /**
@@ -402,8 +406,8 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();
     while (difference < duration) {
-        utils::Logger::Instance().Info("Sleeping for %d ms before sending",
-                duration - difference);
+        utils::Logger::Instance().Info("%s\n\t  - sleeping for %d ms before "
+        "sending", FUNCTION_NAME_CSTR, duration - difference);
         std::this_thread::sleep_for(
                 std::chrono::milliseconds(duration - difference));
         start = std::chrono::system_clock::now();
@@ -448,9 +452,11 @@ MessageProcessor::TrySendReceive(const std::vector<unsigned char>& send_buffer,
     if (status == EchoStatus::ACK) { // got the echo
         if (!item->insteon_message_) { // still need ACK
             if (item->wait_event_.WaitOne(4000)) { // wait here for ACK
-                utils::Logger::Instance().Info("ACK received");
+                utils::Logger::Instance().Info("%s\n\t  - ACK received",
+                        FUNCTION_NAME_CSTR);
             } else { // timeout signaled, no event
-                utils::Logger::Instance().Info("Timeout signaled: no ACK received");
+                utils::Logger::Instance().Info("%s\n\t  - Timeout signaled: no "
+                "ACK received", FUNCTION_NAME_CSTR);
             }
         }
         if (item->insteon_message_) {

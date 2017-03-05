@@ -86,7 +86,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
     device->set_update_handler(std::bind(&type::OnUpdateDevice,
             this, std::placeholders::_1));
     device_list_.insert(InsteonDeviceMapPair(insteon_address, device));
-    
+    /*
     io_service_.post(std::bind(&InsteonDevice::Command, device,
             InsteonDeviceCommand::GetOperatingFlags, 0x00));
     io_service_.post(std::bind(&InsteonDevice::Command, device,
@@ -97,7 +97,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
             InsteonDeviceCommand::ExtendedGetSet, 0x00));
     io_service_.post(std::bind(&InsteonDevice::Command, device,
             InsteonDeviceCommand::LightStatusRequest, 0x00));
-    
+    */
     return device;
 }
 
@@ -154,7 +154,7 @@ InsteonNetwork::Connect() {
             if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled"].as<int>(0) == 0){
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
-                        InsteonDeviceCommand::LightStatusRequest, 0x00));
+                        InsteonDeviceCommand::LightStatusRequest, 0x02));
             }
         }
     }
@@ -266,6 +266,15 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
     int insteon_address = 0;
     std::shared_ptr<InsteonDevice>device;
 
+    std::ostringstream oss;
+    oss << "The following message was received by the Network\n";
+    for (const auto& it : iMsg->properties_){
+        oss << boost::format("\t  %s: %s\n") 
+                % it.first 
+                % utils::int_to_hex(it.second);
+    }
+    utils::Logger::Instance().Info(oss.str().c_str());
+    
     // automatically add devices found in other device databases
     // or devices found by linking.
     if (iMsg->properties_.count("ext_link_address")) {

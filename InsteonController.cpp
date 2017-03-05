@@ -34,6 +34,7 @@
 
 #include "include/Logger.h"
 #include "include/system/Timer.hpp"
+#include "include/utils/utils.hpp"
 
 #include <memory>
 
@@ -224,8 +225,6 @@ InsteonController::OnMessage(
     switch (insteon_message->message_type_) {
         case insteon::InsteonMessageType::DeviceLink:
         {
-            utils::Logger::Instance().Debug("DEVICE LINK");
-
             insteon_address = insteon_message->properties_.find("address")->second;
 
             std::shared_ptr<InsteonDevice> device;
@@ -292,14 +291,16 @@ InsteonController::ProcessDatabaseRecord(
         two = temp & 0xFF;
         GetDatabaseRecords(one, two);
         utils::Logger::Instance().Info("Database record found.\n"
-                "\t    Memory location MSB: %d\n"
-                "\t    Memory location LSB: %d\n"
-                "\t    Link Group: %d\n"
-                "\t    Device Address: %i",
+                "\t  Memory location MSB: %d\n"
+                "\t  Memory location LSB: %d\n"
+                "\t  Link Record Flags: %i\n"
+                "\t  Link Group: %d\n"
+                "\t  Device Address: %s",
                 insteon_message->properties_["db_address_MSB"],
                 insteon_message->properties_["db_address_LSB"],
+                insteon_message->properties_["link_record_flags"],
                 insteon_message->properties_["link_group"],
-                insteon_message->properties_["link_address"]);
+                utils::int_to_hex(insteon_message->properties_["link_address"]).c_str());
     } else {
         is_loading_database_ = false;
         insteon_network_->cv_load_db_.notify_one();

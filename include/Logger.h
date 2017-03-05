@@ -44,9 +44,9 @@ public:
         NONE = 0,
         INFO = 1,
         WARNING = 2,
-        DEBUG = 3,
-        TRACE = 4,
-        VERBOSE = 5,
+        DEBUG = 4,
+        TRACE = 8,
+        VERBOSE = 16,
     };
 
 public:

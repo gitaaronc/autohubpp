@@ -61,6 +61,12 @@ int main(int argc, char** argv) {
     }
 
     // get and set logging mode, default is NONE, no logging
+    /*
+    YAML::Node logging = config["logging_mode"];
+    for (auto it = logging.begin(); it != logging.end(); ++it) {
+        std::cout << it->first.as<std::string>() << std::endl;
+    }
+     */
     std::string logging_mode = config["logging_mode"].as<std::string>("NONE"); 
     std::transform(logging_mode.begin(), logging_mode.end(), 
             logging_mode.begin(), ::tolower);

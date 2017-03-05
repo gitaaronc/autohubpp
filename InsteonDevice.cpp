@@ -108,6 +108,7 @@ InsteonDevice::device_name() {
 void
 InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne, 
         unsigned char recvCmdOne, unsigned char recvCmdTwo) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (!sentCmdOne)
         utils::Logger::Instance().Info("Received unexpected ACK");
     
@@ -241,6 +242,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
 
 Json::Value
 InsteonDevice::SerializeJson() {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     Json::Value root;
     Json::Value properties;
     root["device_address_"] = insteon_address();
@@ -274,6 +276,7 @@ void InsteonDevice::SerializeYAML(){
 bool
 InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (device_properties_.count("device_disabled")){
         if(device_properties_["device_disabled"] != 0){
             io_service_.post(std::bind(&type::StatusUpdate, this, 0));
