@@ -34,8 +34,10 @@
 #include <boost/asio/use_future.hpp>
 #include <future>
 
-namespace ace {
-namespace io {
+namespace ace
+{
+namespace io
+{
 
 void
 SerialPort::async_read_some() {
@@ -133,10 +135,10 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
     do {
         status = read_result.wait_for(std::chrono::milliseconds(msTimeout));
         if (status == std::future_status::timeout) {
-            utils::Logger::Instance().Warning("Timed out waiting for data, "
+            utils::Logger::Instance().Debug("%s\n\t  - timeout waiting for data, "
                     "%d ms timeout expired.\n"
-                    " Canceling async_read_some.", msTimeout);
-            serial_port_->cancel(); 
+                    " Canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
+            serial_port_->cancel();
             break;
         } else if (status == std::future_status::ready) {
             rVal = read_result.get();
@@ -145,10 +147,12 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
                 buffer.push_back(it);
             break;
         } else if (status == std::future_status::deferred) {
-            utils::Logger::Instance().Debug("Deferred waiting for async_read_some");
+            utils::Logger::Instance().Debug("%s\n\t - deferred waiting",
+                    FUNCTION_NAME_CSTR);
         } else {
-            utils::Logger::Instance().Debug("Unknown state while waiting for"
-                    " future of async_read_some");
+            utils::Logger::Instance().Debug("%s\n\t - unknown state while waiting"
+                    "for future",
+                    FUNCTION_NAME_CSTR);
         }
     } while (status != std::future_status::ready);
 

@@ -142,13 +142,16 @@ InsteonDeviceImpl::TryCommandInternal(unsigned char command_one,
     GetStandardMessage(send_buffer, command_one, command_two);
     EchoStatus status = msgProc_->TrySend(send_buffer);
     if (status == EchoStatus::ACK) { // got the echo
-        utils::Logger::Instance().Warning("Set ACK timer");
+        utils::Logger::Instance().Debug("%s\n\t - reset ACK timer",
+                FUNCTION_NAME_CSTR);
         ack_timer_->Reset(4583); // now we wait for the ack
         return true;
     } else if (status == EchoStatus::NAK) { // NAK or NONE received
-        utils::Logger::Instance().Warning("Got NAK from PLM");
+        utils::Logger::Instance().Debug("%s\n\t - got NAK from PLM",
+                FUNCTION_NAME_CSTR);
     } else {
-        utils::Logger::Instance().Warning("Got Nothing from PLM");
+        utils::Logger::Instance().Debug("%s\n\t - got nothing from PLM",
+                FUNCTION_NAME_CSTR);
     }
     ClearPendingCommand(); // clear the command and move on
     return false;
@@ -202,7 +205,8 @@ InsteonDeviceImpl::WaitAndSetPendingCommand(unsigned char command_one,
 
     // We sit here until the previous command completes
     if (ack_event_.WaitOne()) {
-        utils::Logger::Instance().Warning("Previous command cleared. Waiting OVER!!");
+        utils::Logger::Instance().Debug("%s\n\t - pending command cleared.",
+                FUNCTION_NAME_CSTR);
     }
     WaitAndSetPendingCommand(command_one, command_two);
 }

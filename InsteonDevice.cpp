@@ -35,15 +35,17 @@
 
 #include <iostream>
 
-namespace ace {
-namespace insteon {
+namespace ace
+{
+namespace insteon
+{
 
 InsteonDevice::InsteonDevice(int insteon_address,
         boost::asio::io_service& io_service, YAML::Node config) :
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_service_(io_service), config_(config),
-last_action_(InsteonMessageType::Other){
-    device_properties_["light_status"] = 0;    
+last_action_(InsteonMessageType::Other) {
+    device_properties_["light_status"] = 0;
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
     command_map_["on"] = InsteonDeviceCommand::On;
@@ -68,7 +70,7 @@ InsteonDevice::InternalReceiveCommand(std::string command,
         unsigned char command_two) {
     auto it = command_map_.find(command);
     if (it != command_map_.end()) {
-        io_service_.post(std::bind(&type::Command, this, it->second, 
+        io_service_.post(std::bind(&type::Command, this, it->second,
                 command_two));
     } else {
         io_service_.post(std::bind(&type::Command, this,
@@ -106,12 +108,16 @@ InsteonDevice::device_name() {
  * @param cmd2_value The value returned in the command_two field
  */
 void
-InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne, 
+InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         unsigned char recvCmdOne, unsigned char recvCmdTwo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (!sentCmdOne)
-        utils::Logger::Instance().Info("Received unexpected ACK");
-    
+        utils::Logger::Instance().Debug("%s\n\t  - unexpected ACK received",
+            FUNCTION_NAME_CSTR);
+    else
+        utils::Logger::Instance().Debug("%s\n\t  - ACK received for "
+            "command{0x%02x,0%02x}", FUNCTION_NAME_CSTR, recvCmdOne, recvCmdTwo);
+
     InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
@@ -123,7 +129,7 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
             device_properties_["enable_resume_dim"] = recvCmdTwo & 0x04;
             device_properties_["enable_led"] = recvCmdTwo & 0x08;
             device_properties_["enable_load_sense"] = recvCmdTwo & 0x0a;
-            
+
             break;
         case InsteonDeviceCommand::Off:
         case InsteonDeviceCommand::On:
@@ -144,12 +150,12 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
 }
 
 void
-InsteonDevice::LoadProperties(){
+InsteonDevice::LoadProperties() {
     device_name(config_["device_name_"].as<std::string>(device_name()));
     config_["device_name_"] = device_name();
     YAML::Node node = config_["properties_"];
-    for (auto it = node.begin(); it != node.end(); ++it){
-        device_properties_[it->first.as<std::string>()] 
+    for (auto it = node.begin(); it != node.end(); ++it) {
+        device_properties_[it->first.as<std::string>()]
                 = it->second.as<unsigned int>();
     }
 }
@@ -173,9 +179,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
             break;
         case InsteonMessageType::OnBroadcast:
             // device goes to set level at set ramp rate
-            if (!actioned){
+            if (!actioned) {
                 unsigned char val = 0xFF;
-                if (GetPropertyValue("button_on_level", val)){
+                if (GetPropertyValue("button_on_level", val)) {
                     StatusUpdate(val);
                 } else {
                     StatusUpdate(val);
@@ -215,11 +221,11 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
             break;
         case InsteonMessageType::SetButtonPressed:
             device_properties_["device_category"] = keys["device_category"];
-            device_properties_["device_subcategory"] = 
+            device_properties_["device_subcategory"] =
                     keys["device_subcategory"];
-            device_properties_["device_firmware_version"] = 
+            device_properties_["device_firmware_version"] =
                     keys["device_firmware_version"];
-            
+
             break;
         case InsteonMessageType::DirectMessage:
         {
@@ -247,7 +253,7 @@ InsteonDevice::SerializeJson() {
     Json::Value properties;
     root["device_address_"] = insteon_address();
     root["device_name_"] = device_name();
-    
+
     for (const auto& it : device_properties_) {
         properties[it.first] = it.second;
     }
@@ -255,7 +261,7 @@ InsteonDevice::SerializeJson() {
     return root;
 }
 
-void InsteonDevice::SerializeYAML(){
+void InsteonDevice::SerializeYAML() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     YAML::Node properties;
     for (const auto& it : device_properties_) {
@@ -277,8 +283,8 @@ bool
 InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (device_properties_.count("device_disabled")){
-        if(device_properties_["device_disabled"] != 0){
+    if (device_properties_.count("device_disabled")) {
+        if (device_properties_["device_disabled"] != 0) {
             io_service_.post(std::bind(&type::StatusUpdate, this, 0));
             return false;
         }
@@ -286,9 +292,9 @@ InsteonDevice::Command(InsteonDeviceCommand command,
     switch (command) {
         case InsteonDeviceCommand::On:
         {
-            if (command_two > 0x00){
+            if (command_two > 0x00) {
                 return TryCommand(command, command_two);
-            } 
+            }
             unsigned char val = 0x00;
             return TryCommand(command, GetPropertyValue(
                     "button_on_level", val) ? val : 0xFF);
@@ -309,19 +315,20 @@ InsteonDevice::Command(InsteonDeviceCommand command,
 
 void
 InsteonDevice::GetExtendedMessage(std::vector<unsigned char>& send_buffer,
-        unsigned char cmd1, unsigned char cmd2){
+        unsigned char cmd1, unsigned char cmd2) {
     pImpl->GetExtendedMessage(send_buffer, cmd1, cmd2);
 }
 
 bool
-InsteonDevice::GetPropertyValue(const std::string key, unsigned char& val){
+InsteonDevice::GetPropertyValue(const std::string key, unsigned char& val) {
     auto it = device_properties_.find(key);
-    if (it != device_properties_.end()){
+    if (it != device_properties_.end()) {
         val = it->second;
         return true;
     }
     return false;
 }
+
 /**
  * 
  * @param command Insteon Command #1 field
@@ -336,16 +343,16 @@ InsteonDevice::TryCommand(InsteonDeviceCommand command, unsigned char value) {
 }
 
 bool
-InsteonDevice::TryGetExtendedInformation(){
+InsteonDevice::TryGetExtendedInformation() {
     std::vector<unsigned char> send_buffer;
     GetExtendedMessage(send_buffer, 0x2E, 0x00);
     PropertyKeys properties;
     pImpl->WaitAndSetPendingCommand(0x2E, 0x00);
     EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x51, properties);
-    if ((status == EchoStatus::ACK) && (!properties.empty())){
+    if ((status == EchoStatus::ACK) && (!properties.empty())) {
         device_properties_["x10_house_code"] = properties["data_five"];
         device_properties_["x10_unit_code"] = properties["data_six"];
-        device_properties_["button_on_ramp_rate"] 
+        device_properties_["button_on_ramp_rate"]
                 = properties["data_seven"] & 0x1F;
         device_properties_["button_on_level"]
                 = properties["data_eight"];
@@ -359,13 +366,13 @@ InsteonDevice::TryGetExtendedInformation(){
 }
 
 bool
-InsteonDevice::TryReadWriteALDB(){
+InsteonDevice::TryReadWriteALDB() {
     std::vector<unsigned char> send_buffer;
-    pImpl->GetExtendedMessage(send_buffer, 0x2F, 0x00, 0x00,0x00,0x00,0x00,0x00);
+    pImpl->GetExtendedMessage(send_buffer, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
     PropertyKeys properties;
     pImpl->WaitAndSetPendingCommand(0x2F, 0x00);
     EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x50, properties);
-    if ((status == EchoStatus::ACK) && (!properties.empty())){
+    if ((status == EchoStatus::ACK) && (!properties.empty())) {
         return true;
     } else {
         pImpl->ClearPendingCommand();
@@ -374,7 +381,7 @@ InsteonDevice::TryReadWriteALDB(){
 }
 
 void
-InsteonDevice::StatusUpdate(unsigned char status){
+InsteonDevice::StatusUpdate(unsigned char status) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     device_properties_["light_status"] = status;
     if (OnStatusUpdate)

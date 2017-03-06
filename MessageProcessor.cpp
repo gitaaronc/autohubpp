@@ -406,8 +406,8 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();
     while (difference < duration) {
-        utils::Logger::Instance().Info("%s\n\t  - sleeping for %d ms before "
-        "sending", FUNCTION_NAME_CSTR, duration - difference);
+        utils::Logger::Instance().Info("%s\n\t  - sleeping for %i ms before "
+        "sending", FUNCTION_NAME_CSTR, int(duration - difference));
         std::this_thread::sleep_for(
                 std::chrono::milliseconds(duration - difference));
         start = std::chrono::system_clock::now();

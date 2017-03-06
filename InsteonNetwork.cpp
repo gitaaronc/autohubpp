@@ -110,7 +110,7 @@ void
 InsteonNetwork::LoadDevices() {
     YAML::Node device = config_["DEVICES"];
     for (auto it = device.begin(); it != device.end(); ++it) {
-        AddDevice(it->first.as<int>());
+        AddDevice(it->first.as<int>(0));
     }
 }
 
@@ -128,8 +128,11 @@ InsteonNetwork::Connect() {
                 "successfully!");
 
     // start loading the ALDB from PLM
-    if (config_["PLM"]["load_aldb"].as<bool>(true))
+    if (config_["PLM"]["load_aldb"].as<bool>(true)){
+        utils::Logger::Instance().Info("%s\n\t  - getting aldb from PLM",
+                FUNCTION_NAME_CSTR);
         insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
+    }
 
     // wait here until the database is loaded
     std::unique_lock<std::mutex> lk(mx_load_db_);
@@ -139,6 +142,8 @@ InsteonNetwork::Connect() {
 
     // get status of each enabled device in the list
     if (config_["PLM"]["load_aldb"].as<bool>(true)) {
+        utils::Logger::Instance().Info("%s\n\t  - getting aldb from known devices",
+                FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
             if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled"].as<int>(0) == 0){
@@ -150,6 +155,8 @@ InsteonNetwork::Connect() {
     
     // get status of each enabled device in the list
     if (config_["PLM"]["sync_device_status"].as<bool>(true)) {
+        utils::Logger::Instance().Info("%s\n\t  - syncing device status",
+                FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
             if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled"].as<int>(0) == 0){
