@@ -132,30 +132,37 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
     std::future<std::size_t> read_result = serial_port_->async_read_some(
             boost::asio::buffer(data), boost::asio::use_future);
     std::future_status status;
-    do {
-        status = read_result.wait_for(std::chrono::milliseconds(msTimeout));
-        if (status == std::future_status::timeout) {
-            utils::Logger::Instance().Debug("%s\n\t  - timeout waiting for data, "
-                    "%d ms timeout expired.\n"
-                    " Canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
-            serial_port_->cancel();
-            break;
-        } else if (status == std::future_status::ready) {
-            rVal = read_result.get();
-            data.resize(rVal);
-            for (const auto& it : data)
-                buffer.push_back(it);
-            break;
-        } else if (status == std::future_status::deferred) {
-            utils::Logger::Instance().Debug("%s\n\t - deferred waiting",
-                    FUNCTION_NAME_CSTR);
-        } else {
-            utils::Logger::Instance().Debug("%s\n\t - unknown state while waiting"
-                    "for future",
-                    FUNCTION_NAME_CSTR);
-        }
-    } while (status != std::future_status::ready);
-
+    try {
+        do {
+            status = read_result.wait_for(std::chrono::milliseconds(msTimeout));
+            if (status == std::future_status::timeout) {
+                utils::Logger::Instance().Debug("%s\n\t  - timeout waiting for data, "
+                        "%d ms timeout expired.\n"
+                        "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
+                serial_port_->cancel();
+                break;
+            } else if (status == std::future_status::ready) {
+                rVal = read_result.get();
+                data.resize(rVal);
+                for (const auto& it : data)
+                    buffer.push_back(it);
+                break;
+            } else if (status == std::future_status::deferred) {
+                utils::Logger::Instance().Debug("%s\n\t - deferred waiting",
+                        FUNCTION_NAME_CSTR);
+            } else {
+                utils::Logger::Instance().Debug("%s\n\t - unknown state while waiting"
+                        "for future",
+                        FUNCTION_NAME_CSTR);
+            }
+        } while (status != std::future_status::ready);
+    } catch (boost::system::system_error& ec) {
+        ace::utils::Logger::Instance().Debug("%s\n\t  - %s",
+                FUNCTION_NAME_CSTR, ec.what());
+    } catch (...) {
+        ace::utils::Logger::Instance().Debug("%s\n\t  - unknown exception caught",
+                FUNCTION_NAME_CSTR);
+    }
     return rVal;
 }
 
@@ -186,7 +193,7 @@ SerialPort::send_buffer(std::vector<unsigned char>& buffer) {
     unsigned int sent = 0;
     unsigned int to_send = buffer.size();
     std::vector<unsigned char> temp;
-    serial_port_->cancel();
+    // serial_port_->cancel();
     while (sent < to_send) {
         std::vector<unsigned char>().swap(temp);
         std::copy(buffer.begin() + sent, buffer.end(),

@@ -115,17 +115,7 @@ int main(int argc, char** argv) {
         });
     }
 
-    try {
-        autohub.start();
-    } catch (boost::system::system_error& ec){
-        ace::utils::Logger::Instance().Debug("%s\n\t  - %s",
-                FUNCTION_NAME_CSTR, ec.what());
-    } catch (...){
-        ace::utils::Logger::Instance().Debug("%s\n\t  - unknown exception caught",
-                FUNCTION_NAME_CSTR);
-        autohub.stop();
-        io_service.stop();
-    }
+    autohub.start();
 
     threadpool.join_all();
 

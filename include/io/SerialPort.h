@@ -89,7 +89,6 @@ private:
     std::vector<unsigned char> recv_buffer_;
     bool recv_buffer_has_data_;
     std::mutex recv_buffer_mutex_;
-
 };
 } // namespace io
 } // namespace ace

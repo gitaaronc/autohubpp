@@ -91,7 +91,7 @@ void
 SocketPort::close() {
     if (socket_port_) {
         if (socket_port_->is_open()) {
-            socket_port_->cancel();
+            socket_port_->cancel(); // cancel any existing async_read(s)
             socket_port_->close();
         }
         socket_port_.reset();
@@ -118,7 +118,7 @@ SocketPort::recv_with_timeout(std::vector<unsigned char>& buffer,
         int msTimeout) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     unsigned int rVal = 0;
-    socket_port_->cancel();
+    socket_port_->cancel(); // cancel any existing async_read(s)
     std::vector<unsigned char> data;
     data.resize(512);
 
@@ -130,8 +130,8 @@ SocketPort::recv_with_timeout(std::vector<unsigned char>& buffer,
         if (status == std::future_status::timeout) {
             utils::Logger::Instance().Debug("%s\n\t  - timeout waiting for data, "
                     "%d ms timeout expired.\n"
-                    " Canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
-            socket_port_->cancel();
+                    "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
+            socket_port_->cancel(); // cancel any existing async_read(s)
             break;
         } else if (status == std::future_status::ready) {
             rVal = read_result.get();
@@ -179,7 +179,7 @@ SocketPort::send_buffer(std::vector<unsigned char>& buffer) {
     unsigned int sent = 0;
     unsigned int to_send = buffer.size();
     std::vector<unsigned char> temp;
-    socket_port_->cancel();
+    // socket_port_->cancel();
     while (sent < to_send) {
         std::vector<unsigned char>().swap(temp);
         std::copy(buffer.begin() + sent, buffer.end(),

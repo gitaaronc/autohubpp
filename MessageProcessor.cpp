@@ -354,6 +354,7 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
         oss.clear();
         data_port_->send_buffer(send_buffer);
         status = ProcessEcho(echo_length + 2); // +2 because the STX is not included
+        oss << FUNCTION_NAME_CSTR << "\n\t  - ";
         if (status == EchoStatus::ACK) {
             oss << "EchoStatis::ACK\n";
             break;
@@ -472,7 +473,6 @@ MessageProcessor::TrySendReceive(const std::vector<unsigned char>& send_buffer,
 
 void
 MessageProcessor::UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg) {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::lock_guard<std::mutex>lock(mutex_wait_list_);
     auto it = wait_list_.begin();
     for (; it != wait_list_.end(); it++) {
@@ -484,6 +484,8 @@ MessageProcessor::UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg) {
             }
         }
     }
+    utils::Logger::Instance().Trace("%s\n\t  - pending items %zu",
+            FUNCTION_NAME_CSTR, wait_list_.size());
 }
 
 void
