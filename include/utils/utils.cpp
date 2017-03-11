@@ -72,6 +72,7 @@ std::string
 ByteArrayToStringStream(
         const std::vector<unsigned char>& data, int offset, int count) {
     std::stringstream strStream;
+    strStream.str("");
     for (int i = offset; i < offset + count; ++i) {
         if (i < data.size()) {
             strStream << std::hex << std::setw(2) << std::setfill('0')

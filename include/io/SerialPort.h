@@ -26,7 +26,7 @@
  */
 
 #ifndef SERIALPORT_H
-#define	SERIALPORT_H
+#define SERIALPORT_H
 
 #include "ioport.hpp"
 
@@ -39,58 +39,59 @@
 #include <boost/system/error_code.hpp>
 
 namespace ace {
-namespace io {
+    namespace io {
 
-typedef std::shared_ptr<boost::asio::serial_port> serial_port_ptr;
-typedef std::function<void() > recv_handler;
+        typedef std::shared_ptr<boost::asio::serial_port> serial_port_ptr;
+        typedef std::function<void() > recv_handler;
 
-class SerialPort : public IOPort{
-public:
-    typedef IOPort base;
-    typedef SerialPort type;
+        class SerialPort : public IOPort {
+        public:
+            typedef IOPort base;
+            typedef SerialPort type;
 
-    SerialPort(boost::asio::io_service& ios) : base(), serial_io_(ios),
-    recv_buffer_has_data_(false){
-        serial_port_ = std::make_shared<boost::asio::serial_port>
-                (serial_io_);
-    }
+            SerialPort(boost::asio::io_service& ios) : base(), serial_io_(ios),
+            recv_buffer_has_data_(false) {
+                serial_port_ = std::make_shared<boost::asio::serial_port>
+                        (serial_io_);
+            }
 
-    SerialPort() = delete;
-    
-    ~SerialPort() {
-        close();
-    }
+            SerialPort() = delete;
 
-    bool open(const std::string com_port_name, int baud_rate = 9600) override;
-    void async_read_some() override;
+            ~SerialPort() {
+                close();
+            }
 
-    void
-    set_recv_handler(std::function<void() > fp) override{
-        m_recv_handler = fp;
-    }
-    void close();
+            bool open(const std::string com_port_name, int baud_rate = 9600) override;
+            void async_read_some() override;
 
-    std::size_t recv_with_timeout(std::vector<unsigned char>& buffer,
-            int msTimeout = 50) override;
-    unsigned int recv_buffer(std::vector<unsigned char>& buffer) override;
-    unsigned int send_buffer(std::vector<unsigned char>& buffer) override;
-protected:
-    void on_async_receive_some(const boost::system::error_code& ec,
-            size_t bytes_transferred);
-    void on_async_receive_more(const boost::system::error_code& ec,
-            size_t bytes_transferred);
+            void
+            set_recv_handler(std::function<void() > fp) override {
+                m_recv_handler = fp;
+            }
 
-private:
-    boost::asio::io_service& serial_io_;
-    recv_handler m_recv_handler;
-    serial_port_ptr serial_port_;
-    std::vector<unsigned char> incoming_buffer_;
+            void close();
 
-    std::vector<unsigned char> recv_buffer_;
-    bool recv_buffer_has_data_;
-    std::mutex recv_buffer_mutex_;
-};
-} // namespace io
+            std::size_t recv_with_timeout(std::vector<unsigned char>& buffer,
+                    int msTimeout = 50) override;
+            unsigned int recv_buffer(std::vector<unsigned char>& buffer) override;
+            unsigned int send_buffer(std::vector<unsigned char>& buffer) override;
+        protected:
+            void on_async_receive_some(const boost::system::error_code& ec,
+                    size_t bytes_transferred);
+            void on_async_receive_more(const boost::system::error_code& ec,
+                    size_t bytes_transferred);
+
+        private:
+            boost::asio::io_service& serial_io_;
+            recv_handler m_recv_handler;
+            serial_port_ptr serial_port_;
+            std::vector<unsigned char> incoming_buffer_;
+
+            std::vector<unsigned char> recv_buffer_;
+            bool recv_buffer_has_data_;
+            std::mutex recv_buffer_mutex_;
+        };
+    } // namespace io
 } // namespace ace
-#endif	/* SERIALPORT_H */
+#endif /* SERIALPORT_H */
 

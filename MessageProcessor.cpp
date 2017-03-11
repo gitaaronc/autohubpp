@@ -44,8 +44,10 @@
 
 #include <thread>
 
-namespace ace {
-namespace insteon {
+namespace ace
+{
+namespace insteon
+{
 
 MessageProcessor::MessageProcessor(boost::asio::io_service& io_service,
         YAML::Node config)
@@ -61,15 +63,15 @@ bool
 MessageProcessor::Connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
-    std::string plm_type = config_["PLM"]["type"].as<std::string>("serial"); 
+    std::string plm_type = config_["PLM"]["type"].as<std::string>("serial");
     std::string host;
     int port = 0;
     std::unique_ptr<io::IOPort> io;
 
-    std::transform(plm_type.begin(), plm_type.end(), 
+    std::transform(plm_type.begin(), plm_type.end(),
             plm_type.begin(), ::tolower);
-    
-    if (plm_type.compare("hub") == 0){
+
+    if (plm_type.compare("hub") == 0) {
         io = std::move(std::unique_ptr<io::IOPort>(
                 new io::SocketPort(io_service_)));
         host = config_["PLM"]["hub_ip"].as<std::string>("127.0.0.1");
@@ -80,13 +82,13 @@ MessageProcessor::Connect() {
         host = config_["PLM"]["serial_port"].as<std::string>("/dev/ttyUSB0");
         port = config_["PLM"]["baud_rate"].as<int>(9600);
     }
-    
+
     data_port_ = std::move(io);
     data_port_->set_recv_handler(std::bind(
             &type::ProcessData, this));
-    
+
     if (data_port_->open(host, port)) {
-        data_port_->async_read_some();
+        //data_port_->async_read_some();
         return true;
     }
     return false;
@@ -126,12 +128,11 @@ MessageProcessor::ProcessData() {
                 }
                 do {
                     if (ProcessMessage(read_buffer, offset, count)) {
-                        std::ostringstream oss;
-                        oss << boost::format("%s\n\t  Message: {%s}\n")
-                                % FUNCTION_NAME_CSTR
-                                % utils::ByteArrayToStringStream(read_buffer,
-                                offset - 1, offset + count);
-                        utils::Logger::Instance().Info(oss.str().c_str());
+                        utils::Logger::Instance().Info("%s\n"
+                                "\t  - Message parsed {%s}",
+                                FUNCTION_NAME_CSTR,
+                                utils::ByteArrayToStringStream(read_buffer,
+                                offset - 1, offset + count).c_str());
                         offset += count;
                         last = offset;
 
@@ -140,7 +141,7 @@ MessageProcessor::ProcessData() {
                         std::vector<unsigned char> more_data{};
                         std::ostringstream oss;
                         oss << boost::format("%s\n\t  We have %d bytes: (%d:%d) "
-                                "{%s}\n") 
+                                "{%s}\n")
                                 % FUNCTION_NAME_CSTR
                                 % (read_buffer.size()) % last
                                 % (read_buffer.size() - last - 1)
@@ -168,7 +169,7 @@ MessageProcessor::ProcessData() {
             utils::Logger::Instance().Info(oss.str().c_str());
         }
     } else {
-        ace::utils::Logger::Instance().Warning("%s\n \t  - %s", 
+        ace::utils::Logger::Instance().Warning("%s\n \t  - %s",
                 FUNCTION_NAME_CSTR, "nothing to do");
     }
 }
@@ -336,40 +337,41 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
     do {
         if (retry == 0) {
             oss << boost::format("%s\n\t  - sending %d bytes: "
-                    "{%s}\n") 
+                    "{%s}\n")
                     % FUNCTION_NAME_CSTR
                     % (send_buffer.size())
                     % utils::ByteArrayToStringStream(send_buffer, 0,
                     send_buffer.size());
         } else {
-            oss << boost::format("%s\n\t  - retrying %d bytes: {%s}\n") 
+            oss << boost::format("%s\n\t  - retrying %d bytes: {%s}\n")
                     % FUNCTION_NAME_CSTR
                     % (send_buffer.size())
                     % utils::ByteArrayToStringStream(send_buffer, 0,
                     send_buffer.size());
         }
         time_of_last_command_ = std::chrono::system_clock::now();
-        utils::Logger::Instance().Info(oss.str().c_str());
+        utils::Logger::Instance().Info("%s\n%s", FUNCTION_NAME_CSTR,
+                oss.str().c_str());
         oss.str(std::string());
         oss.clear();
         data_port_->send_buffer(send_buffer);
         status = ProcessEcho(echo_length + 2); // +2 because the STX is not included
-        oss << FUNCTION_NAME_CSTR << "\n\t  - ";
         if (status == EchoStatus::ACK) {
-            oss << "EchoStatis::ACK\n";
+            oss << "\t  - EchoStatis::ACK\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
-            oss << "EchoStatis::NAK, no retry on NAK\n";
+            oss << "\t  - EchoStatis::NAK, no retry on NAK\n";
             break;
         }
         if (status == EchoStatus::NAK) {
-            oss << "EchoStatis::NAK, sleeping for 240ms\n";
+            oss << "\t  - EchoStatis::NAK, sleeping for 240ms\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(240));
         }
         retry++;
     } while (retry < 3 && retry_on_nak);
-    utils::Logger::Instance().Info(oss.str().c_str());
+    utils::Logger::Instance().Info("%s\n%s", FUNCTION_NAME_CSTR,
+            oss.str().c_str());
     time_of_last_command_ = std::chrono::system_clock::now();
     return status;
 }
@@ -408,7 +410,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
             (start - time_of_last_command_).count();
     while (difference < duration) {
         utils::Logger::Instance().Info("%s\n\t  - sleeping for %i ms before "
-        "sending", FUNCTION_NAME_CSTR, int(duration - difference));
+                "sending", FUNCTION_NAME_CSTR, int(duration - difference));
         std::this_thread::sleep_for(
                 std::chrono::milliseconds(duration - difference));
         start = std::chrono::system_clock::now();
@@ -424,6 +426,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     data_port_->async_read_some();
     return status;
 }
+
 /**
  * TrySendReceive
  * 
@@ -457,7 +460,7 @@ MessageProcessor::TrySendReceive(const std::vector<unsigned char>& send_buffer,
                         FUNCTION_NAME_CSTR);
             } else { // timeout signaled, no event
                 utils::Logger::Instance().Info("%s\n\t  - Timeout signaled: no "
-                "ACK received", FUNCTION_NAME_CSTR);
+                        "ACK received", FUNCTION_NAME_CSTR);
             }
         }
         if (item->insteon_message_) {
@@ -484,7 +487,7 @@ MessageProcessor::UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg) {
             }
         }
     }
-    utils::Logger::Instance().Trace("%s\n\t  - pending items %zu",
+    utils::Logger::Instance().Trace("%s\n\t  - remaining items %zu",
             FUNCTION_NAME_CSTR, wait_list_.size());
 }
 

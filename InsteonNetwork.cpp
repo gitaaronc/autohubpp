@@ -81,7 +81,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
     std::shared_ptr<InsteonDevice>device =
             std::make_shared<InsteonDevice>(insteon_address, io_service_,
             config_["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
-    
+
     device->set_message_proc(msg_proc_);
     device->set_update_handler(std::bind(&type::OnUpdateDevice,
             this, std::placeholders::_1));
@@ -97,7 +97,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
             InsteonDeviceCommand::ExtendedGetSet, 0x00));
     io_service_.post(std::bind(&InsteonDevice::Command, device,
             InsteonDeviceCommand::LightStatusRequest, 0x00));
-    */
+     */
     return device;
 }
 
@@ -128,7 +128,7 @@ InsteonNetwork::Connect() {
                 "successfully!");
 
     // start loading the ALDB from PLM
-    if (config_["PLM"]["load_aldb"].as<bool>(true)){
+    if (config_["PLM"]["load_aldb"].as<bool>(true)) {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from PLM",
                 FUNCTION_NAME_CSTR);
         insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
@@ -146,26 +146,26 @@ InsteonNetwork::Connect() {
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
             if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
-                    ["device_disabled"].as<int>(0) == 0){
+                    ["device_disabled"].as<int>(0) == 0) {
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
                         InsteonDeviceCommand::ALDBReadWrite, 0x00));
             }
         }
     }
-    
+
     // get status of each enabled device in the list
     if (config_["PLM"]["sync_device_status"].as<bool>(true)) {
         utils::Logger::Instance().Info("%s\n\t  - syncing device status",
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
             if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
-                    ["device_disabled"].as<int>(0) == 0){
+                    ["device_disabled"].as<int>(0) == 0) {
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
                         InsteonDeviceCommand::LightStatusRequest, 0x02));
             }
         }
     }
-    
+
     return true;
 }
 
@@ -261,6 +261,7 @@ InsteonNetwork::OnUpdateDevice(Json::Value json) {
     if (OnUpdate)
         io_service_.post([ = ]{OnUpdate(json);});
 }
+
 /**
  * OnMessage
  * Invoked by the Message Processor when a fully formed message is ready.
@@ -273,20 +274,20 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
     int insteon_address = 0;
     std::shared_ptr<InsteonDevice>device;
 
-    std::ostringstream oss;
-    oss << "The following message was received by the Network\n";
-    for (const auto& it : iMsg->properties_){
-        oss << boost::format("\t  %s: %s\n") 
-                % it.first 
-                % utils::int_to_hex(it.second);
+    if (iMsg->properties_.size() > 0) {
+        std::ostringstream oss;
+        oss << "The following message was received by the Network\n";
+        for (const auto& it : iMsg->properties_) {
+            oss << "\t  " << it.first << ": "
+                    << utils::int_to_hex(it.second) << "\n";
+        }
+        utils::Logger::Instance().Info(oss.str().c_str());
     }
-    utils::Logger::Instance().Info(oss.str().c_str());
-    
     // automatically add devices found in other device databases
     // or devices found by linking.
     if (iMsg->properties_.count("ext_link_address")) {
         insteon_address = iMsg->properties_["ext_link_address"];
-        if (!DeviceExists(insteon_address)){
+        if (!DeviceExists(insteon_address)) {
             AddDevice(insteon_address);
         }
     }

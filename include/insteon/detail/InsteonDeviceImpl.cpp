@@ -83,7 +83,8 @@ InsteonDeviceImpl::GetStandardMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    device_->GetPropertyValue("message_flags_max_hops", max_hops);
+    max_hops = device_->readDeviceProperty("message_flags_max_hops") > 0
+            ? device_->readDeviceProperty("message_flags_max_hops") : max_hops;
     message_flags = (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
         message_flags, cmd1, cmd2};
@@ -100,7 +101,8 @@ InsteonDeviceImpl::GetExtendedMessage(
     send_buffer.clear();
     unsigned char max_hops = 3;
     unsigned char message_flags = 0;
-    device_->GetPropertyValue("message_flags_max_hops", max_hops);
+    max_hops = device_->readDeviceProperty("message_flags_max_hops") > 0
+            ? device_->readDeviceProperty("message_flags_max_hops") : max_hops;
     message_flags = 16 | (max_hops << 2) | max_hops;
     send_buffer = {0x62, HighAddress(), MiddleAddress(), LowAddress(),
         message_flags, cmd1, cmd2, d1, d2, d3, d4, d5, d6, d7, d8,
@@ -230,13 +232,19 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
     }
     if (++pending_retry_ <= max_retries_) {
         //pending_retry_ += 1;
-        utils::Logger::Instance().Info("Command failed - Retrying");
+        utils::Logger::Instance().Info("%s\n\t  - retrying failed command for"
+                " device %s{%s}\n\t  - command {0x%02x,0x%02x}", 
+                FUNCTION_NAME_CSTR, 
+                device_name_.c_str(),
+                utils::int_to_hex(insteon_address_).c_str(),
+                command_one, command_two);
         TryCommandInternal(command_one, command_two);
     } else {
         max_retries_ = max_retries_ - 1 > 0 ? max_retries_ -= 1 : 0;
 
         utils::Logger::Instance().Info("%s{%s} is not responding "
-                "- max retries exceeded", device_name_.c_str(), 
+                "- max retries exceeded\n\t  - disabling device",
+                device_name_.c_str(),
                 utils::int_to_hex(insteon_address_).c_str());
 
         device_->device_properties_["device_disabled"] = 1;

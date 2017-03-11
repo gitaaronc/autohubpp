@@ -85,10 +85,11 @@ namespace ace {
 
             bool Command(InsteonDeviceCommand command, unsigned char command_two);
             void InternalReceiveCommand(std::string command, unsigned char command_two);
+            void writeDeviceProperty(const std::string key, const unsigned int value);
+            unsigned int readDeviceProperty(const std::string key);
         protected:
             void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
                     unsigned char cmd1, unsigned char cmd2);
-            bool GetPropertyValue(const std::string key, unsigned char& val);
             bool TryCommand(InsteonDeviceCommand command, unsigned char value);
             bool TryGetExtendedInformation();
             bool TryReadWriteALDB();
@@ -96,7 +97,6 @@ namespace ace {
             boost::asio::io_service& io_service_;
 
             std::map<std::string, InsteonDeviceCommand> command_map_;
-            PropertyKeys device_properties_;
 
         private:
             friend class detail::InsteonDeviceImpl;
@@ -107,7 +107,9 @@ namespace ace {
             std::unique_ptr<detail::InsteonDeviceImpl> pImpl;
 
             InsteonMessageType last_action_;
-            std::mutex command_lock_;
+
+            PropertyKeys device_properties_;
+            std::mutex property_lock_;
             
             YAML::Node config_;
         };

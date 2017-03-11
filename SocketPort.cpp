@@ -68,6 +68,8 @@ SocketPort::on_async_receive_some(const boost::system::error_code& ec,
             recv_buffer_has_data_ = recv_buffer_.size() > 0;
         }
         async_read_some();
+    } else {
+        utils::Logger::Instance().Debug(FUNCTION_NAME);
     }
 }
 
@@ -77,13 +79,18 @@ SocketPort::open(const std::string com_port_name, int port = 9761) {
     tcp::endpoint ep(boost::asio::ip::address::from_string(com_port_name),
             port);
 
+
+
     if (socket_port_.get() == NULL)
         return false;
-
     socket_port_->connect(ep, ec);
-
     if (ec)
         return false;
+
+
+
+
+    async_read_some();
     return true;
 }
 
@@ -118,10 +125,10 @@ SocketPort::recv_with_timeout(std::vector<unsigned char>& buffer,
         int msTimeout) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     unsigned int rVal = 0;
-    socket_port_->cancel(); // cancel any existing async_read(s)
     std::vector<unsigned char> data;
     data.resize(512);
 
+    socket_port_->cancel();
     std::future<std::size_t> read_result = socket_port_->async_read_some(
             boost::asio::buffer(data), boost::asio::use_future);
     std::future_status status;
@@ -131,7 +138,7 @@ SocketPort::recv_with_timeout(std::vector<unsigned char>& buffer,
             utils::Logger::Instance().Debug("%s\n\t  - timeout waiting for data, "
                     "%d ms timeout expired.\n"
                     "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
-            socket_port_->cancel(); // cancel any existing async_read(s)
+            socket_port_->cancel();
             break;
         } else if (status == std::future_status::ready) {
             rVal = read_result.get();
@@ -148,7 +155,6 @@ SocketPort::recv_with_timeout(std::vector<unsigned char>& buffer,
                     FUNCTION_NAME_CSTR);
         }
     } while (status != std::future_status::ready);
-
     return rVal;
 }
 
@@ -179,13 +185,12 @@ SocketPort::send_buffer(std::vector<unsigned char>& buffer) {
     unsigned int sent = 0;
     unsigned int to_send = buffer.size();
     std::vector<unsigned char> temp;
-    // socket_port_->cancel();
     while (sent < to_send) {
         std::vector<unsigned char>().swap(temp);
         std::copy(buffer.begin() + sent, buffer.end(),
                 std::back_inserter(temp));
-            sent += socket_port_->write_some(boost::asio::buffer(
-                    temp, temp.size()));
+        sent += socket_port_->write_some(boost::asio::buffer(
+                temp, temp.size()));
     }
 }
 } // namespace io

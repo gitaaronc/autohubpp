@@ -79,6 +79,7 @@ namespace ace
 
     void
     Autohub::wsppOnClose(connection_hdl hdl) {
+        utils::Logger::Instance().Trace(FUNCTION_NAME);
         connection_data& data = get_data_from_hdl(hdl);
         std::lock_guard<std::mutex>lock(wspp_connections_mutex_);
         wspp_connections_.erase(hdl);
@@ -240,7 +241,7 @@ namespace ace
 
         try {
             wspp_server_.listen(
-                    root_node_["WEBSOCKET"]["listening_port"].as<int>());
+                    root_node_["WEBSOCKET"]["listening_port"].as<int>(9000));
             wspp_server_.start_accept();
         } catch (std::exception& e) {
             std::cout << e.what() << std::endl;

@@ -78,6 +78,9 @@ public:
     Trace(const std::string& data) {
         Trace(data.data());
     }
+    void Debug(const std::string& data) {
+        Debug(data.data());
+    }
     void Trace(const char *data, ...);
     std::string ByteArrayToStringStream(
             const std::vector<unsigned char>& data, int offset, int count);
