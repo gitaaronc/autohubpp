@@ -70,7 +70,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -lboost_system -lboost_filesystem -lboost_log -lboost_thread -ldl -lrestbed -lcrypto -lssl -lyaml-cpp
+LDLIBSOPTIONS=-L/usr/local/lib -lboost_system -lboost_filesystem -lboost_thread -ldl -lrestbed -lcrypto -lssl -lyaml-cpp
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

@@ -48,6 +48,7 @@ public:
     virtual bool open(const std::string, int) = 0;
     virtual void set_recv_handler(std::function<void() >) = 0;
     virtual std::size_t recv_with_timeout(std::vector<unsigned char>&, int) = 0;
+    // takes a buffer by reference, should place new data on the back
     virtual unsigned int recv_buffer(std::vector<unsigned char>&) = 0;
     virtual unsigned int send_buffer(std::vector<unsigned char>&) = 0;
 };

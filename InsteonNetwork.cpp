@@ -35,7 +35,6 @@
 
 #include <iostream>
 
-#include <boost/format.hpp>
 #include <mutex>
 #include <condition_variable>
 

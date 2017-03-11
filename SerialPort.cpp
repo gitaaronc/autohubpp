@@ -60,6 +60,7 @@ void
 SerialPort::on_async_receive_some(const boost::system::error_code& ec,
         size_t bytes_transferred) {
     if (!ec) {
+        utils::Logger::Instance().Debug(FUNCTION_NAME);
         if (bytes_transferred > 0) {
             std::lock_guard<std::mutex>lk(recv_buffer_mutex_);
             auto it = incoming_buffer_.begin();
@@ -69,7 +70,15 @@ SerialPort::on_async_receive_some(const boost::system::error_code& ec,
         }
         async_read_some();
     } else {
-        utils::Logger::Instance().Debug(FUNCTION_NAME);
+        utils::Logger::Instance().Debug("%s\t  - ERROR: %s",
+                FUNCTION_NAME_CSTR, ec.message().c_str());
+        if (bytes_transferred > 0) {
+            std::lock_guard<std::mutex>lk(recv_buffer_mutex_);
+            auto it = incoming_buffer_.begin();
+            for (; it < incoming_buffer_.begin() + bytes_transferred; it++)
+                recv_buffer_.push_back(*it);
+            recv_buffer_has_data_ = recv_buffer_.size() > 0;
+        }
     }
 }
 

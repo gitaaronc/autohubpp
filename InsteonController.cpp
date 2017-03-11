@@ -40,7 +40,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <boost/format.hpp>
 
 namespace ace
 {
@@ -260,12 +259,11 @@ InsteonController::OnMessage(
             ProcessDatabaseRecord(insteon_message);
             break;
         default:
-            std::ostringstream oss;
-            oss << boost::format("Unexpected Message Received: {%s}\n")
-                    % ByteArrayToStringStream(insteon_message->raw_message,
-                    0, insteon_message->raw_message.size());
-            utils::Logger::Instance().Info(oss.str().c_str());
-
+            utils::Logger::Instance().Info("%s\n\t - unexpected message: {%s}\n",
+                    FUNCTION_NAME_CSTR,
+                    ByteArrayToStringStream(insteon_message->raw_message,
+                    0, insteon_message->raw_message.size()).c_str()
+                    );
             break;
 
     }

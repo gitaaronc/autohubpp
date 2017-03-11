@@ -37,9 +37,6 @@
 #include <chrono>
 #include <algorithm>
 
-#include <boost/format.hpp>
-#include <boost/log/trivial.hpp>
-
 #include <unistd.h>
 
 #include <thread>
@@ -83,11 +80,11 @@ MessageProcessor::Connect() {
         port = config_["PLM"]["baud_rate"].as<int>(9600);
     }
 
-    data_port_ = std::move(io);
-    data_port_->set_recv_handler(std::bind(
+    io_port_ = std::move(io);
+    io_port_->set_recv_handler(std::bind(
             &type::ProcessData, this));
 
-    if (data_port_->open(host, port)) {
+    if (io_port_->open(host, port)) {
         //data_port_->async_read_some();
         return true;
     }
@@ -98,9 +95,12 @@ MessageProcessor::Connect() {
 void
 MessageProcessor::ProcessData() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    // force other thread to wait
+    std::lock_guard<std::mutex>_(lock_data_processor_);
     std::vector<unsigned char> read_buffer;
     {
-        std::lock_guard<std::mutex>_(buffer_lock_);
+        // move the object buffer to the back of local buffer
+        std::lock_guard<std::mutex>_(lock_buffer_);
         if (buffer_.size() > 0) {
             for (const auto& it : buffer_) {
                 read_buffer.push_back(it);
@@ -109,24 +109,23 @@ MessageProcessor::ProcessData() {
             std::vector<unsigned char>().swap(buffer_);
         }
     }
-    if ((data_port_->recv_buffer(read_buffer) > 0) || (read_buffer.size() > 0)) {
+    // get data from the io port while looking for a complete message
+    if ((io_port_->recv_buffer(read_buffer) > 0) || (read_buffer.size() > 0)) {
         int count = 0;
         int offset = 0;
         int last = 0;
-        while (offset < read_buffer.size()) {
-            if (read_buffer[offset++] == 0x02) { // got start of text
+        while (offset < read_buffer.size()) { // iterate buffer looking for STX
+            if (read_buffer[offset++] == 0x02) { // got STX
                 if (last != offset - 1) {
-                    std::ostringstream oss;
-                    oss << boost::format(
+                    utils::Logger::Instance().Info(
                             "%s\n\t  Skipping Bytes between: "
-                            "[last:offset][%d:%d] {%s}\n")
-                            % FUNCTION_NAME_CSTR
-                            % last % offset
-                            % utils::ByteArrayToStringStream(
-                            read_buffer, last, offset - 1 - last);
-                    utils::Logger::Instance().Info(oss.str().c_str());
+                            "[last:offset][%d:%d] {%s}\n",
+                            FUNCTION_NAME_CSTR, last, offset,
+                            utils::ByteArrayToStringStream(read_buffer,
+                            last, offset - 1 - last).c_str()
+                            );
                 }
-                do {
+                do { // try to make sense of the data
                     if (ProcessMessage(read_buffer, offset, count)) {
                         utils::Logger::Instance().Info("%s\n"
                                 "\t  - Message parsed {%s}",
@@ -136,18 +135,18 @@ MessageProcessor::ProcessData() {
                         offset += count;
                         last = offset;
 
-                        break;
-                    } else {
+                        break; // found a message, get out of do while loop
+                    } else { // still looking
                         std::vector<unsigned char> more_data{};
-                        std::ostringstream oss;
-                        oss << boost::format("%s\n\t  We have %d bytes: (%d:%d) "
-                                "{%s}\n")
-                                % FUNCTION_NAME_CSTR
-                                % (read_buffer.size()) % last
-                                % (read_buffer.size() - last - 1)
-                                % utils::ByteArrayToStringStream(read_buffer, last,
-                                read_buffer.size() - last);
-                        utils::Logger::Instance().Info(oss.str().c_str());
+
+                        utils::Logger::Instance().Info(
+                                "%s\n\t  - working with %d bytes: (%d:%d) {%s}\n",
+                                FUNCTION_NAME_CSTR, read_buffer.size(), last,
+                                read_buffer.size(),
+                                utils::ByteArrayToStringStream(read_buffer,
+                                last, read_buffer.size() - last).c_str()
+                                );
+
                         ReadData(more_data, 1, false);
                         if (more_data.size() == 0) {
                         } else {
@@ -159,14 +158,13 @@ MessageProcessor::ProcessData() {
                 } while (++offset < read_buffer.size());
             }
         }
-        //offset = offset > read_buffer.size() ? read_buffer.size() : offset;
         if (last != offset) {
-            std::ostringstream oss;
-            oss << boost::format("%s\n\t  Discarding %d bytes: (%d:%d) {%s}\n")
-                    % FUNCTION_NAME_CSTR
-                    % (offset - last) % last % (offset - 1)
-                    % utils::ByteArrayToStringStream(read_buffer, last, offset);
-            utils::Logger::Instance().Info(oss.str().c_str());
+            utils::Logger::Instance().Info(
+                    "%s\n\t  - discarding %d bytes: (%d:%d) {%s}\n",
+                    FUNCTION_NAME_CSTR, offset - last, last, offset - 1,
+                    utils::ByteArrayToStringStream(read_buffer,
+                    last, offset).c_str()
+                    );
         }
     } else {
         ace::utils::Logger::Instance().Warning("%s\n \t  - %s",
@@ -209,11 +207,11 @@ MessageProcessor::ProcessEcho(int echo_length) {
 
     if (read_buffer[0] == 0x15) {
         if (read_buffer.size() > 1) {
-            buffer_lock_.lock();
+            lock_buffer_.lock();
             auto it = read_buffer.begin() + 1;
             for (; it != read_buffer.end(); ++it)
                 buffer_.push_back(*it);
-            buffer_lock_.unlock();
+            lock_buffer_.unlock();
             ProcessData();
         }
         return EchoStatus::NAK;
@@ -228,13 +226,11 @@ MessageProcessor::ProcessEcho(int echo_length) {
     }
 
     if (offset > 1) {
-        std::ostringstream oss;
-        oss << boost::format(
-                "Skipping Bytes: [last:offset][%d:%d] {%s}\n")
-                % offset
-                % utils::ByteArrayToStringStream(
-                read_buffer, 0, offset - 1);
-        utils::Logger::Instance().Info(oss.str().c_str());
+        utils::Logger::Instance().Info(
+                "%s\n\t  - skipping bytes between: [last:offset][%d:%d] {%s}\n",
+                FUNCTION_NAME_CSTR, offset, utils::ByteArrayToStringStream(
+                read_buffer, 0, offset - 1).c_str()
+                );
     }
     int count = 0;
     if (ProcessEcho(read_buffer, offset, count)) {
@@ -242,11 +238,11 @@ MessageProcessor::ProcessEcho(int echo_length) {
         unsigned char result = j < read_buffer.size() ? read_buffer[j] : 0x00;
         j += 1;
         if (read_buffer.size() > j) {
-            buffer_lock_.lock();
+            lock_buffer_.lock();
             auto it = read_buffer.begin() + j;
             for (; it != read_buffer.end(); ++it)
                 buffer_.push_back(*it);
-            buffer_lock_.unlock();
+            lock_buffer_.unlock();
             ProcessData();
         }
         if (result == 0x06) {
@@ -287,7 +283,7 @@ MessageProcessor::ReadData(std::vector<unsigned char>& return_buffer,
         int bytes_expected, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::vector<unsigned char> read_buffer;
-    data_port_->recv_with_timeout(read_buffer, 250);
+    io_port_->recv_with_timeout(read_buffer, 250);
 
     if (is_echo && read_buffer.size() > 0 && read_buffer[0] == 0x15) {
         for (const auto& it : read_buffer)
@@ -301,7 +297,7 @@ MessageProcessor::ReadData(std::vector<unsigned char>& return_buffer,
         do {
             if (read_buffer.size() < bytes_expected) {
                 // try one more time
-                data_port_->recv_with_timeout(read_buffer, 50);
+                io_port_->recv_with_timeout(read_buffer, 50);
                 count++;
             } else {
                 break;
@@ -336,25 +332,22 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
     int retry = 0;
     do {
         if (retry == 0) {
-            oss << boost::format("%s\n\t  - sending %d bytes: "
-                    "{%s}\n")
-                    % FUNCTION_NAME_CSTR
-                    % (send_buffer.size())
-                    % utils::ByteArrayToStringStream(send_buffer, 0,
-                    send_buffer.size());
+            utils::Logger::Instance().Info("%s\n\t - sending %d bytes: {%s}\n",
+                    FUNCTION_NAME_CSTR, send_buffer.size(),
+                    utils::ByteArrayToStringStream(send_buffer, 0,
+                    send_buffer.size()).c_str());
         } else {
-            oss << boost::format("%s\n\t  - retrying %d bytes: {%s}\n")
-                    % FUNCTION_NAME_CSTR
-                    % (send_buffer.size())
-                    % utils::ByteArrayToStringStream(send_buffer, 0,
-                    send_buffer.size());
+            utils::Logger::Instance().Info("%s\n\t - retrying %d bytes: {%s}\n",
+                    FUNCTION_NAME_CSTR, send_buffer.size(),
+                    utils::ByteArrayToStringStream(send_buffer, 0,
+                    send_buffer.size()).c_str());
         }
         time_of_last_command_ = std::chrono::system_clock::now();
         utils::Logger::Instance().Info("%s\n%s", FUNCTION_NAME_CSTR,
                 oss.str().c_str());
         oss.str(std::string());
         oss.clear();
-        data_port_->send_buffer(send_buffer);
+        io_port_->send_buffer(send_buffer);
         status = ProcessEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
             oss << "\t  - EchoStatis::ACK\n";
@@ -399,10 +392,15 @@ EchoStatus
 MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
         bool retry_on_nak, int echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    std::lock_guard<std::mutex>lock(io_lock_);
+    // force other sending threads to wait for us to finish
+    std::lock_guard<std::mutex>lock(lock_io_);
     EchoStatus status = EchoStatus::None;
-    data_port_->set_recv_handler(nullptr);
 
+
+    {
+        std::lock_guard<std::mutex>_(lock_data_processor_);
+        io_port_->set_recv_handler(nullptr);
+    }
 
     auto duration = config_["PLM"]["command_delay"].as<int>(1500);
     auto start = std::chrono::system_clock::now();
@@ -421,9 +419,9 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     sent_message_ = send_buffer;
     status = Send(send_buffer, retry_on_nak, echo_length);
     sent_message_.empty();
-    data_port_->set_recv_handler(std::bind(
+    io_port_->set_recv_handler(std::bind(
             &type::ProcessData, this));
-    data_port_->async_read_some();
+    io_port_->async_read_some();
     return status;
 }
 

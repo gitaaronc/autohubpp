@@ -107,18 +107,20 @@ namespace ace {
                     bool retry_on_nak, int echo_length);
             void UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 
-            std::unique_ptr<io::IOPort> data_port_;
+            std::unique_ptr<io::IOPort> io_port_;
             boost::asio::io_service& io_service_;
             msg_handler msg_handler_;
             InsteonProtocol insteon_protocol_;
 
-            std::mutex io_lock_;
+            std::mutex lock_io_;
             std::list<std::shared_ptr<WaitItem>> wait_list_;
             std::mutex mutex_wait_list_;
             std::vector<unsigned char> sent_message_;
-            std::mutex buffer_lock_;
+            std::mutex lock_buffer_;
             std::vector<unsigned char> buffer_;
 
+            std::mutex lock_data_processor_; 
+            
             std::chrono::system_clock::time_point time_of_last_command_;
             
             YAML::Node config_;
