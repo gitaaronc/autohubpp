@@ -118,30 +118,30 @@ MessageProcessor::ProcessData() {
             if (read_buffer[offset++] == 0x02) { // got STX
                 if (last != offset - 1) {
                     utils::Logger::Instance().Info(
-                            "%s\n\t  Skipping Bytes between: "
-                            "[last:offset][%d:%d] {%s}\n",
-                            FUNCTION_NAME_CSTR, last, offset,
+                            "%s\n\t  - skipping %d bytes between "
+                            "[last:offset][%d:%d]: {%s}\n",
+                            FUNCTION_NAME_CSTR, offset - last - 1, last, offset,
                             utils::ByteArrayToStringStream(read_buffer,
-                            last, offset - 1 - last).c_str()
+                            last, offset - last - 1).c_str()
                             );
                 }
                 do { // try to make sense of the data
                     if (ProcessMessage(read_buffer, offset, count)) {
                         utils::Logger::Instance().Info("%s\n"
-                                "\t  - Message parsed {%s}",
-                                FUNCTION_NAME_CSTR,
+                                "\t  - message parsed between [last:offset]"
+                                "[%d:%d]: {%s}",
+                                FUNCTION_NAME_CSTR, last, offset + count,
                                 utils::ByteArrayToStringStream(read_buffer,
-                                offset - 1, offset + count).c_str());
+                                offset - 1, count + 1).c_str());
                         offset += count;
                         last = offset;
-
                         break; // found a message, get out of do while loop
                     } else { // still looking
                         std::vector<unsigned char> more_data{};
 
                         utils::Logger::Instance().Info(
                                 "%s\n\t  - working with %d bytes: (%d:%d) {%s}\n",
-                                FUNCTION_NAME_CSTR, read_buffer.size(), last,
+                                FUNCTION_NAME_CSTR, read_buffer.size() - last, last,
                                 read_buffer.size(),
                                 utils::ByteArrayToStringStream(read_buffer,
                                 last, read_buffer.size() - last).c_str()
@@ -161,9 +161,9 @@ MessageProcessor::ProcessData() {
         if (last != offset) {
             utils::Logger::Instance().Info(
                     "%s\n\t  - discarding %d bytes: (%d:%d) {%s}\n",
-                    FUNCTION_NAME_CSTR, offset - last, last, offset - 1,
-                    utils::ByteArrayToStringStream(read_buffer,
-                    last, offset).c_str()
+                    FUNCTION_NAME_CSTR, read_buffer.size() - last, last,
+                    read_buffer.size() - 1, utils::ByteArrayToStringStream(
+                    read_buffer, last, read_buffer.size() - last).c_str()
                     );
         }
     } else {
@@ -399,7 +399,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
 
     {
         std::lock_guard<std::mutex>_(lock_data_processor_);
-        io_port_->set_recv_handler(nullptr);
+        io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
     }
 
     auto duration = config_["PLM"]["command_delay"].as<int>(1500);

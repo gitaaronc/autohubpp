@@ -35,7 +35,6 @@
 #include <condition_variable>
 
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/strand.hpp>
 
 #include <yaml-cpp/yaml.h>
 
@@ -79,7 +78,7 @@ protected:
     bool
     DeviceExists(int insteon_address);
 
-    void OnMessage(std::shared_ptr<InsteonMessage> iMessage);
+    void OnMessage(std::shared_ptr<InsteonMessage> im);
     void OnUpdateDevice(Json::Value json);
 
     std::mutex mx_load_db_;

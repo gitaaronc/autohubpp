@@ -77,14 +77,21 @@ std::shared_ptr<InsteonDevice>
 InsteonNetwork::AddDevice(int insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
-    std::shared_ptr<InsteonDevice>device =
-            std::make_shared<InsteonDevice>(insteon_address, io_service_,
-            config_["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
+    if (device_list_.count(insteon_address)){
+        return device_list_[insteon_address];
+    }
+    
+    std::shared_ptr<InsteonDevice> device = std::make_shared<InsteonDevice>
+            (insteon_address, io_service_, config_
+            ["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
 
     device->set_message_proc(msg_proc_);
     device->set_update_handler(std::bind(&type::OnUpdateDevice,
             this, std::placeholders::_1));
+    
     device_list_.insert(InsteonDeviceMapPair(insteon_address, device));
+    
+    return device;
     /*
     io_service_.post(std::bind(&InsteonDevice::Command, device,
             InsteonDeviceCommand::GetOperatingFlags, 0x00));
@@ -97,7 +104,6 @@ InsteonNetwork::AddDevice(int insteon_address) {
     io_service_.post(std::bind(&InsteonDevice::Command, device,
             InsteonDeviceCommand::LightStatusRequest, 0x00));
      */
-    return device;
 }
 
 /**
@@ -139,7 +145,7 @@ InsteonNetwork::Connect() {
         return insteon_controller_->is_loading_database_ == false;
     });
 
-    // get status of each enabled device in the list
+    // get aldb from each enabled device in the list
     if (config_["PLM"]["load_aldb"].as<bool>(true)) {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from known devices",
                 FUNCTION_NAME_CSTR);
@@ -268,24 +274,26 @@ InsteonNetwork::OnUpdateDevice(Json::Value json) {
  * @param iMsg
  */
 void
-InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
+InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
     std::shared_ptr<InsteonDevice>device;
 
-    if (iMsg->properties_.size() > 0) {
+    if (im->properties_.size() > 0) {
         std::ostringstream oss;
-        oss << "The following message was received by the Network\n";
-        for (const auto& it : iMsg->properties_) {
+        oss << "The following message was received by the network\n";
+        oss << "\t  - {0x" << utils::ByteArrayToStringStream(
+                im->raw_message, 0, im->raw_message.size()) << "}\n";
+        for (const auto& it : im->properties_) {
             oss << "\t  " << it.first << ": "
                     << utils::int_to_hex(it.second) << "\n";
         }
-        utils::Logger::Instance().Info(oss.str().c_str());
+        utils::Logger::Instance().Debug(oss.str().c_str());
     }
     // automatically add devices found in other device databases
     // or devices found by linking.
-    if (iMsg->properties_.count("ext_link_address")) {
-        insteon_address = iMsg->properties_["ext_link_address"];
+    if (im->properties_.count("ext_link_address")) {
+        insteon_address = im->properties_["ext_link_address"];
         if (!DeviceExists(insteon_address)) {
             AddDevice(insteon_address);
         }
@@ -293,19 +301,19 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> iMsg) {
 
     // route messages to appropriate device or controller
     // automatically add new/discovered devices.
-    if (iMsg->properties_.count("from_address")) { // route to device
-        insteon_address = iMsg->properties_["from_address"];
+    if (im->properties_.count("from_address")) { // route to device
+        insteon_address = im->properties_["from_address"];
         if (DeviceExists(insteon_address)) {
             device = GetDevice(insteon_address);
-            io_service_.post(std::bind(&InsteonDevice::OnMessage, device, iMsg));
-        } else if (iMsg->message_type_ == InsteonMessageType::SetButtonPressed) {
-            insteon_controller_->OnMessage(iMsg);
+            io_service_.post(std::bind(&InsteonDevice::OnMessage, device, im));
+        } else if (im->message_type_ == InsteonMessageType::SetButtonPressed) {
+            insteon_controller_->OnMessage(im);
         } else {
             device = AddDevice(insteon_address);
-            device->OnMessage(iMsg);
+            device->OnMessage(im);
         }
     } else { // route to controller/PLM
-        insteon_controller_->OnMessage(iMsg);
+        insteon_controller_->OnMessage(im);
     }
 
 }

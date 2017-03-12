@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 
     int worker_threads = config["worker_threads"].as<int>(50);
     
-    for (int c = 0; c < worker_threads; c++) {
+    for (int c = 0; c < worker_threads; ++c) {
         ace::utils::Logger::Instance().Debug("Starting Thread: %d", (c + 1));
         threadpool.create_thread([&io_service]() {
             io_service.run();

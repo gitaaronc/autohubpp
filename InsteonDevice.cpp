@@ -113,7 +113,7 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (!sentCmdOne)
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-            "\t  - unexpected ACK received {0x%02x, 0x%02x}\n",
+            "\t  - unexpected ACK received {0x%02x, 0x%02x}",
             FUNCTION_NAME_CSTR, device_name().c_str(), recvCmdOne, recvCmdTwo);
     else
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
@@ -163,21 +163,36 @@ InsteonDevice::LoadProperties() {
 }
 
 void
-InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
+InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    PropertyKeys keys = insteon_message->properties_;
+    PropertyKeys keys = im->properties_;
     unsigned char command_one = keys["command_one"];
     unsigned char command_two = keys["command_two"];
     writeDeviceProperty("device_disabled", 0);
+
+    if (im->properties_.size() > 0) {
+        std::ostringstream oss;
+        oss << "The following message was received by this device\n";
+        oss << "\t  - " << device_name() << " {0x" << utils::int_to_hex(
+                this->insteon_address()) << "}\n";
+        oss << "\t  - {0x" << utils::ByteArrayToStringStream(
+                im->raw_message, 0, im->raw_message.size()) << "}\n";
+        for (const auto& it : im->properties_) {
+            oss << "\t  " << it.first << ": "
+                    << utils::int_to_hex(it.second) << "\n";
+        }
+        utils::Logger::Instance().Debug(oss.str().c_str());
+    }
+
     // TODO verify broadcast message cleanup events & to/from process
-    bool actioned = ((unsigned char) insteon_message->message_type_
+    bool actioned = ((unsigned char) im->message_type_
             == (unsigned char) last_action_);
     if (!actioned) { //used to prevent acting on duplicate or similar messages
-        last_action_ = insteon_message->message_type_;
+        last_action_ = im->message_type_;
     }
-    switch (insteon_message->message_type_) {
+    switch (im->message_type_) {
         case InsteonMessageType::Ack: // response to direct command
-            pImpl->CommandAckProcessor(insteon_message);
+            pImpl->CommandAckProcessor(im);
             break;
         case InsteonMessageType::OnBroadcast:
             // device goes to set level at set ramp rate
@@ -230,19 +245,13 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> insteon_message) {
 
             break;
         case InsteonMessageType::DirectMessage:
-        {
-            utils::Logger::Instance().Info("Direct message received");
-            int address = 0;
-            address = insteon_message->properties_["data_eight"] << 16
-                    & insteon_message->properties_["data_nine"] << 8
-                    & insteon_message->properties_["data_ten"];
-        }
+            utils::Logger::Instance().Debug("Direct message received");
             break;
         case InsteonMessageType::DeviceLinkRecord:
-            utils::Logger::Instance().Info("Link record received");
+            utils::Logger::Instance().Debug("Link record received");
             break;
         default:
-            utils::Logger::Instance().Info("%s\n\t - unknown message type received\n"
+            utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"
                     "\t  - for device %s{%s}", FUNCTION_NAME_CSTR, device_name().c_str(),
                     utils::int_to_hex(insteon_address()).c_str());
             break;
@@ -407,11 +416,8 @@ InsteonDevice::readDeviceProperty(const std::string key) {
     std::lock_guard<std::mutex>lock(property_lock_);
     auto it = device_properties_.find(key);
     if (it != device_properties_.end()) {
-        //val = it->second;
-        //return true;
         return it->second;
     }
-    //return false;
     return 0;
 }
 

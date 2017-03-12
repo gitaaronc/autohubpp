@@ -271,34 +271,37 @@ InsteonController::OnMessage(
 
 void
 InsteonController::ProcessDatabaseRecord(
-        std::shared_ptr<insteon::InsteonMessage> insteon_message) {
+        std::shared_ptr<insteon::InsteonMessage> im) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     int address = 0;
-    address = insteon_message->properties_["link_address"];
+    address = im->properties_["link_address"];
     if (address > 0)
         insteon_network_->AddDevice(address);
     bool get_next = false;
-    int has_flags = insteon_message->properties_["link_record_flags"];
+    int has_flags = im->properties_["link_record_flags"];
     get_next = has_flags > 0;
     if (get_next) {
         unsigned int temp = 0;
-        unsigned char one = insteon_message->properties_["db_address_MSB"];
-        unsigned char two = insteon_message->properties_["db_address_LSB"];
-        temp = (one << 8) | (two);
-        temp -= 8;
-        one = (temp >> 8) & 0xFF;
-        two = temp & 0xFF;
-        GetDatabaseRecords(one, two);
-        utils::Logger::Instance().Info("Database record found.\n"
+        unsigned char one = im->properties_["db_address_MSB"];
+        unsigned char two = im->properties_["db_address_LSB"];
+
+        utils::Logger::Instance().Debug("Database record found.\n"
                 "\t  Memory location MSB: %d\n"
                 "\t  Memory location LSB: %d\n"
                 "\t  Link Record Flags: %i\n"
                 "\t  Link Group: %d\n"
                 "\t  Device Address: %s",
-                insteon_message->properties_["db_address_MSB"],
-                insteon_message->properties_["db_address_LSB"],
-                insteon_message->properties_["link_record_flags"],
-                insteon_message->properties_["link_group"],
-                utils::int_to_hex(insteon_message->properties_["link_address"]).c_str());
+                im->properties_["db_address_MSB"],
+                im->properties_["db_address_LSB"],
+                im->properties_["link_record_flags"],
+                im->properties_["link_group"],
+                utils::int_to_hex(im->properties_["link_address"]).c_str());
+
+        temp = (one << 8) | (two);
+        temp -= 8;
+        one = (temp >> 8) & 0xFF;
+        two = temp & 0xFF;
+        GetDatabaseRecords(one, two);
     } else {
         is_loading_database_ = false;
         insteon_network_->cv_load_db_.notify_one();

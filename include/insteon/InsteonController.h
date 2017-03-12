@@ -83,7 +83,7 @@ namespace ace {
             void OnDeviceUnlinked(std::shared_ptr<InsteonDevice>& device);
 
             void ProcessDatabaseRecord(
-                    std::shared_ptr<insteon::InsteonMessage> insteon_message);
+                    std::shared_ptr<insteon::InsteonMessage> im);
 
             void SetAddress(int address);
 

@@ -71,7 +71,7 @@ namespace ace {
             InsteonDevice& operator=(InsteonDevice&& rhs) noexcept = delete;
 
             virtual ~InsteonDevice();
-            virtual void OnMessage(std::shared_ptr<InsteonMessage> insteon_message);
+            virtual void OnMessage(std::shared_ptr<InsteonMessage> im);
             Json::Value SerializeJson();
             void SerializeYAML();
 
