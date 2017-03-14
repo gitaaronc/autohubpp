@@ -137,6 +137,8 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         case InsteonDeviceCommand::FastOff:
         case InsteonDeviceCommand::FastOn:
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_service_.post(std::bind(&type::Command, this,
+                    InsteonDeviceCommand::LightStatusRequest, 0x02));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
             // Do we care about the database delta?
@@ -168,7 +170,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
     PropertyKeys keys = im->properties_;
     unsigned char command_one = keys["command_one"];
     unsigned char command_two = keys["command_two"];
-    writeDeviceProperty("device_disabled", 0);
+    config_["device_disabled"] = false;
 
     if (im->properties_.size() > 0) {
         std::ostringstream oss;
@@ -197,12 +199,15 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
         case InsteonMessageType::OnBroadcast:
             // device goes to set level at set ramp rate
             if (!actioned) {
-                unsigned char val = 0xFF;
-                if (val = readDeviceProperty("button_on_level") > 0) {
-                    StatusUpdate(val);
-                } else {
-                    StatusUpdate(val);
+                unsigned char val = readDeviceProperty("button_on_level");
+                if (!val){
+                    if (TryGetExtendedInformation()){
+                        val = readDeviceProperty("button_on_level");
+                    }
                 }
+                if (readDeviceProperty("light_status") > 0)
+                    val = 0xFF;
+                StatusUpdate(val);
             }
             break;
         case InsteonMessageType::OnCleanup:
@@ -267,7 +272,7 @@ InsteonDevice::SerializeJson() {
     Json::Value properties;
     root["device_address_"] = insteon_address();
     root["device_name_"] = device_name();
-
+    root["device_disabled"] = config_["device_disabled"].as<bool>(false);
     for (const auto& it : device_properties_) {
         properties[it.first] = it.second;
     }
@@ -298,25 +303,11 @@ bool
 InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    {
-        std::lock_guard<std::mutex>lock(property_lock_);
-        if (device_properties_.count("device_disabled")) {
-            if (device_properties_["device_disabled"] != 0) {
-                io_service_.post(std::bind(&type::StatusUpdate, this, 0));
-                return false;
-            }
-        }
+    if (config_["device_disabled"].as<bool>(false)) {
+        io_service_.post(std::bind(&type::StatusUpdate, this, 0));
+        return false; // device disabled, stop here and return
     }
     switch (command) {
-        case InsteonDeviceCommand::On:
-        {
-            if (command_two > 0x00) {
-                return TryCommand(command, command_two);
-            }
-            unsigned char val = readDeviceProperty("button_on_level");
-            return TryCommand(command, val > 0 ? val : 0xFF);
-        }
-            break;
         case InsteonDeviceCommand::ExtendedGetSet:
             return TryGetExtendedInformation();
             break;

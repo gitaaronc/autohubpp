@@ -77,9 +77,9 @@ std::shared_ptr<InsteonDevice>
 InsteonNetwork::AddDevice(int insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
-    if (device_list_.count(insteon_address)){
-        return device_list_[insteon_address];
-    }
+    auto it = device_list_.find(insteon_address);
+    if (it != device_list_.end())
+        return it->second;
     
     std::shared_ptr<InsteonDevice> device = std::make_shared<InsteonDevice>
             (insteon_address, io_service_, config_
@@ -92,18 +92,6 @@ InsteonNetwork::AddDevice(int insteon_address) {
     device_list_.insert(InsteonDeviceMapPair(insteon_address, device));
     
     return device;
-    /*
-    io_service_.post(std::bind(&InsteonDevice::Command, device,
-            InsteonDeviceCommand::GetOperatingFlags, 0x00));
-    io_service_.post(std::bind(&InsteonDevice::Command, device,
-            InsteonDeviceCommand::GetInsteonEngineVersion, 0x00));
-    io_service_.post(std::bind(&InsteonDevice::Command, device,
-            InsteonDeviceCommand::IDRequest, 0x00));
-    io_service_.post(std::bind(&InsteonDevice::Command, device,
-            InsteonDeviceCommand::ExtendedGetSet, 0x00));
-    io_service_.post(std::bind(&InsteonDevice::Command, device,
-            InsteonDeviceCommand::LightStatusRequest, 0x00));
-     */
 }
 
 /**
@@ -150,8 +138,8 @@ InsteonNetwork::Connect() {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from known devices",
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
-            if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
-                    ["device_disabled"].as<int>(0) == 0) {
+            if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
+                    ["device_disabled"].as<bool>(false)) {
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
                         InsteonDeviceCommand::ALDBReadWrite, 0x00));
             }
@@ -163,8 +151,8 @@ InsteonNetwork::Connect() {
         utils::Logger::Instance().Info("%s\n\t  - syncing device status",
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
-            if (config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
-                    ["device_disabled"].as<int>(0) == 0) {
+            if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
+                    ["device_disabled"].as<bool>(false)) {
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
                         InsteonDeviceCommand::LightStatusRequest, 0x02));
             }
@@ -310,7 +298,8 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
             insteon_controller_->OnMessage(im);
         } else {
             device = AddDevice(insteon_address);
-            device->OnMessage(im);
+            //device->OnMessage(im);
+            io_service_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         }
     } else { // route to controller/PLM
         insteon_controller_->OnMessage(im);

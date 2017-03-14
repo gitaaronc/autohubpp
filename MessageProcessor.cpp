@@ -118,9 +118,9 @@ MessageProcessor::ProcessData() {
             if (read_buffer[offset++] == 0x02) { // got STX
                 if (last != offset - 1) {
                     utils::Logger::Instance().Info(
-                            "%s\n\t  - skipping %d bytes between "
-                            "[last:offset][%d:%d]: {%s}\n",
-                            FUNCTION_NAME_CSTR, offset - last - 1, last, offset,
+                            "%s\n\t  - skipping %d bytes "
+                            "[last:offset][%d:%d]: {%s}\n", FUNCTION_NAME_CSTR, 
+                            offset - last - 1, last, offset - 2,
                             utils::ByteArrayToStringStream(read_buffer,
                             last, offset - last - 1).c_str()
                             );
@@ -128,9 +128,9 @@ MessageProcessor::ProcessData() {
                 do { // try to make sense of the data
                     if (ProcessMessage(read_buffer, offset, count)) {
                         utils::Logger::Instance().Info("%s\n"
-                                "\t  - message parsed between [last:offset]"
-                                "[%d:%d]: {%s}",
-                                FUNCTION_NAME_CSTR, last, offset + count,
+                                "\t  - message parsed [begin:end]"
+                                "[%d:%d]: {%s}", FUNCTION_NAME_CSTR, 
+                                offset - 1, offset + count - 1,
                                 utils::ByteArrayToStringStream(read_buffer,
                                 offset - 1, count + 1).c_str());
                         offset += count;
@@ -141,8 +141,8 @@ MessageProcessor::ProcessData() {
 
                         utils::Logger::Instance().Info(
                                 "%s\n\t  - working with %d bytes: (%d:%d) {%s}\n",
-                                FUNCTION_NAME_CSTR, read_buffer.size() - last, last,
-                                read_buffer.size(),
+                                FUNCTION_NAME_CSTR, read_buffer.size() - last, 
+                                last, read_buffer.size() - 1,
                                 utils::ByteArrayToStringStream(read_buffer,
                                 last, read_buffer.size() - last).c_str()
                                 );
@@ -350,15 +350,15 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
         io_port_->send_buffer(send_buffer);
         status = ProcessEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
-            oss << "\t  - EchoStatis::ACK\n";
+            oss << "\t  - EchoStatus::ACK received\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
-            oss << "\t  - EchoStatis::NAK, no retry on NAK\n";
+            oss << "\t  - EchoStatus::NAK received, no retry on NAK\n";
             break;
         }
         if (status == EchoStatus::NAK) {
-            oss << "\t  - EchoStatis::NAK, sleeping for 240ms\n";
+            oss << "\t  - EchoStatus::NAK received, sleeping for 240ms\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(240));
         }
         retry++;
@@ -407,7 +407,7 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();
     while (difference < duration) {
-        utils::Logger::Instance().Info("%s\n\t  - sleeping for %i ms before "
+        utils::Logger::Instance().Info("%s\n\t  - sleeping for %ims before "
                 "sending", FUNCTION_NAME_CSTR, int(duration - difference));
         std::this_thread::sleep_for(
                 std::chrono::milliseconds(duration - difference));

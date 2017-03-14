@@ -247,7 +247,7 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
                 device_name_.c_str(),
                 utils::int_to_hex(insteon_address_).c_str());
 
-        device_->device_properties_["device_disabled"] = 1;
+        device_->config_["device_disabled"] = true;
         ClearPendingCommand();
     }
 }
