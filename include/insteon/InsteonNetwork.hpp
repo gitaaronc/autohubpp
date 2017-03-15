@@ -61,6 +61,7 @@ public:
 
     bool Connect();
     void LoadDevices();
+    void SaveDevices();
     Json::Value SerializeJson(int device_id = 0);
     void InternalReceiveCommand(std::string json);
     void set_update_handler(

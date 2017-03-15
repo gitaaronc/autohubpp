@@ -41,7 +41,7 @@ InsteonDeviceImpl::InsteonDeviceImpl(InsteonDevice* pDevice,
         int insteon_address)
 : ack_timer_(new system::Timer(pDevice->io_service_)), pending_command_(0),
 pending_command_two_(0), pending_retry_(0), max_retries_(0),
-device_(pDevice), insteon_address_(insteon_address) {
+device_(pDevice), insteon_address_(insteon_address), device_disabled_(false) {
 
     device_name_ = ace::utils::int_to_hex<int>(insteon_address);
     ack_timer_->SetTimerCallback(
@@ -247,7 +247,7 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
                 device_name_.c_str(),
                 utils::int_to_hex(insteon_address_).c_str());
 
-        device_->config_["device_disabled"] = true;
+        device_disabled_ = true;
         ClearPendingCommand();
     }
 }

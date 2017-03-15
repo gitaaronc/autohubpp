@@ -110,6 +110,7 @@ public:
     
     int insteon_address_;
     std::string device_name_;
+    bool device_disabled_;
     
 };
 }

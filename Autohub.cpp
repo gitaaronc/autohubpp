@@ -212,6 +212,7 @@ namespace ace
     void
     Autohub::stop() {
         utils::Logger::Instance().Trace(FUNCTION_NAME);
+        insteon_network_->SaveDevices();
         restbed_.stop();
         wspp_server_.stop();
         if (wspp_server_thread_.joinable()) {

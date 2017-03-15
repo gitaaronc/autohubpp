@@ -57,8 +57,6 @@ msg_proc_(new MessageProcessor(io_service, config)) {
 }
 
 InsteonNetwork::~InsteonNetwork() {
-    for (const auto& it : device_list_)
-        it.second->SerializeYAML();
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
@@ -107,6 +105,13 @@ InsteonNetwork::LoadDevices() {
     }
 }
 
+void
+InsteonNetwork::SaveDevices(){
+    for (const auto& it : device_list_){
+        it.second->SerializeYAML();
+    }
+}
+
 bool
 InsteonNetwork::Connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -139,7 +144,7 @@ InsteonNetwork::Connect() {
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
             if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
-                    ["device_disabled"].as<bool>(false)) {
+                    ["device_disabled_"].as<bool>(false)) {
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
                         InsteonDeviceCommand::ALDBReadWrite, 0x00));
             }
@@ -152,7 +157,7 @@ InsteonNetwork::Connect() {
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
             if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
-                    ["device_disabled"].as<bool>(false)) {
+                    ["device_disabled_"].as<bool>(false)) {
                 io_service_.post(std::bind(&InsteonDevice::Command, it.second,
                         InsteonDeviceCommand::LightStatusRequest, 0x02));
             }

@@ -99,6 +99,15 @@ InsteonDevice::device_name() {
     return pImpl->device_name_;
 }
 
+bool
+InsteonDevice::device_disabled(){
+    return pImpl->device_disabled_;
+}
+
+void
+InsteonDevice::device_disabled(bool disabled){
+    pImpl->device_disabled_ = disabled;
+}
 /**
  * AckOfDirectCommand
  * The function is called in Acknowledgment of a direct command.
@@ -152,11 +161,15 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
     }
 }
 
-void
-InsteonDevice::LoadProperties() {
+/**
+ * LoadDeviceProperties
+ * Loads device object properties from yaml-cpp object
+ */
+void InsteonDevice::LoadProperties() {
     std::lock_guard<std::mutex>lock(property_lock_);
-    device_name(config_["device_name_"].as<std::string>(device_name()));
-    config_["device_name_"] = device_name();
+    device_name(config_["device_name_"].as<std::string>(
+            utils::int_to_hex(insteon_address())));
+    device_disabled(config_["device_disabled_"].as<bool>(false));
     YAML::Node node = config_["properties_"];
     for (auto it = node.begin(); it != node.end(); ++it) {
         device_properties_[it->first.as<std::string>()]
@@ -170,7 +183,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
     PropertyKeys keys = im->properties_;
     unsigned char command_one = keys["command_one"];
     unsigned char command_two = keys["command_two"];
-    config_["device_disabled"] = false;
+    config_["device_disabled_"] = false;
 
     if (im->properties_.size() > 0) {
         std::ostringstream oss;
@@ -272,7 +285,7 @@ InsteonDevice::SerializeJson() {
     Json::Value properties;
     root["device_address_"] = insteon_address();
     root["device_name_"] = device_name();
-    root["device_disabled"] = config_["device_disabled"].as<bool>(false);
+    root["device_disabled_"] = config_["device_disabled_"].as<bool>(false);
     for (const auto& it : device_properties_) {
         properties[it.first] = it.second;
     }
@@ -284,6 +297,9 @@ void InsteonDevice::SerializeYAML() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::lock_guard<std::mutex>lock(property_lock_);
     YAML::Node properties;
+    config_["device_address_"] = insteon_address();
+    config_["device_name_"] = device_name();
+    config_["device_disabled_"] = device_disabled();
     for (const auto& it : device_properties_) {
         properties[it.first] = it.second;
     }
@@ -303,7 +319,7 @@ bool
 InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (config_["device_disabled"].as<bool>(false)) {
+    if (config_["device_disabled_"].as<bool>(false)) {
         io_service_.post(std::bind(&type::StatusUpdate, this, 0));
         return false; // device disabled, stop here and return
     }

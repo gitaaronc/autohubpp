@@ -28,8 +28,6 @@
 #ifndef INSTEONDEVICEBASE_H
 #define INSTEONDEVICEBASE_H
 
-//#include "InsteonMessage.hpp"
-
 #include <functional>
 #include <map>
 #include <memory>
@@ -81,12 +79,13 @@ namespace ace {
             /* member variables, setters and getters */
             int insteon_address(); // returns insteon address assigned to this device
             std::string device_name(); // returns the name assigned to this device
-            void device_name(std::string device_name);
+            bool device_disabled();
 
             bool Command(InsteonDeviceCommand command, unsigned char command_two);
             void InternalReceiveCommand(std::string command, unsigned char command_two);
             void writeDeviceProperty(const std::string key, const unsigned int value);
             unsigned int readDeviceProperty(const std::string key);
+            
         protected:
             void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
                     unsigned char cmd1, unsigned char cmd2);
@@ -100,17 +99,21 @@ namespace ace {
 
         private:
             friend class detail::InsteonDeviceImpl;
-            void AckOfDirectCommand(unsigned char sentCmdOne, unsigned char recvCmdOne,
-                    unsigned char recvCmdTwo);
-            void LoadProperties();
-            std::function<void(Json::Value) > OnStatusUpdate;
             std::unique_ptr<detail::InsteonDeviceImpl> pImpl;
 
-            InsteonMessageType last_action_;
+            std::function<void(Json::Value) > OnStatusUpdate;
 
+            InsteonMessageType last_action_;
+            void AckOfDirectCommand(unsigned char sentCmdOne, unsigned char recvCmdOne,
+                    unsigned char recvCmdTwo);
+
+            void device_name(std::string device_name);
+            void device_disabled(bool disabled);
+            
             PropertyKeys device_properties_;
             std::mutex property_lock_;
             
+            void LoadProperties();
             YAML::Node config_;
         };
 
