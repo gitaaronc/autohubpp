@@ -209,7 +209,7 @@ InsteonProtocol::StandardMessage(const std::vector<unsigned char>& data,
         GetAddressProperty("to_address", data, offset + 4, count, 
                 properties);
     } else {
-        count += 4;
+        count += 3;
     }
     properties["command_one"] = data[offset + 8];
     properties["command_two"] = data[offset + 9];

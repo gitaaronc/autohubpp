@@ -130,7 +130,7 @@ MessageProcessor::ProcessData() {
                         utils::Logger::Instance().Info("%s\n"
                                 "\t  - message parsed [begin:end]"
                                 "[%d:%d]: {%s}", FUNCTION_NAME_CSTR, 
-                                offset - 1, offset + count - 1,
+                                offset - 1, offset - 1 + count,
                                 utils::ByteArrayToStringStream(read_buffer,
                                 offset - 1, count + 1).c_str());
                         offset += count;
@@ -268,7 +268,7 @@ MessageProcessor::ProcessMessage(const std::vector<unsigned char>& read_buffer,
             insteon_message)) {
         time_of_last_command_ = std::chrono::system_clock::now();
         auto it = read_buffer.begin() + offset - 1;
-        for (; it != read_buffer.begin() + offset + count; ++it)
+        for (; it < read_buffer.begin() + offset + count; it++)
             insteon_message->raw_message.push_back(*it); // copy the buffer
         UpdateWaitItems(insteon_message);
         if (msg_handler_)

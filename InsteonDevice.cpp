@@ -120,15 +120,17 @@ void
 InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         unsigned char recvCmdOne, unsigned char recvCmdTwo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (!sentCmdOne)
+    if (!sentCmdOne){
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
             "\t  - unexpected ACK received {0x%02x, 0x%02x}",
             FUNCTION_NAME_CSTR, device_name().c_str(), recvCmdOne, recvCmdTwo);
-    else
+        io_service_.post(std::bind(&type::Command, this,
+                InsteonDeviceCommand::LightStatusRequest, 0x00));
+    } else {
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
             "\t  - ACK received for command{0x%02x,0x%02x}",
             FUNCTION_NAME_CSTR, device_name().c_str(), recvCmdOne, recvCmdTwo);
-
+    }
     InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
@@ -146,8 +148,6 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         case InsteonDeviceCommand::FastOff:
         case InsteonDeviceCommand::FastOn:
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
-            io_service_.post(std::bind(&type::Command, this,
-                    InsteonDeviceCommand::LightStatusRequest, 0x02));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
             // Do we care about the database delta?
@@ -212,15 +212,18 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
         case InsteonMessageType::OnBroadcast:
             // device goes to set level at set ramp rate
             if (!actioned) {
-                unsigned char val = readDeviceProperty("button_on_level");
-                if (!val){
+                unsigned char set_level = readDeviceProperty("button_on_level"); 
+                unsigned char current_level = readDeviceProperty("light_status");
+                
+                if (!set_level){
                     if (TryGetExtendedInformation()){
-                        val = readDeviceProperty("button_on_level");
+                        set_level = readDeviceProperty("button_on_level");
                     }
                 }
-                if (readDeviceProperty("light_status") > 0)
-                    val = 0xFF;
-                StatusUpdate(val);
+                set_level = current_level != set_level ? set_level : 0xFF; 
+                StatusUpdate(set_level);
+                io_service_.post(std::bind(&type::Command, this,
+                        InsteonDeviceCommand::LightStatusRequest, 0x00));
             }
             break;
         case InsteonMessageType::OnCleanup:
@@ -418,7 +421,7 @@ InsteonDevice::writeDeviceProperty(const std::string key, const unsigned int val
     device_properties_[key] = value;
 }
 
-unsigned int
+unsigned char
 InsteonDevice::readDeviceProperty(const std::string key) {
     std::lock_guard<std::mutex>lock(property_lock_);
     auto it = device_properties_.find(key);

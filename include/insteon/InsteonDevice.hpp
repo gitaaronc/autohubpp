@@ -84,7 +84,7 @@ namespace ace {
             bool Command(InsteonDeviceCommand command, unsigned char command_two);
             void InternalReceiveCommand(std::string command, unsigned char command_two);
             void writeDeviceProperty(const std::string key, const unsigned int value);
-            unsigned int readDeviceProperty(const std::string key);
+            unsigned char readDeviceProperty(const std::string key);
             
         protected:
             void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
