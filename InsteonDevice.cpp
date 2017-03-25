@@ -45,7 +45,7 @@ InsteonDevice::InsteonDevice(int insteon_address,
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_strand_(io_strand), config_(config),
 last_action_(InsteonMessageType::Other) {
-    
+
     device_properties_["light_status"] = 0;
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
@@ -69,23 +69,24 @@ InsteonDevice::~InsteonDevice() {
 void
 InsteonDevice::InternalReceiveCommand(std::string command,
         unsigned char command_two) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     auto it = command_map_.find(command);
     if (it != command_map_.end()) {
         //Command(it->second, command_two);
-        io_strand_.post(std::bind(&type::Command, this, it->second, 
+        io_strand_.post(std::bind(&type::Command, this, it->second,
                 command_two));
     } else {
         //Command(InsteonDeviceCommand::GetOperatingFlags, 0x00);
         //Command(InsteonDeviceCommand::GetInsteonEngineVersion, 0x00);
         //Command(InsteonDeviceCommand::IDRequest, 0x00);
-        
-        io_strand_.post(std::bind(&type::Command, this, 
+
+        io_strand_.post(std::bind(&type::Command, this,
                 InsteonDeviceCommand::GetOperatingFlags, 0x00));
-        io_strand_.post(std::bind(&type::Command, this, 
+        io_strand_.post(std::bind(&type::Command, this,
                 InsteonDeviceCommand::GetInsteonEngineVersion, 0x00));
-        io_strand_.post(std::bind(&type::Command, this, 
+        io_strand_.post(std::bind(&type::Command, this,
                 InsteonDeviceCommand::IDRequest, 0x00));
-        
+
     }
 }
 
@@ -151,14 +152,14 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         case InsteonDeviceCommand::On:
         case InsteonDeviceCommand::FastOff:
         case InsteonDeviceCommand::FastOn:
-            io_strand_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
             writeDeviceProperty("link_database_delta", recvCmdOne);
-            io_strand_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
         default:
-            io_strand_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
     }
 }
@@ -224,9 +225,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
      */
 
     if (!set_level) {
-        io_strand_.post(std::bind(&type::Command, this, 
+        io_strand_.post(std::bind(&type::Command, this,
                 InsteonDeviceCommand::LightStatusRequest, 0x02));
-        io_strand_.post(std::bind(&type::Command, this, 
+        io_strand_.post(std::bind(&type::Command, this,
                 InsteonDeviceCommand::ExtendedGetSet, 0x00));
     }
 
@@ -237,17 +238,17 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             // device goes to set level at set ramp rate
         case InsteonMessageType::OnBroadcast:
             set_level = current_level != set_level ? set_level : 0xFF;
-            StatusUpdate(set_level);
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, set_level));
             break;
             // go to saved on level instantly
         case InsteonMessageType::FastOnBroadcast:
-            StatusUpdate(0xFF);
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, 0xFF));
             break;
             // goes to off level instantly
         case InsteonMessageType::FastOffBroadcast:
             // goes to off level at set ramp rate
         case InsteonMessageType::OffBroadcast:
-            StatusUpdate(0x00);
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, 0x00));
             break;
         case InsteonMessageType::IncrementEndBroadcast:
         case InsteonMessageType::FastOffCleanup:
@@ -328,7 +329,7 @@ InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (device_disabled()) {
-        io_strand_.post(std::bind(&type::StatusUpdate, this, 0x00));
+        io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, command_two));
         return false; // device disabled, stop here and return
     }
     switch (command) {

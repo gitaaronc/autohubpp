@@ -392,8 +392,6 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
     // force other sending threads to wait for us to finish
     //std::lock_guard<std::mutex>lock(lock_io_);
     EchoStatus status = EchoStatus::None;
-
-
     {
         //std::lock_guard<std::mutex>_(lock_data_processor_);
         io_port_->set_recv_handler(nullptr); // prevent io from calling a handler

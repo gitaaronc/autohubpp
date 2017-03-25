@@ -45,7 +45,7 @@ namespace insteon
 
 InsteonNetwork::InsteonNetwork(boost::asio::io_service& io_service,
         YAML::Node config)
-: io_service_(io_service), io_strand_(io_service), config_(config), 
+: io_service_(io_service), io_strand_(io_service), config_(config),
 msg_proc_(new MessageProcessor(io_service, config["PLM"])) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     msg_proc_->set_message_handler(std::bind(&type::OnMessage, this,
@@ -76,7 +76,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
     auto it = device_list_.find(insteon_address);
     if (it != device_list_.end())
         return it->second;
-    
+
     std::shared_ptr<InsteonDevice> device = std::make_shared<InsteonDevice>
             (insteon_address, io_strand_, config_
             ["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
@@ -84,10 +84,10 @@ InsteonNetwork::AddDevice(int insteon_address) {
     device->set_message_proc(msg_proc_);
     device->set_update_handler(std::bind(&type::OnUpdateDevice,
             this, std::placeholders::_1));
-    
+
     return device_list_.insert(InsteonDeviceMapPair(insteon_address, device))
             .first->second;
-    
+
 }
 
 /**
@@ -104,10 +104,10 @@ InsteonNetwork::LoadDevices() {
 }
 
 void
-InsteonNetwork::SaveDevices(){
+InsteonNetwork::SaveDevices() {
     utils::Logger::Instance().Debug("%s\n\t  - %d devices total",
             FUNCTION_NAME_CSTR, device_list_.size());
-    for (const auto& it : device_list_){
+    for (const auto& it : device_list_) {
         it.second->SerializeYAML();
     }
 }
@@ -229,6 +229,7 @@ InsteonNetwork::SerializeJson(int device_id) {
 
 void
 InsteonNetwork::InternalReceiveCommand(std::string json) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     Json::Reader reader;
     Json::Value root;
     std::string command;
@@ -247,7 +248,7 @@ InsteonNetwork::InternalReceiveCommand(std::string json) {
         device->InternalReceiveCommand(command, command_two);
     } else {
         utils::Logger::Instance().Warning("Received command for device that"
-        " doesn't exist.");
+                " doesn't exist.");
     }
 }
 
@@ -273,9 +274,8 @@ void
 InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
-    std::shared_ptr<InsteonDevice>device;
 
-    if (im->properties_.size() > 0) {
+    /*if (im->properties_.size() > 0) {
         std::ostringstream oss;
         oss << "The following message was received by the network\n";
         oss << "\t  - {0x" << utils::ByteArrayToStringStream(
@@ -285,8 +285,8 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
                     << utils::int_to_hex(it.second) << "\n";
         }
         utils::Logger::Instance().Debug(oss.str().c_str());
-    }
-    
+    }*/
+
     // automatically add devices found in other device databases
     // or devices found by linking.
     if (im->properties_.count("ext_link_address")) {
@@ -298,6 +298,7 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
 
     // route messages to appropriate device or controller
     if (im->properties_.count("from_address")) { // route to device
+        std::shared_ptr<InsteonDevice>device;
         insteon_address = im->properties_["from_address"];
         if (DeviceExists(insteon_address)) {
             device = GetDevice(insteon_address);
