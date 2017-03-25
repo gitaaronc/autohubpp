@@ -31,10 +31,7 @@
 #include "InsteonControllerGroupCommands.h"
 #include "PropertyKey.hpp"
 
-//#include "InsteonDevice.hpp"
-//#include "InsteonMessage.hpp"
-
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 
 namespace ace {
     namespace insteon {

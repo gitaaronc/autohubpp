@@ -48,10 +48,10 @@ namespace ace {
             typedef IOPort base;
             typedef SocketPort type;
 
-            SocketPort(boost::asio::io_service& ios) : base(), socket_io_(ios),
+            SocketPort(boost::asio::io_service& ios) : base(), io_service_(ios),
             recv_buffer_has_data_(false) {
                 socket_port_ = std::make_shared<boost::asio::ip::tcp::socket>
-                        (socket_io_);
+                        (io_service_);
             }
 
             SocketPort() = delete;
@@ -86,7 +86,7 @@ namespace ace {
                     size_t bytes_transferred);
 
         private:
-            boost::asio::io_service& socket_io_;
+            boost::asio::io_service& io_service_;
             recv_handler m_recv_handler;
             socket_port_ptr socket_port_;
             std::vector<unsigned char> incoming_buffer_;

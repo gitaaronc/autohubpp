@@ -48,7 +48,7 @@ namespace insteon
 
 MessageProcessor::MessageProcessor(boost::asio::io_service& io_service,
         YAML::Node config)
-: io_service_(io_service), config_(config) {
+: io_service_(io_service), io_strand_(io_service), config_(config) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
@@ -60,7 +60,7 @@ bool
 MessageProcessor::Connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
-    std::string plm_type = config_["PLM"]["type"].as<std::string>("serial");
+    std::string plm_type = config_["type"].as<std::string>("serial");
     std::string host;
     int port = 0;
     std::unique_ptr<io::IOPort> io;
@@ -71,13 +71,13 @@ MessageProcessor::Connect() {
     if (plm_type.compare("hub") == 0) {
         io = std::move(std::unique_ptr<io::IOPort>(
                 new io::SocketPort(io_service_)));
-        host = config_["PLM"]["hub_ip"].as<std::string>("127.0.0.1");
-        port = config_["PLM"]["hub_port"].as<int>(9761);
+        host = config_["hub_ip"].as<std::string>("127.0.0.1");
+        port = config_["hub_port"].as<int>(9761);
     } else {
         io = std::move(std::unique_ptr<io::IOPort>(
                 new io::SerialPort(io_service_)));
-        host = config_["PLM"]["serial_port"].as<std::string>("/dev/ttyUSB0");
-        port = config_["PLM"]["baud_rate"].as<int>(9600);
+        host = config_["serial_port"].as<std::string>("/dev/ttyUSB0");
+        port = config_["baud_rate"].as<int>(9600);
     }
 
     io_port_ = std::move(io);
@@ -96,7 +96,7 @@ void
 MessageProcessor::ProcessData() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     // force other thread to wait
-    std::lock_guard<std::mutex>_(lock_data_processor_);
+    //std::lock_guard<std::mutex>_(lock_data_processor_);
     std::vector<unsigned char> read_buffer;
     {
         // move the object buffer to the back of local buffer
@@ -272,7 +272,7 @@ MessageProcessor::ProcessMessage(const std::vector<unsigned char>& read_buffer,
             insteon_message->raw_message.push_back(*it); // copy the buffer
         UpdateWaitItems(insteon_message);
         if (msg_handler_)
-            io_service_.post(std::bind(msg_handler_, insteon_message));
+            io_strand_.post(std::bind(msg_handler_, insteon_message));
         return true;
     }
     return false;
@@ -343,10 +343,7 @@ MessageProcessor::Send(std::vector<unsigned char> send_buffer,
                     send_buffer.size()).c_str());
         }
         time_of_last_command_ = std::chrono::system_clock::now();
-        utils::Logger::Instance().Info("%s\n%s", FUNCTION_NAME_CSTR,
-                oss.str().c_str());
         oss.str(std::string());
-        oss.clear();
         io_port_->send_buffer(send_buffer);
         status = ProcessEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
@@ -393,16 +390,16 @@ MessageProcessor::TrySend(const std::vector<unsigned char>& send_buffer,
         bool retry_on_nak, int echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     // force other sending threads to wait for us to finish
-    std::lock_guard<std::mutex>lock(lock_io_);
+    //std::lock_guard<std::mutex>lock(lock_io_);
     EchoStatus status = EchoStatus::None;
 
 
     {
-        std::lock_guard<std::mutex>_(lock_data_processor_);
+        //std::lock_guard<std::mutex>_(lock_data_processor_);
         io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
     }
 
-    auto duration = config_["PLM"]["command_delay"].as<int>(1500);
+    auto duration = config_["command_delay"].as<int>(1500);
     auto start = std::chrono::system_clock::now();
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();

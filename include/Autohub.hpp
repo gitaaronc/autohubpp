@@ -92,6 +92,7 @@ private:
     void TestPlugin();
 private:
     boost::asio::io_service& io_service_;
+    boost::asio::strand strand_hub_;
     std::unique_ptr<insteon::InsteonNetwork> insteon_network_;
     
     std::string yaml_config_file_;

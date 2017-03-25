@@ -49,10 +49,10 @@ namespace ace {
             typedef IOPort base;
             typedef SerialPort type;
 
-            SerialPort(boost::asio::io_service& ios) : base(), serial_io_(ios),
+            SerialPort(boost::asio::io_service& ios) : base(), io_service_(ios),
             recv_buffer_has_data_(false) {
                 serial_port_ = std::make_shared<boost::asio::serial_port>
-                        (serial_io_);
+                        (io_service_);
             }
 
             SerialPort() = delete;
@@ -82,7 +82,7 @@ namespace ace {
                     size_t bytes_transferred);
 
         private:
-            boost::asio::io_service& serial_io_;
+            boost::asio::io_service& io_service_;
             recv_handler m_recv_handler;
             serial_port_ptr serial_port_;
             std::vector<unsigned char> incoming_buffer_;

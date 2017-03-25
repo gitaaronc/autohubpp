@@ -39,9 +39,10 @@ namespace detail
 
 InsteonDeviceImpl::InsteonDeviceImpl(InsteonDevice* pDevice,
         int insteon_address)
-: ack_timer_(new system::Timer(pDevice->io_service_)), pending_command_(0),
-pending_command_two_(0), pending_retry_(0), max_retries_(0),
-device_(pDevice), insteon_address_(insteon_address), device_disabled_(false) {
+: ack_timer_(new system::Timer(pDevice->io_service_)),
+pending_command_(0), pending_command_two_(0), pending_retry_(0),
+max_retries_(0), device_(pDevice), insteon_address_(insteon_address),
+device_disabled_(false) {
 
     device_name_ = ace::utils::int_to_hex<int>(insteon_address);
     ack_timer_->SetTimerCallback(
@@ -51,7 +52,6 @@ device_(pDevice), insteon_address_(insteon_address), device_disabled_(false) {
 }
 
 InsteonDeviceImpl::~InsteonDeviceImpl() {
-
 }
 
 /**
@@ -143,6 +143,12 @@ InsteonDeviceImpl::TryCommandInternal(unsigned char command_one,
     std::vector<unsigned char> send_buffer;
     GetStandardMessage(send_buffer, command_one, command_two);
     EchoStatus status = msgProc_->TrySend(send_buffer);
+    return TryProcessEcho(status);
+}
+
+bool
+InsteonDeviceImpl::TryProcessEcho(EchoStatus status) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (status == EchoStatus::ACK) { // got the echo
         utils::Logger::Instance().Debug("%s\n\t - reset ACK timer",
                 FUNCTION_NAME_CSTR);
@@ -233,8 +239,8 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
     if (++pending_retry_ <= max_retries_) {
         //pending_retry_ += 1;
         utils::Logger::Instance().Info("%s\n\t  - retrying failed command for"
-                " device %s{%s}\n\t  - command {0x%02x,0x%02x}", 
-                FUNCTION_NAME_CSTR, 
+                " device %s{%s}\n\t  - command {0x%02x,0x%02x}",
+                FUNCTION_NAME_CSTR,
                 device_name_.c_str(),
                 utils::int_to_hex(insteon_address_).c_str(),
                 command_one, command_two);

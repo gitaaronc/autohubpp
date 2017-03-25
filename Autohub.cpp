@@ -44,16 +44,15 @@ namespace ace
 
     // TODO verify YAML::Node prior to passing to InsteonNetwork constructor
     Autohub::Autohub(boost::asio::io_service& io_service, YAML::Node root)
-    : io_service_(io_service),
-    insteon_network_(
-    new insteon::InsteonNetwork(io_service, root["INSTEON"])),
-    wspp_next_id_(0), root_node_(root) {
-        if (root_node_["INSTEON"].IsNull() || !root_node_["INSTEON"].IsDefined())
+    : io_service_(io_service), strand_hub_(io_service), root_node_(root),
+    insteon_network_(new insteon::InsteonNetwork(io_service, root["INSTEON"])),
+    wspp_next_id_(0){
+        /*if (root_node_["INSTEON"].IsNull() || !root_node_["INSTEON"].IsDefined())
             throw; // TODO remove throw and improve error handling
+         */
     }
 
     Autohub::~Autohub() {
-        stop();
         utils::Logger::Instance().Trace(FUNCTION_NAME);
     }
 
@@ -117,7 +116,7 @@ namespace ace
             msg->set_payload(root.toStyledString());
             wspp_server_.send(hdl, msg);
         } else if (event.compare("device") == 0) {
-            io_service_.post(std::bind(&type::InternalReceiveCommand, this,
+            strand_hub_.post(std::bind(&type::InternalReceiveCommand, this,
                     ss.str()));
         }
         //TestPlugin();
@@ -155,8 +154,6 @@ namespace ace
         utils::Logger::Instance().Trace(FUNCTION_NAME);
         json["event"] = "deviceUpdate";
         for (const auto& it : wspp_connections_) {
-            // Emit is a work around. I gave up casting a function pointer of an 
-            // overloaded function (&wspp_server::send) to work with bind
             io_service_.post(std::bind(&Autohub::wsppEmit, this, it.first,
                     json.toStyledString()));
         }
@@ -171,10 +168,7 @@ namespace ace
         }
     }
 
-    // wsppEmit is a work around. I gave up casting a function pointer of an 
-    // overloaded function (&wspp_server::send) to work with bind
     // TODO: omit wsppEmit!!
-
     void
     Autohub::wsppEmit(websocketpp::connection_hdl hdl, const std::string& buf) {
         utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -213,12 +207,12 @@ namespace ace
     Autohub::stop() {
         utils::Logger::Instance().Trace(FUNCTION_NAME);
         insteon_network_->SaveDevices();
-        restbed_.stop();
         wspp_server_.stop();
         if (wspp_server_thread_.joinable()) {
             wspp_server_thread_.join();
         }
         dynamicLibraryMap_.clear();
+        restbed_.stop();
     }
 
     void
@@ -449,7 +443,7 @@ namespace ace
                     reader.getFormattedErrorMessages().c_str());
             return;
         }
-        io_service_.post(std::bind(&type::InternalReceiveCommand, this,
+        strand_hub_.post(std::bind(&type::InternalReceiveCommand, this,
                 test));
         utils::Logger::Instance().Debug(root.toStyledString().c_str());
     }

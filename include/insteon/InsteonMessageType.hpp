@@ -52,7 +52,8 @@ namespace ace {
                     OnBroadcast,
                     OnCleanup,
                     SetButtonPressed,
-                    SuccessBroadcast
+                    SuccessBroadcast,
+                    UnexpectedEchoReceived
         };
     } // namespace insteon
 } // namespace ace

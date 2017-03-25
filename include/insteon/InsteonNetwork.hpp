@@ -34,7 +34,7 @@
 #include <memory>
 #include <condition_variable>
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 
 #include <yaml-cpp/yaml.h>
 
@@ -86,9 +86,14 @@ protected:
     std::condition_variable cv_load_db_;
 private:
     boost::asio::io_service& io_service_;
+    boost::asio::io_service::strand io_strand_;
+    // pointer to Insteon Controller object
     std::unique_ptr<InsteonController> insteon_controller_;
+    // list of Insteon Devices
     InsteonDeviceMap device_list_;
+    // pointer to message processor
     std::shared_ptr<MessageProcessor> msg_proc_;
+    // pointer to callback function, executed when updates occur
     std::function<void(Json::Value) > OnUpdate;
     
     YAML::Node config_;

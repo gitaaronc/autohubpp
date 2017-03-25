@@ -81,6 +81,8 @@ public:
 
     void OnPendingCommandTimeout();
 
+    bool TryProcessEcho(EchoStatus status = EchoStatus::Unknown);
+    
     unsigned char
     HighAddress() {
         return insteon_address_ >> 16 & 0xFF;

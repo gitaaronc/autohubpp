@@ -35,6 +35,7 @@
 #include <list>
 
 #include <boost/asio.hpp>
+
 #include <yaml-cpp/yaml.h>
 
 #include "../config.hpp"
@@ -109,17 +110,18 @@ namespace ace {
 
             std::unique_ptr<io::IOPort> io_port_;
             boost::asio::io_service& io_service_;
+            boost::asio::io_service::strand io_strand_;
             msg_handler msg_handler_;
             InsteonProtocol insteon_protocol_;
 
-            std::mutex lock_io_;
+            //std::mutex lock_io_;
             std::list<std::shared_ptr<WaitItem>> wait_list_;
             std::mutex mutex_wait_list_;
             std::vector<unsigned char> sent_message_;
             std::mutex lock_buffer_;
             std::vector<unsigned char> buffer_;
 
-            std::mutex lock_data_processor_; 
+            //std::mutex lock_data_processor_; 
             
             std::chrono::system_clock::time_point time_of_last_command_;
             

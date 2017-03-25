@@ -38,7 +38,7 @@
 #include "InsteonDeviceCommands.hpp"
 #include "PropertyKey.hpp"
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio.hpp>
 
 #include <yaml-cpp/yaml.h>
 
@@ -94,7 +94,8 @@ namespace ace {
             bool TryReadWriteALDB();
             void StatusUpdate(unsigned char status);
             boost::asio::io_service& io_service_;
-
+            boost::asio::io_service::strand io_strand_;
+            
             std::map<std::string, InsteonDeviceCommand> command_map_;
 
         private:

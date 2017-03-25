@@ -43,8 +43,9 @@ namespace insteon
 InsteonDevice::InsteonDevice(int insteon_address,
         boost::asio::io_service& io_service, YAML::Node config) :
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
-io_service_(io_service), config_(config),
+io_service_(io_service), io_strand_(io_service), config_(config),
 last_action_(InsteonMessageType::Other) {
+    
     device_properties_["light_status"] = 0;
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
@@ -70,17 +71,21 @@ InsteonDevice::InternalReceiveCommand(std::string command,
         unsigned char command_two) {
     auto it = command_map_.find(command);
     if (it != command_map_.end()) {
-        io_service_.post(std::bind(&type::Command, this, it->second,
+        //Command(it->second, command_two);
+        io_strand_.post(std::bind(&type::Command, this, it->second, 
                 command_two));
     } else {
-        io_service_.post(std::bind(&type::Command, this,
+        //Command(InsteonDeviceCommand::GetOperatingFlags, 0x00);
+        //Command(InsteonDeviceCommand::GetInsteonEngineVersion, 0x00);
+        //Command(InsteonDeviceCommand::IDRequest, 0x00);
+        
+        io_strand_.post(std::bind(&type::Command, this, 
                 InsteonDeviceCommand::GetOperatingFlags, 0x00));
-
-        io_service_.post(std::bind(&type::Command, this,
+        io_strand_.post(std::bind(&type::Command, this, 
                 InsteonDeviceCommand::GetInsteonEngineVersion, 0x00));
-
-        io_service_.post(std::bind(&type::Command, this,
+        io_strand_.post(std::bind(&type::Command, this, 
                 InsteonDeviceCommand::IDRequest, 0x00));
+        
     }
 }
 
@@ -100,14 +105,15 @@ InsteonDevice::device_name() {
 }
 
 bool
-InsteonDevice::device_disabled(){
+InsteonDevice::device_disabled() {
     return pImpl->device_disabled_;
 }
 
 void
-InsteonDevice::device_disabled(bool disabled){
+InsteonDevice::device_disabled(bool disabled) {
     pImpl->device_disabled_ = disabled;
 }
+
 /**
  * AckOfDirectCommand
  * The function is called in Acknowledgment of a direct command.
@@ -120,26 +126,24 @@ void
 InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         unsigned char recvCmdOne, unsigned char recvCmdTwo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (!sentCmdOne){
+    if (!sentCmdOne) {
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-            "\t  - unexpected ACK received {0x%02x, 0x%02x}",
-            FUNCTION_NAME_CSTR, device_name().c_str(), recvCmdOne, recvCmdTwo);
-        io_service_.post(std::bind(&type::Command, this,
-                InsteonDeviceCommand::LightStatusRequest, 0x00));
+                "\t  - unexpected ACK received {0x%02x ,0x%02x, 0x%02x}",
+                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, recvCmdOne, recvCmdTwo);
     } else {
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-            "\t  - ACK received for command{0x%02x,0x%02x}",
-            FUNCTION_NAME_CSTR, device_name().c_str(), recvCmdOne, recvCmdTwo);
+                "\t  - ACK received for command{0x%02x, 0x%02x,0x%02x}",
+                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, recvCmdOne, recvCmdTwo);
     }
     InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
-            writeDeviceProperty("device_engine_version",recvCmdTwo);
+            writeDeviceProperty("device_engine_version", recvCmdTwo);
             break;
         case InsteonDeviceCommand::GetOperatingFlags:
-            writeDeviceProperty("enable_programming_lock",recvCmdTwo & 0x01);
+            writeDeviceProperty("enable_programming_lock", recvCmdTwo & 0x01);
             writeDeviceProperty("enable_blink_on_traffic", recvCmdTwo & 0x02);
-            writeDeviceProperty("enable_resume_dim",recvCmdTwo & 0x04);
+            writeDeviceProperty("enable_resume_dim", recvCmdTwo & 0x04);
             writeDeviceProperty("enable_led", recvCmdTwo & 0x08);
             writeDeviceProperty("enable_load_sense", recvCmdTwo & 0x0a);
             break;
@@ -150,8 +154,6 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
-            // Do we care about the database delta?
-            // why do they include it in the lightStatusRequest response?
             writeDeviceProperty("link_database_delta", recvCmdOne);
             io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
@@ -183,7 +185,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
     PropertyKeys keys = im->properties_;
     unsigned char command_one = keys["command_one"];
     unsigned char command_two = keys["command_two"];
-    config_["device_disabled_"] = false;
+    unsigned char set_level = readDeviceProperty("button_on_level");
+    unsigned char current_level = readDeviceProperty("light_status");
+    device_disabled(false);
 
     if (im->properties_.size() > 0) {
         std::ostringstream oss;
@@ -199,63 +203,61 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
         utils::Logger::Instance().Debug(oss.str().c_str());
     }
 
-    // TODO verify broadcast message cleanup events & to/from process
+    // if group number > 0 return, we don't care yet
+    if (im->properties_.count("group")) {
+        if (im->properties_["group"]) {
+            utils::Logger::Instance().Debug("%s\n\t  - Group command received, "
+                    "returning.", FUNCTION_NAME_CSTR);
+            return;
+        }
+    }
+    /*
     bool actioned = ((unsigned char) im->message_type_
             == (unsigned char) last_action_);
     if (!actioned) { //used to prevent acting on duplicate or similar messages
         last_action_ = im->message_type_;
+    } else {
+        utils::Logger::Instance().Debug("%s\n\t  - command already actioned, "
+                "returning.", FUNCTION_NAME_CSTR);
+        return;
     }
+     */
+
+    if (!set_level) {
+        io_strand_.post(std::bind(&type::Command, this, 
+                InsteonDeviceCommand::LightStatusRequest, 0x02));
+        io_strand_.post(std::bind(&type::Command, this, 
+                InsteonDeviceCommand::ExtendedGetSet, 0x00));
+    }
+
     switch (im->message_type_) {
         case InsteonMessageType::Ack: // response to direct command
             pImpl->CommandAckProcessor(im);
             break;
-        case InsteonMessageType::OnBroadcast:
             // device goes to set level at set ramp rate
-            if (!actioned) {
-                unsigned char set_level = readDeviceProperty("button_on_level"); 
-                unsigned char current_level = readDeviceProperty("light_status");
-                
-                if (!set_level){
-                    if (TryGetExtendedInformation()){
-                        set_level = readDeviceProperty("button_on_level");
-                    }
-                }
-                set_level = current_level != set_level ? set_level : 0xFF; 
-                StatusUpdate(set_level);
-                io_service_.post(std::bind(&type::Command, this,
-                        InsteonDeviceCommand::LightStatusRequest, 0x00));
-            }
+        case InsteonMessageType::OnBroadcast:
+            set_level = current_level != set_level ? set_level : 0xFF;
+            StatusUpdate(set_level);
             break;
-        case InsteonMessageType::OnCleanup:
-            break;
-        case InsteonMessageType::OffBroadcast:
-            // device turns off at set ramp rate
-            if (!actioned)
-                StatusUpdate(0x00);
-            break;
-        case InsteonMessageType::OffCleanup:
-            break;
+            // go to saved on level instantly
         case InsteonMessageType::FastOnBroadcast:
-            // Device goes to max light level, no ramp
-            if (!actioned)
-                StatusUpdate(0xFF);
+            StatusUpdate(0xFF);
             break;
+            // goes to off level instantly
         case InsteonMessageType::FastOffBroadcast:
-            // device turns off, no delay
-            if (!actioned)
-                StatusUpdate(0x00);
-            break;
-        case InsteonMessageType::FastOnCleanup:
-            break;
-        case InsteonMessageType::FastOffCleanup:
-            break;
-        case InsteonMessageType::IncrementBeginBroadcast:
+            // goes to off level at set ramp rate
+        case InsteonMessageType::OffBroadcast:
+            StatusUpdate(0x00);
             break;
         case InsteonMessageType::IncrementEndBroadcast:
-            if (!actioned) {
-                io_service_.post(std::bind(&type::Command, this,
-                        InsteonDeviceCommand::LightStatusRequest, 0x00));
-            }
+        case InsteonMessageType::FastOffCleanup:
+        case InsteonMessageType::FastOnCleanup:
+        case InsteonMessageType::OffCleanup:
+        case InsteonMessageType::OnCleanup:
+            io_strand_.post(std::bind(&type::Command, this,
+                    InsteonDeviceCommand::LightStatusRequest, 0x00));
+            break;
+        case InsteonMessageType::IncrementBeginBroadcast:
             break;
         case InsteonMessageType::SetButtonPressed:
             writeDeviceProperty("device_category", keys["device_category"]);
@@ -270,6 +272,11 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             break;
         case InsteonMessageType::DeviceLinkRecord:
             utils::Logger::Instance().Debug("Link record received");
+            break;
+        case InsteonMessageType::UnexpectedEchoReceived:
+            utils::Logger::Instance().Debug("Unexpected ECHO received");
+            pImpl->WaitAndSetPendingCommand(command_one, command_two);
+            pImpl->TryProcessEcho(EchoStatus::ACK);
             break;
         default:
             utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"
@@ -299,14 +306,12 @@ InsteonDevice::SerializeJson() {
 void InsteonDevice::SerializeYAML() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::lock_guard<std::mutex>lock(property_lock_);
-    YAML::Node properties;
     config_["device_address_"] = insteon_address();
     config_["device_name_"] = device_name();
     config_["device_disabled_"] = device_disabled();
     for (const auto& it : device_properties_) {
-        properties[it.first] = it.second;
+        config_["properties_"][it.first] = it.second;
     }
-    config_["properties_"] = properties;
 }
 
 /**
@@ -322,8 +327,8 @@ bool
 InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (config_["device_disabled_"].as<bool>(false)) {
-        io_service_.post(std::bind(&type::StatusUpdate, this, 0));
+    if (device_disabled()) {
+        io_service_.post(std::bind(&type::StatusUpdate, this, 0x00));
         return false; // device disabled, stop here and return
     }
     switch (command) {
@@ -369,7 +374,7 @@ InsteonDevice::TryGetExtendedInformation() {
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
         writeDeviceProperty("x10_house_code", properties["data_five"]);
         writeDeviceProperty("x10_unit_code", properties["data_six"]);
-        writeDeviceProperty("button_on_ramp_rate", 
+        writeDeviceProperty("button_on_ramp_rate",
                 properties["data_seven"] & 0x1F);
         writeDeviceProperty("button_on_level", properties["data_eight"]);
         writeDeviceProperty("signal_to_noise_threshold", properties["data_nine"]);
@@ -415,7 +420,7 @@ InsteonDevice::set_update_handler(std::function<
     OnStatusUpdate = callback;
 }
 
-void 
+void
 InsteonDevice::writeDeviceProperty(const std::string key, const unsigned int value) {
     std::lock_guard<std::mutex>lock(property_lock_);
     device_properties_[key] = value;
