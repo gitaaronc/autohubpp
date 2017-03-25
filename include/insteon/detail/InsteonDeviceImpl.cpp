@@ -39,7 +39,7 @@ namespace detail
 
 InsteonDeviceImpl::InsteonDeviceImpl(InsteonDevice* pDevice,
         int insteon_address)
-: ack_timer_(new system::Timer(pDevice->io_service_)),
+: ack_timer_(new system::Timer(pDevice->io_strand_.get_io_service())),
 pending_command_(0), pending_command_two_(0), pending_retry_(0),
 max_retries_(0), device_(pDevice), insteon_address_(insteon_address),
 device_disabled_(false) {

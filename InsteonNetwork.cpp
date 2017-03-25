@@ -78,7 +78,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
         return it->second;
     
     std::shared_ptr<InsteonDevice> device = std::make_shared<InsteonDevice>
-            (insteon_address, io_service_, config_
+            (insteon_address, io_strand_, config_
             ["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
 
     device->set_message_proc(msg_proc_);

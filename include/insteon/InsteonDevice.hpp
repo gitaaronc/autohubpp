@@ -57,11 +57,13 @@ namespace ace {
         }
 
         // Implements Insteon Device functions and stores attributes
+
         class InsteonDevice {
             typedef InsteonDevice type;
         public:
             InsteonDevice() = delete;
-            InsteonDevice(int insteon_address, boost::asio::io_service& io_service,
+            InsteonDevice(int insteon_address,
+                    boost::asio::io_service::strand& io_strand,
                     YAML::Node config);
             InsteonDevice(const InsteonDevice& rhs) = delete;
             InsteonDevice(InsteonDevice&& rhs) noexcept = delete;
@@ -85,7 +87,7 @@ namespace ace {
             void InternalReceiveCommand(std::string command, unsigned char command_two);
             void writeDeviceProperty(const std::string key, const unsigned int value);
             unsigned char readDeviceProperty(const std::string key);
-            
+
         protected:
             void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
                     unsigned char cmd1, unsigned char cmd2);
@@ -93,9 +95,9 @@ namespace ace {
             bool TryGetExtendedInformation();
             bool TryReadWriteALDB();
             void StatusUpdate(unsigned char status);
-            boost::asio::io_service& io_service_;
+            //boost::asio::io_service& io_service_;
             boost::asio::io_service::strand io_strand_;
-            
+
             std::map<std::string, InsteonDeviceCommand> command_map_;
 
         private:
@@ -110,10 +112,10 @@ namespace ace {
 
             void device_name(std::string device_name);
             void device_disabled(bool disabled);
-            
+
             PropertyKeys device_properties_;
             std::mutex property_lock_;
-            
+
             void LoadProperties();
             YAML::Node config_;
         };

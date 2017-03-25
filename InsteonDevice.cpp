@@ -41,9 +41,9 @@ namespace insteon
 {
 
 InsteonDevice::InsteonDevice(int insteon_address,
-        boost::asio::io_service& io_service, YAML::Node config) :
+        boost::asio::io_service::strand& io_strand, YAML::Node config) :
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
-io_service_(io_service), io_strand_(io_service), config_(config),
+io_strand_(io_strand), config_(config),
 last_action_(InsteonMessageType::Other) {
     
     device_properties_["light_status"] = 0;
@@ -151,14 +151,14 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
         case InsteonDeviceCommand::On:
         case InsteonDeviceCommand::FastOff:
         case InsteonDeviceCommand::FastOn:
-            io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_strand_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
             writeDeviceProperty("link_database_delta", recvCmdOne);
-            io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_strand_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
         default:
-            io_service_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
+            io_strand_.post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
     }
 }
@@ -328,7 +328,7 @@ InsteonDevice::Command(InsteonDeviceCommand command,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (device_disabled()) {
-        io_service_.post(std::bind(&type::StatusUpdate, this, 0x00));
+        io_strand_.post(std::bind(&type::StatusUpdate, this, 0x00));
         return false; // device disabled, stop here and return
     }
     switch (command) {

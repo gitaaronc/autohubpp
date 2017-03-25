@@ -154,6 +154,9 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
             data.resize(rVal);
             for (const auto& it : data)
                 buffer.push_back(it);
+            utils::Logger::Instance().Debug("%s\n\t  - the future is now!\n"
+                    "\t  - %d bytes available.\n"
+                    "\t  - success!!", FUNCTION_NAME_CSTR, buffer.size());
             break;
         } else if (status == std::future_status::deferred) {
             utils::Logger::Instance().Debug("%s\n\t - deferred waiting",
