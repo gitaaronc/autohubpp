@@ -26,8 +26,10 @@
  */
 #include "Timer.hpp"
 
-namespace ace {
-namespace system {
+namespace ace
+{
+namespace system
+{
 
 Timer::Timer(boost::asio::io_service& io_service)
 : io_service_(io_service), interval_milliseconds_(0),
@@ -44,8 +46,8 @@ Timer::~Timer() {
 }
 
 void
-Timer::OnTimer(){
-    _timerCallback(); 
+Timer::OnTimer() {
+    _timerCallback();
 }
 
 bool
@@ -63,7 +65,9 @@ Timer::Run() {
                 std::lock_guard<std::mutex>lock(lock_);
                 timer_active_ = false;
             }
-            io_service_.post(std::bind(&type::OnTimer, this));
+            std::thread t(&type::OnTimer, this);
+            t.detach();
+            //io_service_.post(std::bind(&type::OnTimer, this));
         } else { // timer_event_ = true
                 timer_event_ = false; // reset event
             }

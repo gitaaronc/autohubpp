@@ -302,12 +302,14 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
         insteon_address = im->properties_["from_address"];
         if (DeviceExists(insteon_address)) {
             device = GetDevice(insteon_address);
-            io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
+            device->OnMessage(im);
+            //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         } else if (im->message_type_ == InsteonMessageType::SetButtonPressed) {
             insteon_controller_->OnMessage(im);
         } else {
             device = AddDevice(insteon_address);
-            io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
+            device->OnMessage(im);
+            //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         }
     } else { // route to controller/PLM
         insteon_controller_->OnMessage(im);

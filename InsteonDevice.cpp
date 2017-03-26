@@ -76,9 +76,9 @@ InsteonDevice::InternalReceiveCommand(std::string command,
         io_strand_.post(std::bind(&type::Command, this, it->second,
                 command_two));
     } else {
-        //Command(InsteonDeviceCommand::GetOperatingFlags, 0x00);
-        //Command(InsteonDeviceCommand::GetInsteonEngineVersion, 0x00);
-        //Command(InsteonDeviceCommand::IDRequest, 0x00);
+        /*Command(InsteonDeviceCommand::GetOperatingFlags, 0x00);
+        Command(InsteonDeviceCommand::GetInsteonEngineVersion, 0x00);
+        Command(InsteonDeviceCommand::IDRequest, 0x00);*/
 
         io_strand_.post(std::bind(&type::Command, this,
                 InsteonDeviceCommand::GetOperatingFlags, 0x00));
