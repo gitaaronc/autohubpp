@@ -149,8 +149,10 @@ InsteonDevice::AckOfDirectCommand(unsigned char sentCmdOne,
             writeDeviceProperty("enable_load_sense", recvCmdTwo & 0x0a);
             break;
         case InsteonDeviceCommand::Off:
-        case InsteonDeviceCommand::On:
         case InsteonDeviceCommand::FastOff:
+            io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, 0x00));
+            break;
+        case InsteonDeviceCommand::On:
         case InsteonDeviceCommand::FastOn:
             io_strand_.get_io_service().post(std::bind(&type::StatusUpdate, this, recvCmdTwo));
             break;
