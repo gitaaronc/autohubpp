@@ -156,8 +156,10 @@ Autohub::OnUpdateDevice(Json::Value json) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     json["event"] = "deviceUpdate";
     for (const auto& it : wspp_connections_) {
-        io_service_.post(std::bind(&Autohub::wsppEmit, this, it.first,
-                json.toStyledString()));
+        io_service_.post([ = ]{
+            wspp_server_.send(it.first, json.toStyledString(), 
+                    websocketpp::frame::opcode::text);});
+
     }
     std::ostringstream ss;
     Json::FastWriter fw;
@@ -168,14 +170,6 @@ Autohub::OnUpdateDevice(Json::Value json) {
 
         });
     }
-}
-
-// TODO: omit wsppEmit!!
-
-void
-Autohub::wsppEmit(websocketpp::connection_hdl hdl, const std::string& buf) {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
-    wspp_server_.send(hdl, buf, websocketpp::frame::opcode::text);
 }
 
 void

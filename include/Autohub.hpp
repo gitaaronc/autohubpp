@@ -26,7 +26,7 @@
  */
 
 #ifndef AUTOHUB_HPP
-#define	AUTOHUB_HPP
+#define AUTOHUB_HPP
 
 #include <memory>
 
@@ -55,73 +55,72 @@ using websocketpp::lib::condition_variable;
 #endif
 
 namespace Json {
-class Value;
+    class Value;
 }
 namespace ace {
-class DynamicLibrary;
-namespace insteon {
-class InsteonNetwork;
+    class DynamicLibrary;
+    namespace insteon {
+        class InsteonNetwork;
+    }
+
+    struct connection_data {
+        int session_id;
+        std::string name;
+        bool authenticated;
+    };
+
+    class Autohub {
+        typedef Autohub type;
+    public:
+        Autohub() = delete;
+        Autohub(boost::asio::io_service& io_service, YAML::Node root);
+        ~Autohub();
+        void burp(std::string burp); // plugin test
+        void start();
+        void stop();
+    private:
+        void wsppOnOpen(connection_hdl hdl);
+        void wsppOnClose(connection_hdl hdl);
+        void wsppOnMessage(connection_hdl hdl, wspp_server::message_ptr msg);
+        connection_data& get_data_from_hdl(connection_hdl hdl);
+
+        void InternalReceiveCommand(const std::string json);
+        void OnUpdateDevice(Json::Value json);
+
+        std::shared_ptr<DynamicLibrary> LoadLibrary(const std::string& path,
+                std::string errorString);
+        void TestPlugin();
+    private:
+        boost::asio::io_service& io_service_;
+        boost::asio::strand strand_hub_;
+        std::unique_ptr<insteon::InsteonNetwork> insteon_network_;
+
+        std::string yaml_config_file_;
+        YAML::Node root_node_;
+
+        wspp_server wspp_server_;
+        typedef std::map<connection_hdl, connection_data,
+        std::owner_less<connection_hdl>> con_list;
+        con_list wspp_connections_;
+        std::mutex wspp_connections_mutex_;
+        std::thread wspp_server_thread_;
+        int wspp_next_id_;
+
+        restbed::Service restbed_;
+        void startRestbed();
+        void restEvents(const std::shared_ptr<restbed::Session> session);
+        void restGetDevice(const std::shared_ptr<restbed::Session> session);
+        void restGetDevices(const std::shared_ptr<restbed::Session> session);
+        void restGetHtmlHandler(const std::shared_ptr<restbed::Session> session);
+        void restGetAuthToken(const std::shared_ptr<restbed::Session> session);
+        void restPostCommand(const std::shared_ptr<restbed::Session> session);
+        void restProcessJson(const std::shared_ptr<restbed::Session> session,
+                const restbed::Bytes& body);
+        std::map<std::string, std::shared_ptr<restbed::Session> > rest_sessions_;
+
+        std::map<std::string, std::shared_ptr<DynamicLibrary>> dynamicLibraryMap_;
+    };
 }
 
-struct connection_data {
-    int session_id;
-    std::string name;
-    bool authenticated;
-};
-
-class Autohub {
-    typedef Autohub type;
-public:
-    Autohub() = delete;
-    Autohub(boost::asio::io_service& io_service, YAML::Node root);
-    ~Autohub();
-    void burp(std::string burp); // plugin test
-    void start();
-    void stop();
-private:
-    void wsppOnOpen(connection_hdl hdl);
-    void wsppOnClose(connection_hdl hdl);
-    void wsppOnMessage(connection_hdl hdl, wspp_server::message_ptr msg);
-    connection_data& get_data_from_hdl(connection_hdl hdl);
-
-    void InternalReceiveCommand(const std::string json);
-    void OnUpdateDevice(Json::Value json);
-
-    std::shared_ptr<DynamicLibrary> LoadLibrary(const std::string& path,
-            std::string errorString);
-    void TestPlugin();
-private:
-    boost::asio::io_service& io_service_;
-    boost::asio::strand strand_hub_;
-    std::unique_ptr<insteon::InsteonNetwork> insteon_network_;
-    
-    std::string yaml_config_file_;
-    YAML::Node root_node_;
-    
-    wspp_server wspp_server_;
-    void wsppEmit(websocketpp::connection_hdl hdl, std::string const& buf);
-    typedef std::map<connection_hdl, connection_data,
-    std::owner_less<connection_hdl>> con_list;
-    con_list wspp_connections_;
-    std::mutex wspp_connections_mutex_;
-    std::thread wspp_server_thread_;
-    int wspp_next_id_;
-
-    restbed::Service restbed_;
-    void startRestbed();
-    void restEvents(const std::shared_ptr<restbed::Session> session);
-    void restGetDevice(const std::shared_ptr<restbed::Session> session);
-    void restGetDevices(const std::shared_ptr<restbed::Session> session);
-    void restGetHtmlHandler(const std::shared_ptr<restbed::Session> session);
-    void restGetAuthToken(const std::shared_ptr<restbed::Session> session);
-    void restPostCommand(const std::shared_ptr<restbed::Session> session);
-    void restProcessJson(const std::shared_ptr<restbed::Session> session,
-            const restbed::Bytes& body);
-    std::map<std::string, std::shared_ptr<restbed::Session> > rest_sessions_;
-
-    std::map<std::string, std::shared_ptr<DynamicLibrary>> dynamicLibraryMap_;
-};
-}
-
-#endif	/* AUTOHUB_HPP */
+#endif /* AUTOHUB_HPP */
 

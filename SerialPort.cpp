@@ -137,7 +137,10 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
     std::vector<unsigned char> data;
     data.resize(512);
 
-    serial_port_->cancel();
+    boost::system::error_code ec;
+    serial_port_->cancel(ec);
+    utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
+
     std::future<std::size_t> read_result = serial_port_->async_read_some(
             boost::asio::buffer(data), boost::asio::use_future);
     std::future_status status;
@@ -147,7 +150,10 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
             utils::Logger::Instance().Debug("%s\n\t  - timeout waiting for data, "
                     "%d ms timeout expired.\n"
                     "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
+            
             serial_port_->cancel();
+            utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
+            
             break;
         } else if (status == std::future_status::ready) {
             rVal = read_result.get();
