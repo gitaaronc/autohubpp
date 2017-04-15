@@ -36,12 +36,12 @@ namespace ace {
             unsigned char address_high_ : 8;
             unsigned char address_middle_ : 8;
             unsigned char address_low_ : 8;
-            void SetAddress(int value){
+            void setAddress(int value){
                 address_high_ = value >> 16 & 0xFF;
                 address_middle_ = value >> 8 & 0xFF;
                 address_low_ = value & 0xFF;
             }
-            int GetAddress(){
+            int getAddress(){
                 return address_high_ << 16 | address_middle_ << 8 | address_low_;
             }
         };
@@ -52,12 +52,12 @@ namespace ace {
             unsigned char firmware_version : 8;
             InsteonIdentity()
             : category(0), sub_category(0), firmware_version(0){}
-            void SetIdentity(int value){
+            void setIdentity(int value){
                 category = value >> 16 & 0xFF;
                 sub_category = value >> 8 & 0xFF;
                 firmware_version = value & 0xFF;
             }
-            int GetIdentity(){
+            int getIdentity(){
                 return category << 16 | sub_category << 8 | firmware_version;
             }
         };

@@ -76,37 +76,37 @@ namespace ace {
                     YAML::Node config);
             ~MessageProcessor();
 
-            bool Connect();
-            void ProcessData();
-            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
+            bool connect();
+            void processData();
+            EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
                     bool retry_on_nak = true);
-            EchoStatus TrySendReceive(const std::vector<unsigned char>&
+            EchoStatus trySendReceive(const std::vector<unsigned char>&
                     send_buffer, bool retry_on_nak, unsigned char receive_message_id,
                     PropertyKeys& properties);
 
             void set_message_handler(msg_handler handler);
         protected:
         private:
-            std::string ByteArrayToStringStream(const std::vector<unsigned char>&
+            std::string byteArrayToStringStream(const std::vector<unsigned char>&
                     data,
                     int offset, int count);
 
-            EchoStatus ProcessEcho(int echo_length);
-            bool ProcessEcho(const std::vector<unsigned char>& message_buffer,
+            EchoStatus processEcho(int echo_length);
+            bool processEcho(const std::vector<unsigned char>& message_buffer,
                     int offset, int& count);
-            bool ProcessMessage(const std::vector<unsigned char>& read_buffer,
+            bool processMessage(const std::vector<unsigned char>& read_buffer,
                     int offset,
                     int& count);
 
-            void ReadData(std::vector<unsigned char>& return_buffer,
+            void readData(std::vector<unsigned char>& return_buffer,
                     int bytes_expected,
                     bool is_echo);
 
-            EchoStatus Send(std::vector<unsigned char> send_buffer,
+            EchoStatus send(std::vector<unsigned char> send_buffer,
                     bool retry_on_nak, int echo_length);
-            EchoStatus TrySend(const std::vector<unsigned char>& send_buffer,
+            EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
                     bool retry_on_nak, int echo_length);
-            void UpdateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
+            void updateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 
             std::unique_ptr<io::IOPort> io_port_;
             boost::asio::io_service& io_service_;

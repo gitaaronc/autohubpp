@@ -132,7 +132,7 @@ InsteonDeviceImpl::CommandAckProcessor(
         sentCmdOne = pending_command_;
     }
     max_retries_ = 3;
-    device_->AckOfDirectCommand(sentCmdOne, recvCmdOne, recvCmdTwo);
+    device_->ackOfDirectCommand(sentCmdOne, recvCmdOne, recvCmdTwo);
     ClearPendingCommand();
 }
 
@@ -142,7 +142,7 @@ InsteonDeviceImpl::TryCommandInternal(unsigned char command_one,
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::vector<unsigned char> send_buffer;
     GetStandardMessage(send_buffer, command_one, command_two);
-    EchoStatus status = msgProc_->TrySend(send_buffer);
+    EchoStatus status = msgProc_->trySend(send_buffer);
     return TryProcessEcho(status);
 }
 
@@ -182,7 +182,7 @@ InsteonDeviceImpl::TrySendReceive(
         std::vector<unsigned char> send_buffer,
         bool retry_on_nak, unsigned char receive_message_id,
         PropertyKeys& properties) {
-    return msgProc_->TrySendReceive(send_buffer, retry_on_nak,
+    return msgProc_->trySendReceive(send_buffer, retry_on_nak,
             receive_message_id, properties);
 }
 

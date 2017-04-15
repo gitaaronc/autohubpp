@@ -51,47 +51,47 @@ namespace ace {
             ~InsteonController();
         public:
 
-            int GetAddress();
+            int getAddress();
 
-            void EnterLinkMode(InsteonLinkMode mode, unsigned char group);
+            void enterLinkMode(InsteonLinkMode mode, unsigned char group);
 
-            void CancelLinkMode();
+            void cancelLinkMode();
 
-            void GroupCommand(InsteonControllerGroupCommands command,
+            void groupCommand(InsteonControllerGroupCommands command,
                     unsigned char group);
 
-            void GroupCommand(InsteonControllerGroupCommands command,
+            void groupCommand(InsteonControllerGroupCommands command,
                     unsigned char group, unsigned char value);
-            void GetDatabaseRecords(unsigned char one, unsigned char two);
-            void GetIMConfiguration();
+            void getDatabaseRecords(unsigned char one, unsigned char two);
+            void getIMConfiguration();
 
-            bool EnableMonitorMode();
+            bool enableMonitorMode();
 
-            void OnMessage(std::shared_ptr<InsteonMessage>
+            void onMessage(std::shared_ptr<InsteonMessage>
                     insteon_message);
             bool is_loading_database_;
         private:
-            void InternalSend(const std::vector<unsigned char>& buffer);
+            void internalSend(const std::vector<unsigned char>& buffer);
 
-            void OnTimerEvent();
+            void onTimerEvent();
 
-            void OnDeviceLinked(std::shared_ptr<InsteonDevice>& device);
+            void onDeviceLinked(std::shared_ptr<InsteonDevice>& device);
 
-            void OnDeviceUnlinked(std::shared_ptr<InsteonDevice>& device);
+            void onDeviceUnlinked(std::shared_ptr<InsteonDevice>& device);
 
-            void ProcessDatabaseRecord(
+            void processDatabaseRecord(
                     std::shared_ptr<insteon::InsteonMessage> im);
 
-            void SetAddress(int address);
+            void setAddress(int address);
 
-            bool TryEnterLinkMode(InsteonLinkMode mode, unsigned char group);
+            bool tryEnterLinkMode(InsteonLinkMode mode, unsigned char group);
 
-            bool TryCancelLinkMode();
+            bool tryCancelLinkMode();
 
-            bool TryGroupCommand(InsteonControllerGroupCommands command,
+            bool tryGroupCommand(InsteonControllerGroupCommands command,
                     unsigned char group);
 
-            bool TryGroupCommand(InsteonControllerGroupCommands command,
+            bool tryGroupCommand(InsteonControllerGroupCommands command,
                     unsigned char group, unsigned char value);
 
             std::unique_ptr<detail::InsteonController_impl> pImpl_;

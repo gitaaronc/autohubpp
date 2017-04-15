@@ -115,13 +115,13 @@ InsteonNetwork::saveDevices() {
 bool
 InsteonNetwork::connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (!msg_proc_->Connect())
+    if (!msg_proc_->connect())
         return false;
 
     loadDevices();
 
     if (config_["PLM"]["enable_monitor_mode"].as<bool>(false))
-        if (insteon_controller_->EnableMonitorMode())
+        if (insteon_controller_->enableMonitorMode())
             utils::Logger::Instance().Info("PLM monitor mode enabled "
                 "successfully!");
 
@@ -129,7 +129,7 @@ InsteonNetwork::connect() {
     if (config_["PLM"]["load_aldb"].as<bool>(true)) {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from PLM",
                 FUNCTION_NAME_CSTR);
-        insteon_controller_->GetDatabaseRecords(0x1F, 0xF8);
+        insteon_controller_->getDatabaseRecords(0x1F, 0xF8);
     }
 
     // wait here until the database is loaded
@@ -145,7 +145,7 @@ InsteonNetwork::connect() {
         for (const auto& it : device_list_) {
             if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled_"].as<bool>(false)) {
-                io_strand_.post(std::bind(&InsteonDevice::Command, it.second,
+                io_strand_.post(std::bind(&InsteonDevice::command, it.second,
                         InsteonDeviceCommand::ALDBReadWrite, 0x00));
             }
         }
@@ -158,7 +158,7 @@ InsteonNetwork::connect() {
         for (const auto& it : device_list_) {
             if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled_"].as<bool>(false)) {
-                io_strand_.post(std::bind(&InsteonDevice::Command, it.second,
+                io_strand_.post(std::bind(&InsteonDevice::command, it.second,
                         InsteonDeviceCommand::LightStatusRequest, 0x02));
             }
         }
@@ -245,7 +245,7 @@ InsteonNetwork::internalReceiveCommand(std::string json) {
     command_two = root.get("command_two", 0).asInt();
     device = getDevice(std::stoi(device_id));
     if (device) {
-        device->InternalReceiveCommand(command, command_two);
+        device->internalReceiveCommand(command, command_two);
     } else {
         utils::Logger::Instance().Warning("Received command for device that"
                 " doesn't exist.");
@@ -305,14 +305,14 @@ InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
             device->OnMessage(im);
             //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         } else if (im->message_type_ == InsteonMessageType::SetButtonPressed) {
-            insteon_controller_->OnMessage(im);
+            insteon_controller_->onMessage(im);
         } else {
             device = addDevice(insteon_address);
             device->OnMessage(im);
             //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         }
     } else { // route to controller/PLM
-        insteon_controller_->OnMessage(im);
+        insteon_controller_->onMessage(im);
     }
 
 }

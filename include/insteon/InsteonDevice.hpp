@@ -83,18 +83,18 @@ namespace ace {
             std::string device_name(); // returns the name assigned to this device
             bool device_disabled();
 
-            bool Command(InsteonDeviceCommand command, unsigned char command_two);
-            void InternalReceiveCommand(std::string command, unsigned char command_two);
+            bool command(InsteonDeviceCommand command, unsigned char command_two);
+            void internalReceiveCommand(std::string command, unsigned char command_two);
             void writeDeviceProperty(const std::string key, const unsigned int value);
             unsigned char readDeviceProperty(const std::string key);
 
         protected:
-            void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
+            void getExtendedMessage(std::vector<unsigned char>& send_buffer,
                     unsigned char cmd1, unsigned char cmd2);
-            bool TryCommand(InsteonDeviceCommand command, unsigned char value);
-            bool TryGetExtendedInformation();
-            bool TryReadWriteALDB();
-            void StatusUpdate(unsigned char status);
+            bool tryCommand(InsteonDeviceCommand command, unsigned char value);
+            bool tryGetExtendedInformation();
+            bool tryReadWriteALDB();
+            void statusUpdate(unsigned char status);
             //boost::asio::io_service& io_service_;
             boost::asio::io_service::strand io_strand_;
 
@@ -104,10 +104,10 @@ namespace ace {
             friend class detail::InsteonDeviceImpl;
             std::unique_ptr<detail::InsteonDeviceImpl> pImpl;
 
-            std::function<void(Json::Value) > OnStatusUpdate;
+            std::function<void(Json::Value) > onStatusUpdate;
 
             InsteonMessageType last_action_;
-            void AckOfDirectCommand(unsigned char sentCmdOne, unsigned char recvCmdOne,
+            void ackOfDirectCommand(unsigned char sentCmdOne, unsigned char recvCmdOne,
                     unsigned char recvCmdTwo);
 
             void device_name(std::string device_name);
@@ -116,7 +116,7 @@ namespace ace {
             PropertyKeys device_properties_;
             std::mutex property_lock_;
 
-            void LoadProperties();
+            void loadProperties();
             YAML::Node config_;
         };
 

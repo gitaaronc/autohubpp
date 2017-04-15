@@ -70,7 +70,7 @@ pImpl_(new detail::InsteonController_impl) {
     pImpl_->timer_ = std::move(
             std::unique_ptr<system::Timer>(new system::Timer(io_service)));
     pImpl_->timer_->SetTimerCallback(
-            std::bind(&InsteonController::OnTimerEvent, this));
+            std::bind(&InsteonController::onTimerEvent, this));
     pImpl_->timer_->RunAsync();
     pImpl_->timer_->Stop();
 }
@@ -80,21 +80,21 @@ InsteonController::~InsteonController() {
 }
 
 void
-InsteonController::SetAddress(int address) {
+InsteonController::setAddress(int address) {
     pImpl_->insteon_address_.address_high_ = address >> 16 & 0xFF;
     pImpl_->insteon_address_.address_middle_ = address >> 8 & 0xFF;
     pImpl_->insteon_address_.address_low_ = address & 0xFF;
 }
 
 int
-InsteonController::GetAddress() {
+InsteonController::getAddress() {
     return pImpl_->insteon_address_.address_high_ << 16 |
             pImpl_->insteon_address_.address_middle_ << 8 |
             pImpl_->insteon_address_.address_low_;
 }
 
 void
-InsteonController::GetDatabaseRecords(unsigned char one, unsigned char two) {
+InsteonController::getDatabaseRecords(unsigned char one, unsigned char two) {
     is_loading_database_ = true;
     if ((one == 0x1C) && (two == 0x00)) {
         is_loading_database_ = false;
@@ -108,39 +108,39 @@ InsteonController::GetDatabaseRecords(unsigned char one, unsigned char two) {
     //std::vector<unsigned char> send_buffer = {0x69};
     //insteon_network_->io_service_.post(std::bind(
     //        &type::InternalSend, this, send_buffer));
-    insteon_network_->msg_proc_->TrySend(send_buffer, false);
+    insteon_network_->msg_proc_->trySend(send_buffer, false);
 }
 
 void
-InsteonController::GetIMConfiguration() {
+InsteonController::getIMConfiguration() {
     std::vector<unsigned char> send_buffer = {0x73};
-    insteon_network_->msg_proc_->TrySend(send_buffer);
+    insteon_network_->msg_proc_->trySend(send_buffer);
 }
 
-bool InsteonController::EnableMonitorMode() {
+bool InsteonController::enableMonitorMode() {
     std::vector<unsigned char> send_buffer = {0x6B, 0x20};
-    if (insteon_network_->msg_proc_->TrySend(send_buffer) == EchoStatus::ACK)
+    if (insteon_network_->msg_proc_->trySend(send_buffer) == EchoStatus::ACK)
         return true;
     return false;
 }
 
 void
-InsteonController::EnterLinkMode(InsteonLinkMode mode, unsigned char group) {
-    if (!TryEnterLinkMode(mode, group)) {
+InsteonController::enterLinkMode(InsteonLinkMode mode, unsigned char group) {
+    if (!tryEnterLinkMode(mode, group)) {
         return; // TODO add exception handling
     }
 }
 
 void
-InsteonController::InternalSend(const std::vector<unsigned char>& buffer) {
-    insteon_network_->msg_proc_->TrySend(buffer);
+InsteonController::internalSend(const std::vector<unsigned char>& buffer) {
+    insteon_network_->msg_proc_->trySend(buffer);
 }
 
 bool
-InsteonController::TryEnterLinkMode(InsteonLinkMode mode, unsigned char group) {
+InsteonController::tryEnterLinkMode(InsteonLinkMode mode, unsigned char group) {
     pImpl_->LinkingMode_ = mode;
     std::vector<unsigned char> send_buffer = {0x64, (unsigned char) mode, group};
-    if (insteon_network_->msg_proc_->TrySend(send_buffer) != insteon::EchoStatus
+    if (insteon_network_->msg_proc_->trySend(send_buffer) != insteon::EchoStatus
             ::ACK) {
         return false;
     }
@@ -150,74 +150,74 @@ InsteonController::TryEnterLinkMode(InsteonLinkMode mode, unsigned char group) {
 }
 
 void
-InsteonController::CancelLinkMode() {
-    if (!TryCancelLinkMode()) {
+InsteonController::cancelLinkMode() {
+    if (!tryCancelLinkMode()) {
         return; // TODO add exception handling
     }
 }
 
 bool
-InsteonController::TryCancelLinkMode() {
+InsteonController::tryCancelLinkMode() {
     pImpl_->timer_->Stop();
     pImpl_->IsInLinkingMode_ = false;
     pImpl_->LinkingMode_ = InsteonLinkMode::Contoller;
     std::vector<unsigned char> send_buffer = {0x65};
-    return insteon_network_->msg_proc_->TrySend(send_buffer) ==
+    return insteon_network_->msg_proc_->trySend(send_buffer) ==
             insteon::EchoStatus::ACK;
 }
 
 void
-InsteonController::GroupCommand(InsteonControllerGroupCommands command,
+InsteonController::groupCommand(InsteonControllerGroupCommands command,
         unsigned char group) {
     unsigned char value = 0;
     if (command == InsteonControllerGroupCommands::StopDimming)
         return; // Add exception handling
     if (command == InsteonControllerGroupCommands::On)
         value = 0xFF;
-    GroupCommand(command, group, value);
+    groupCommand(command, group, value);
 }
 
 void
-InsteonController::GroupCommand(InsteonControllerGroupCommands command,
+InsteonController::groupCommand(InsteonControllerGroupCommands command,
         unsigned char group, unsigned char value) {
     unsigned char cmd = (unsigned char) command;
     std::vector<unsigned char> send_buffer = {0x61, group, cmd, value};
-    insteon_network_->msg_proc_->TrySend(send_buffer);
+    insteon_network_->msg_proc_->trySend(send_buffer);
 }
 
 bool
-InsteonController::TryGroupCommand(InsteonControllerGroupCommands command,
+InsteonController::tryGroupCommand(InsteonControllerGroupCommands command,
         unsigned char group) {
     return false;
 }
 
 bool
-InsteonController::TryGroupCommand(InsteonControllerGroupCommands command,
+InsteonController::tryGroupCommand(InsteonControllerGroupCommands command,
         unsigned char group, unsigned char value) {
     return false;
 }
 
 void
-InsteonController::OnTimerEvent() {
+InsteonController::onTimerEvent() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     pImpl_->IsInLinkingMode_ = false;
     pImpl_->timer_->Stop();
 }
 
 void
-InsteonController::OnDeviceLinked(std::shared_ptr<
+InsteonController::onDeviceLinked(std::shared_ptr<
         InsteonDevice>& device) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
 void
-InsteonController::OnDeviceUnlinked(std::shared_ptr<
+InsteonController::onDeviceUnlinked(std::shared_ptr<
         InsteonDevice>& device) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
 void
-InsteonController::OnMessage(
+InsteonController::onMessage(
         std::shared_ptr<insteon::InsteonMessage> insteon_message) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
@@ -233,9 +233,9 @@ InsteonController::OnMessage(
             pImpl_->IsInLinkingMode_ = false;
 
             if (pImpl_->LinkingMode_ != InsteonLinkMode::Delete)
-                OnDeviceLinked(device);
+                onDeviceLinked(device);
             else
-                OnDeviceUnlinked(device);
+                onDeviceUnlinked(device);
         }
             break;
         case insteon::InsteonMessageType::GetIMInfo:
@@ -256,7 +256,7 @@ InsteonController::OnMessage(
         case insteon::InsteonMessageType::DeviceLinkRecord:
         case insteon::InsteonMessageType::ALDBRecord:
             utils::Logger::Instance().Info("ALDB record received");
-            ProcessDatabaseRecord(insteon_message);
+            processDatabaseRecord(insteon_message);
             break;
         default:
             utils::Logger::Instance().Info("%s\n\t - unexpected message: {%s}\n",
@@ -270,7 +270,7 @@ InsteonController::OnMessage(
 }
 
 void
-InsteonController::ProcessDatabaseRecord(
+InsteonController::processDatabaseRecord(
         std::shared_ptr<insteon::InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int address = 0;
@@ -301,7 +301,7 @@ InsteonController::ProcessDatabaseRecord(
         temp -= 8;
         one = (temp >> 8) & 0xFF;
         two = temp & 0xFF;
-        GetDatabaseRecords(one, two);
+        getDatabaseRecords(one, two);
     } else {
         is_loading_database_ = false;
         insteon_network_->cv_load_db_.notify_one();
