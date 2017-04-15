@@ -227,7 +227,7 @@ InsteonController::OnMessage(
             insteon_address = insteon_message->properties_.find("address")->second;
 
             std::shared_ptr<InsteonDevice> device;
-            device = insteon_network_->AddDevice(insteon_address);
+            device = insteon_network_->addDevice(insteon_address);
 
             pImpl_->timer_->Stop();
             pImpl_->IsInLinkingMode_ = false;
@@ -276,7 +276,7 @@ InsteonController::ProcessDatabaseRecord(
     int address = 0;
     address = im->properties_["link_address"];
     if (address > 0)
-        insteon_network_->AddDevice(address);
+        insteon_network_->addDevice(address);
     bool get_next = false;
     int has_flags = im->properties_["link_record_flags"];
     get_next = has_flags > 0;

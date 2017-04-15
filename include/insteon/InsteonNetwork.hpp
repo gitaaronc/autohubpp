@@ -56,31 +56,31 @@ public:
     ~InsteonNetwork();
 
     void
-    Close() {
+    close() {
     };
 
-    bool Connect();
-    void LoadDevices();
-    void SaveDevices();
-    Json::Value SerializeJson(int device_id = 0);
-    void InternalReceiveCommand(std::string json);
+    bool connect();
+    void loadDevices();
+    void saveDevices();
+    Json::Value serializeJson(int device_id = 0);
+    void internalReceiveCommand(std::string json);
     void set_update_handler(
             std::function<void(Json::Value json) > callback);
 protected:
     friend class InsteonController;
     // adds a device to insteon_device_list
-    std::shared_ptr<InsteonDevice> AddDevice(int insteon_address);
-    std::shared_ptr<InsteonDevice> GetDevice(int insteon_address);
+    std::shared_ptr<InsteonDevice> addDevice(int insteon_address);
+    std::shared_ptr<InsteonDevice> getDevice(int insteon_address);
 
     void
-    Disconnect() {
+    disconnect() {
     };
 
     bool
-    DeviceExists(int insteon_address);
+    deviceExists(int insteon_address);
 
-    void OnMessage(std::shared_ptr<InsteonMessage> im);
-    void OnUpdateDevice(Json::Value json);
+    void onMessage(std::shared_ptr<InsteonMessage> im);
+    void onUpdateDevice(Json::Value json);
 
     std::mutex mx_load_db_;
     std::condition_variable cv_load_db_;
@@ -94,7 +94,7 @@ private:
     // pointer to message processor
     std::shared_ptr<MessageProcessor> msg_proc_;
     // pointer to callback function, executed when updates occur
-    std::function<void(Json::Value) > OnUpdate;
+    std::function<void(Json::Value) > on_update;
     
     YAML::Node config_;
 };

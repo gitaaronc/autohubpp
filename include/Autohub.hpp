@@ -84,8 +84,8 @@ namespace ace {
         void wsppOnMessage(connection_hdl hdl, wspp_server::message_ptr msg);
         connection_data& get_data_from_hdl(connection_hdl hdl);
 
-        void InternalReceiveCommand(const std::string json);
-        void OnUpdateDevice(Json::Value json);
+        void internalReceiveCommand(const std::string json);
+        void onUpdateDevice(Json::Value json);
 
         std::shared_ptr<DynamicLibrary> LoadLibrary(const std::string& path,
                 std::string errorString);

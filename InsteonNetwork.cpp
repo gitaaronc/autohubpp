@@ -48,7 +48,7 @@ InsteonNetwork::InsteonNetwork(boost::asio::io_service& io_service,
 : io_service_(io_service), io_strand_(io_service), config_(config),
 msg_proc_(new MessageProcessor(io_service, config["PLM"])) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    msg_proc_->set_message_handler(std::bind(&type::OnMessage, this,
+    msg_proc_->set_message_handler(std::bind(&type::onMessage, this,
             std::placeholders::_1));
     insteon_controller_ = std::move(std::unique_ptr<InsteonController>(
             new InsteonController(this, io_service)));
@@ -70,7 +70,7 @@ InsteonNetwork::~InsteonNetwork() {
  */
 
 std::shared_ptr<InsteonDevice>
-InsteonNetwork::AddDevice(int insteon_address) {
+InsteonNetwork::addDevice(int insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
     auto it = device_list_.find(insteon_address);
@@ -82,7 +82,7 @@ InsteonNetwork::AddDevice(int insteon_address) {
             ["DEVICES"][ace::utils::int_to_hex(insteon_address)]);
 
     device->set_message_proc(msg_proc_);
-    device->set_update_handler(std::bind(&type::OnUpdateDevice,
+    device->set_update_handler(std::bind(&type::onUpdateDevice,
             this, std::placeholders::_1));
 
     return device_list_.insert(InsteonDeviceMapPair(insteon_address, device))
@@ -96,15 +96,15 @@ InsteonNetwork::AddDevice(int insteon_address) {
  * Loads devices from configuration object(YAML::Node)
  */
 void
-InsteonNetwork::LoadDevices() {
+InsteonNetwork::loadDevices() {
     YAML::Node device = config_["DEVICES"];
     for (auto it = device.begin(); it != device.end(); ++it) {
-        AddDevice(it->first.as<int>(0));
+        addDevice(it->first.as<int>(0));
     }
 }
 
 void
-InsteonNetwork::SaveDevices() {
+InsteonNetwork::saveDevices() {
     utils::Logger::Instance().Debug("%s\n\t  - %d devices total",
             FUNCTION_NAME_CSTR, device_list_.size());
     for (const auto& it : device_list_) {
@@ -113,12 +113,12 @@ InsteonNetwork::SaveDevices() {
 }
 
 bool
-InsteonNetwork::Connect() {
+InsteonNetwork::connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (!msg_proc_->Connect())
         return false;
 
-    LoadDevices();
+    loadDevices();
 
     if (config_["PLM"]["enable_monitor_mode"].as<bool>(false))
         if (insteon_controller_->EnableMonitorMode())
@@ -177,7 +177,7 @@ InsteonNetwork::Connect() {
  * @return bool True/False
  */
 bool
-InsteonNetwork::DeviceExists(int insteon_address) {
+InsteonNetwork::deviceExists(int insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     auto it = device_list_.find(insteon_address);
     return it != device_list_.end();
@@ -192,7 +192,7 @@ InsteonNetwork::DeviceExists(int insteon_address) {
  * @return Returns a ptr to shared<InsteonDevice> object.
  */
 std::shared_ptr<InsteonDevice>
-InsteonNetwork::GetDevice(int insteon_address) {
+InsteonNetwork::getDevice(int insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::shared_ptr<InsteonDevice>device;
     auto it = device_list_.find(insteon_address);
@@ -211,7 +211,7 @@ InsteonNetwork::GetDevice(int insteon_address) {
  * @return 
  */
 Json::Value
-InsteonNetwork::SerializeJson(int device_id) {
+InsteonNetwork::serializeJson(int device_id) {
     Json::Value root;
     if (device_id == 0) {
         Json::Value devices;
@@ -221,14 +221,14 @@ InsteonNetwork::SerializeJson(int device_id) {
         root["devices"] = devices;
         root["event"] = "deviceList";
     } else {
-        root["device"] = GetDevice(device_id)->SerializeJson();
+        root["device"] = getDevice(device_id)->SerializeJson();
         root["event"] = "deviceUpdate";
     }
     return root;
 }
 
 void
-InsteonNetwork::InternalReceiveCommand(std::string json) {
+InsteonNetwork::internalReceiveCommand(std::string json) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     Json::Reader reader;
     Json::Value root;
@@ -243,7 +243,7 @@ InsteonNetwork::InternalReceiveCommand(std::string json) {
 
     command = root.get("command", "").asString();
     command_two = root.get("command_two", 0).asInt();
-    device = GetDevice(std::stoi(device_id));
+    device = getDevice(std::stoi(device_id));
     if (device) {
         device->InternalReceiveCommand(command, command_two);
     } else {
@@ -259,9 +259,9 @@ InsteonNetwork::InternalReceiveCommand(std::string json) {
  * @param json
  */
 void
-InsteonNetwork::OnUpdateDevice(Json::Value json) {
-    if (OnUpdate)
-        io_service_.post([ = ]{OnUpdate(json);});
+InsteonNetwork::onUpdateDevice(Json::Value json) {
+    if (on_update)
+        io_service_.post([ = ]{on_update(json);});
 }
 
 /**
@@ -271,7 +271,7 @@ InsteonNetwork::OnUpdateDevice(Json::Value json) {
  * @param iMsg
  */
 void
-InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
+InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
 
@@ -291,8 +291,8 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
     // or devices found by linking.
     if (im->properties_.count("ext_link_address")) {
         insteon_address = im->properties_["ext_link_address"];
-        if (!DeviceExists(insteon_address)) {
-            AddDevice(insteon_address);
+        if (!deviceExists(insteon_address)) {
+            addDevice(insteon_address);
         }
     }
 
@@ -300,14 +300,14 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
     if (im->properties_.count("from_address")) { // route to device
         std::shared_ptr<InsteonDevice>device;
         insteon_address = im->properties_["from_address"];
-        if (DeviceExists(insteon_address)) {
-            device = GetDevice(insteon_address);
+        if (deviceExists(insteon_address)) {
+            device = getDevice(insteon_address);
             device->OnMessage(im);
             //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         } else if (im->message_type_ == InsteonMessageType::SetButtonPressed) {
             insteon_controller_->OnMessage(im);
         } else {
-            device = AddDevice(insteon_address);
+            device = addDevice(insteon_address);
             device->OnMessage(im);
             //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         }
@@ -326,7 +326,7 @@ InsteonNetwork::OnMessage(std::shared_ptr<InsteonMessage> im) {
 void
 InsteonNetwork::set_update_handler(
         std::function<void(Json::Value) > callback) {
-    OnUpdate = callback;
+    on_update = callback;
 }
 } // namespace insteon
 } // namespace ace

@@ -112,12 +112,12 @@ Autohub::wsppOnMessage(connection_hdl hdl,
 
     if (event.compare("getDeviceList") == 0) {
         Json::Value root;
-        root = insteon_network_->SerializeJson();
+        root = insteon_network_->serializeJson();
         utils::Logger::Instance().Info(root.toStyledString().c_str());
         msg->set_payload(root.toStyledString());
         wspp_server_.send(hdl, msg);
     } else if (event.compare("device") == 0) {
-        strand_hub_.post(std::bind(&type::InternalReceiveCommand, this,
+        strand_hub_.post(std::bind(&type::internalReceiveCommand, this,
                 ss.str()));
     }
     //TestPlugin();
@@ -139,7 +139,7 @@ Autohub::burp(std::string burp) {
 }
 
 void
-Autohub::InternalReceiveCommand(const std::string json) {
+Autohub::internalReceiveCommand(const std::string json) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     for (const auto& it : dynamicLibraryMap_) {
         std::shared_ptr<DynamicLibrary> ptr = it.second;
@@ -148,11 +148,11 @@ Autohub::InternalReceiveCommand(const std::string json) {
                     ptr->get_object(), json));
         }
     }
-    insteon_network_->InternalReceiveCommand(json);
+    insteon_network_->internalReceiveCommand(json);
 }
 
 void
-Autohub::OnUpdateDevice(Json::Value json) {
+Autohub::onUpdateDevice(Json::Value json) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     json["event"] = "deviceUpdate";
     for (const auto& it : wspp_connections_) {
@@ -203,7 +203,7 @@ Autohub::LoadLibrary(const std::string& path, std::string errorString) {
 void
 Autohub::stop() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    insteon_network_->SaveDevices();
+    insteon_network_->saveDevices();
     wspp_server_.stop_listening();
     {
         std::lock_guard<std::mutex>lock(wspp_connections_mutex_);
@@ -252,9 +252,9 @@ Autohub::start() {
             std::bind(&wspp_server::run,
             &wspp_server_)));
 
-    insteon_network_->set_update_handler(bind(&type::OnUpdateDevice, this,
+    insteon_network_->set_update_handler(bind(&type::onUpdateDevice, this,
             std::placeholders::_1));
-    if (!insteon_network_->Connect()) {
+    if (!insteon_network_->connect()) {
         stop();
         return;
     }
@@ -341,7 +341,7 @@ Autohub::restGetDevice(const std::shared_ptr<restbed::Session> session) {
     int device_id = 0;
     device_id = std::stoi(device);
     Json::Value root;
-    root = insteon_network_->SerializeJson(device_id);
+    root = insteon_network_->serializeJson(device_id);
     const std::multimap<std::string, std::string> headers{
         { "Content-Type", "text/html"},
         { "Cache-Control", "no-store"},
@@ -355,7 +355,7 @@ Autohub::restGetDevice(const std::shared_ptr<restbed::Session> session) {
 void
 Autohub::restGetDevices(const std::shared_ptr<restbed::Session> session) {
     Json::Value root;
-    root = insteon_network_->SerializeJson();
+    root = insteon_network_->serializeJson();
     const std::multimap<std::string, std::string> headers{
         { "Content-Type", "text/html"},
         { "Cache-Control", "no-store"},
@@ -449,7 +449,7 @@ Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
                 reader.getFormattedErrorMessages().c_str());
         return;
     }
-    strand_hub_.post(std::bind(&type::InternalReceiveCommand, this,
+    strand_hub_.post(std::bind(&type::internalReceiveCommand, this,
             test));
     utils::Logger::Instance().Debug(root.toStyledString().c_str());
 }
