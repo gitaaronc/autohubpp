@@ -117,9 +117,8 @@
           <standard>10</standard>
         </cTool>
         <ccTool>
-          <standard>8</standard>
+          <standard>11</standard>
           <incDir>
-            <pElem>/usr/include/yaml-cpp</pElem>
             <pElem>/usr/include/websocketpp</pElem>
             <pElem>/usr/include/restbed</pElem>
           </incDir>
@@ -129,9 +128,6 @@
           </preprocessorList>
         </ccTool>
         <linkerTool>
-          <linkerAddLib>
-            <pElem>/usr/local/lib</pElem>
-          </linkerAddLib>
           <linkerLibItems>
             <linkerLibLibItem>boost_system</linkerLibLibItem>
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
