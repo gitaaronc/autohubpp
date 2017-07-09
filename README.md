@@ -35,12 +35,14 @@ You must have all the the required dependencies to compile autohubpp.<br/>
 First ensure you have at least version 1.55 of the boost libraries installed.<br/>
 <b>apt-get install libboost-all-dev</b><br/>
 
+You'll also need yaml-cpp<br/>
+<b>apt-get install libyaml-cpp-dev</b><br/>
+
 It's recommended to create a dev directory and clone the following repositories into it.
 ```
 -dev
 --restbed
 --websocketpp
---yaml-cpp
 --autohubpp
 ```
 <b>RESTBED</b><br/>
@@ -49,10 +51,6 @@ Follow the instructions for compiling and installing restbed: https://github.com
 
 <b>WEBSOCKETPP</b><br/>
 git clone https://github.com/gitaaronc/websocketpp.git<br/>
-
-<b>YAML-CPP</b><br/>
-https://github.com/gitaaronc/yaml-cpp.git
-Follow the instructions for compiling provided in theyaml-cpp repo.<br/>
 
 <b>AUTOHUBPP</b><br/>
 Clone this repository.
@@ -66,7 +64,6 @@ Clone this repository.
  I create a softlink inside of /usr/include<br />
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
  ln -s /{GIT_REPO_ROOT}/restbed restbed<br />
- ln -s /{GIT_REPO_ROOT}/yaml-cpp yaml-cpp<br />
  Once you have the dependencies in place and the symbolic links created you can run make.<br />
  The libraries created by the above dependencies will require placement into your /usr/lib folder.</br>
  Rather than moving or copying the required libraries, I create symbolic links using the above method.<br/>
