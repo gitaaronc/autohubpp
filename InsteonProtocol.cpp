@@ -180,6 +180,10 @@ InsteonProtocol::processMessage(const std::vector<unsigned char>& data,
             return true;
         case 0x73: // get insteon modem configuration
             return getIMConfiguration(data, offset, count, insteon_message);
+        case 0x75:
+            if (data.size() < offset + count + 2)
+                return false;
+            return true;
     }
     return false;
 }
