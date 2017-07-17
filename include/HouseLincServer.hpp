@@ -45,7 +45,7 @@ private:
                 [this, self](boost::system::error_code ec, std::size_t length) {
                     if (!ec) {
                         std::vector<unsigned char> data;
-                        for(int i = 1; i < length -1; i++){
+                        for(int i = 1; i < length; i++){
                                 data.push_back(data_[i]);
                         }
                         on_receive_(data);
