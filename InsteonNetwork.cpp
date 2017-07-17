@@ -328,5 +328,14 @@ InsteonNetwork::set_update_handler(
         std::function<void(Json::Value) > callback) {
     on_update = callback;
 }
+
+void
+InsteonNetwork::houseLincRx(std::vector<unsigned char> buffer){
+    msg_proc_->trySend(buffer, false);
+}
+
+void InsteonNetwork::houseLincTx(std::vector<unsigned char> buffer){
+    //houseLincTx_;
+}
 } // namespace insteon
 } // namespace ace

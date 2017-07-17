@@ -64,6 +64,8 @@ public:
     void saveDevices();
     Json::Value serializeJson(int device_id = 0);
     void internalReceiveCommand(std::string json);
+    void houseLincRx(std::vector<unsigned char> buffer);
+    void houseLincTx(std::vector<unsigned char> buffer);
     void set_update_handler(
             std::function<void(Json::Value json) > callback);
 protected:

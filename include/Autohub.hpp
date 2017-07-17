@@ -118,6 +118,8 @@ namespace ace {
                 const restbed::Bytes& body);
         std::map<std::string, std::shared_ptr<restbed::Session> > rest_sessions_;
 
+        void houseLincRx(std::vector<unsigned char> buffer);
+        void houseLincTx(std::vector<unsigned char> buffer);
         std::map<std::string, std::shared_ptr<DynamicLibrary>> dynamicLibraryMap_;
     };
 }

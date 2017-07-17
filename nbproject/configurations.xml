@@ -41,6 +41,7 @@
       </logicalFolder>
       <itemPath>include/Autohub.hpp</itemPath>
       <itemPath>include/DynamicLibrary.hpp</itemPath>
+      <itemPath>include/HouseLincServer.hpp</itemPath>
       <itemPath>include/Logger.h</itemPath>
       <itemPath>include/autoapi.hpp</itemPath>
       <itemPath>include/config.hpp</itemPath>
@@ -172,6 +173,8 @@
       <item path="include/Autohub.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/DynamicLibrary.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/HouseLincServer.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/Logger.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -355,6 +358,8 @@
       <item path="include/Autohub.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/DynamicLibrary.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/HouseLincServer.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/Logger.h" ex="false" tool="3" flavor2="0">
       </item>

@@ -25,6 +25,7 @@
  *
  */
 #include "include/Autohub.hpp"
+#include "include/HouseLincServer.hpp"
 #include "include/insteon/InsteonNetwork.hpp"
 #include "include/autoapi.hpp"
 #include "include/DynamicLibrary.hpp"
@@ -32,6 +33,7 @@
 
 #include "include/json/json.h"
 #include "include/json/json-forwards.h"
+#include "include/utils/utils.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -258,6 +260,9 @@ Autohub::start() {
         stop();
         return;
     }
+    server s(io_service_, 9761, bind(&type::houseLincRx, this, 
+            std::placeholders::_1));
+
     TestPlugin();
     startRestbed(); // running in this thread
 }
@@ -452,5 +457,20 @@ Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
     strand_hub_.post(std::bind(&type::internalReceiveCommand, this,
             test));
     utils::Logger::Instance().Debug(root.toStyledString().c_str());
+}
+
+void
+Autohub::houseLincRx(std::vector<unsigned char> buffer){
+        std::ostringstream oss;
+        oss << "The following message was received by the network\n";
+        oss << "\t  - {0x" << utils::ByteArrayToStringStream(
+                buffer, 0, buffer.size()) << "}\n";
+        utils::Logger::Instance().Debug(oss.str().c_str());    
+        insteon_network_->houseLincRx(buffer);
+}
+
+void
+Autohub::houseLincTx(std::vector<unsigned char> buffer){
+    
 }
 } // namespace ace

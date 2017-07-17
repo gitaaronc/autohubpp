@@ -175,15 +175,13 @@ InsteonProtocol::processMessage(const std::vector<unsigned char>& data,
                 return false;
             return unexpectedEchoReceived(data, offset, count, insteon_message);
         case 0x65:
-            if (data.size() < offset + count)
-                return false;
-            return true;
+            return (data.size() < offset + count) ? false : true;
+        case 0x6b: // TODO set IM configuration 
+            return (data.size() < offset + count + 1) ? false : true;
         case 0x73: // get insteon modem configuration
             return getIMConfiguration(data, offset, count, insteon_message);
-        case 0x75:
-            if (data.size() < offset + count + 2)
-                return false;
-            return true;
+        case 0x75: // TODO Read 8 bytes from database
+            return (data.size() < offset + count + 2) ? false : true;
     }
     return false;
 }
