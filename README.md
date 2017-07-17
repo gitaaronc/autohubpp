@@ -65,6 +65,7 @@ Clone this repository.
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
  ln -s /{GIT_REPO_ROOT}/restbed/source restbed<br />
  You will also need to create a link to the librestbed.so if the file does not exist in your /usr/lib directory.</br>
+ eg: ln -s /root/github/restbed/distribution/library/librestbed.so librestbed.so</br>
  
  Once you have the dependencies in place and the symbolic links created you can run make.<br />
  The libraries created by the above dependencies will require placement into your /usr/lib folder.</br>
