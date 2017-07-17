@@ -63,7 +63,7 @@ Clone this repository.
  The compiler must be able to find the header files included with the above dependencies.<br />
  I create a softlink inside of /usr/include<br />
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
- ln -s /{GIT_REPO_ROOT}/restbed restbed<br />
+ ln -s /{GIT_REPO_ROOT}/restbed/source restbed<br />
  You will also need to create a link to the librestbed.so if the file does not exist in your /usr/lib directory.</br>
  
  Once you have the dependencies in place and the symbolic links created you can run make.<br />
