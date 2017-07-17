@@ -64,6 +64,8 @@ Clone this repository.
  I create a softlink inside of /usr/include<br />
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
  ln -s /{GIT_REPO_ROOT}/restbed/source restbed<br />
+ When you get to the part in the restbed instruction where you run cmake, run cmake with these options.</br>
+ <b>cmake -DBUILD_SHARED=YES ..</b></br>
  You will also need to create a link to the librestbed.so if the file does not exist in your /usr/lib directory.</br>
  eg: ln -s /root/github/restbed/distribution/library/librestbed.so librestbed.so</br>
  
