@@ -48,7 +48,9 @@ It's recommended to create a dev directory and clone the following repositories 
 <b>RESTBED</b><br/>
 git clone --recursive https://github.com/gitaaronc/restbed.git<br/>
 Follow the instructions for compiling and installing restbed: https://github.com/gitaaronc/restbed<br/>
-
+When you get to the part in the restbed instruction where you run cmake, run cmake with these options.</br>
+ <b>cmake -DBUILD_SHARED=YES ..</b></br>
+ 
 <b>WEBSOCKETPP</b><br/>
 git clone https://github.com/gitaaronc/websocketpp.git<br/>
 
@@ -61,9 +63,14 @@ Clone this repository.
  I do use Netbeans as an IDE on windows, but all compiling is done remotely on linux.<br />
 
  The compiler must be able to find the header files included with the above dependencies.<br />
+ 
  I create a softlink inside of /usr/include<br />
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
- ln -s /{GIT_REPO_ROOT}/restbed restbed<br />
+ ln -s /{GIT_REPO_ROOT}/restbed/source restbed<br />
+ 
+ You will also need to create a link to the librestbed.so if the file does not exist in your /usr/lib directory.</br>
+ eg: ln -s /root/github/restbed/distribution/library/librestbed.so librestbed.so</br>
+ 
  Once you have the dependencies in place and the symbolic links created you can run make.<br />
  The libraries created by the above dependencies will require placement into your /usr/lib folder.</br>
  Rather than moving or copying the required libraries, I create symbolic links using the above method.<br/>
