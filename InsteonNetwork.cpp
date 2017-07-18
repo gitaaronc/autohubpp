@@ -275,6 +275,9 @@ InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
 
+    if(houselinc_tx){
+        houselinc_tx(im->raw_message);
+    }
     /*if (im->properties_.size() > 0) {
         std::ostringstream oss;
         oss << "The following message was received by the network\n";
@@ -312,7 +315,7 @@ InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
             //io_strand_.post(std::bind(&InsteonDevice::OnMessage, device, im));
         }
     } else { // route to controller/PLM
-        insteon_controller_->onMessage(im);
+        //insteon_controller_->onMessage(im);
     }
 
 }
@@ -330,12 +333,15 @@ InsteonNetwork::set_update_handler(
 }
 
 void
-InsteonNetwork::houseLincRx(std::vector<unsigned char> buffer){
+InsteonNetwork::set_houselinc_tx(
+        std::function<void(std::vector<unsigned char>) > callback) {
+    houselinc_tx = callback;
+}
+
+void
+InsteonNetwork::internalRawCommand(std::vector<unsigned char> buffer) {
     msg_proc_->trySend(buffer, false);
 }
 
-void InsteonNetwork::houseLincTx(std::vector<unsigned char> buffer){
-    //houseLincTx_;
-}
 } // namespace insteon
 } // namespace ace

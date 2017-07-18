@@ -26,7 +26,7 @@
  */
 
 #ifndef INSTEONNETWORK_HPP
-#define	INSTEONNETWORK_HPP
+#define INSTEONNETWORK_HPP
 
 #include "InsteonDevice.hpp"
 #include "../io/SerialPort.h"
@@ -38,70 +38,73 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace Json{
-class Value;
+namespace Json {
+    class Value;
 }
 
 namespace ace {
-namespace insteon {
-class MessageProcessor;
-class InsteonMessage;
-class InsteonController;
+    namespace insteon {
+        class MessageProcessor;
+        class InsteonMessage;
+        class InsteonController;
 
-class InsteonNetwork {
-    typedef InsteonNetwork type;
-public:
-    InsteonNetwork() = delete;
-    InsteonNetwork(boost::asio::io_service& io_service, YAML::Node config);
-    ~InsteonNetwork();
+        class InsteonNetwork {
+            typedef InsteonNetwork type;
+        public:
+            InsteonNetwork() = delete;
+            InsteonNetwork(boost::asio::io_service& io_service, YAML::Node config);
+            ~InsteonNetwork();
 
-    void
-    close() {
-    };
+            void
+            close() {
+            };
 
-    bool connect();
-    void loadDevices();
-    void saveDevices();
-    Json::Value serializeJson(int device_id = 0);
-    void internalReceiveCommand(std::string json);
-    void houseLincRx(std::vector<unsigned char> buffer);
-    void houseLincTx(std::vector<unsigned char> buffer);
-    void set_update_handler(
-            std::function<void(Json::Value json) > callback);
-protected:
-    friend class InsteonController;
-    // adds a device to insteon_device_list
-    std::shared_ptr<InsteonDevice> addDevice(int insteon_address);
-    std::shared_ptr<InsteonDevice> getDevice(int insteon_address);
+            bool connect();
+            void loadDevices();
+            void saveDevices();
+            Json::Value serializeJson(int device_id = 0);
+            void internalReceiveCommand(std::string json);
+            void internalRawCommand(std::vector<unsigned char> buffer);
+            void set_update_handler(
+                    std::function<void(Json::Value json) > callback);
+            void set_houselinc_tx(
+                    std::function<void(std::vector<unsigned char> buffer) > callback);
 
-    void
-    disconnect() {
-    };
+        protected:
+            friend class InsteonController;
+            // adds a device to insteon_device_list
+            std::shared_ptr<InsteonDevice> addDevice(int insteon_address);
+            std::shared_ptr<InsteonDevice> getDevice(int insteon_address);
 
-    bool
-    deviceExists(int insteon_address);
+            void
+            disconnect() {
+            };
 
-    void onMessage(std::shared_ptr<InsteonMessage> im);
-    void onUpdateDevice(Json::Value json);
+            bool
+            deviceExists(int insteon_address);
 
-    std::mutex mx_load_db_;
-    std::condition_variable cv_load_db_;
-private:
-    boost::asio::io_service& io_service_;
-    boost::asio::io_service::strand io_strand_;
-    // pointer to Insteon Controller object
-    std::unique_ptr<InsteonController> insteon_controller_;
-    // list of Insteon Devices
-    InsteonDeviceMap device_list_;
-    // pointer to message processor
-    std::shared_ptr<MessageProcessor> msg_proc_;
-    // pointer to callback function, executed when updates occur
-    std::function<void(Json::Value) > on_update;
-    
-    YAML::Node config_;
-};
-} // namespace insteon
+            void onMessage(std::shared_ptr<InsteonMessage> im);
+            void onUpdateDevice(Json::Value json);
+
+            std::mutex mx_load_db_;
+            std::condition_variable cv_load_db_;
+        private:
+            boost::asio::io_service& io_service_;
+            boost::asio::io_service::strand io_strand_;
+            // pointer to Insteon Controller object
+            std::unique_ptr<InsteonController> insteon_controller_;
+            // list of Insteon Devices
+            InsteonDeviceMap device_list_;
+            // pointer to message processor
+            std::shared_ptr<MessageProcessor> msg_proc_;
+            // pointer to callback function, executed when updates occur
+            std::function<void(Json::Value) > on_update;
+            std::function<void(std::vector<unsigned char>) > houselinc_tx;
+
+            YAML::Node config_;
+        };
+    } // namespace insteon
 } // namespace ace
 
-#endif	/* INSTEONNETWORK_HPP */
+#endif /* INSTEONNETWORK_HPP */
 

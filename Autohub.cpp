@@ -159,8 +159,9 @@ Autohub::onUpdateDevice(Json::Value json) {
     json["event"] = "deviceUpdate";
     for (const auto& it : wspp_connections_) {
         io_service_.post([ = ]{
-            wspp_server_.send(it.first, json.toStyledString(), 
-                    websocketpp::frame::opcode::text);});
+            wspp_server_.send(it.first, json.toStyledString(),
+            websocketpp::frame::opcode::text);
+        });
 
     }
     std::ostringstream ss;
@@ -209,7 +210,7 @@ Autohub::stop() {
     wspp_server_.stop_listening();
     {
         std::lock_guard<std::mutex>lock(wspp_connections_mutex_);
-        for (const auto& it : wspp_connections_){
+        for (const auto& it : wspp_connections_) {
             wspp_server::connection_ptr con = wspp_server_.get_con_from_hdl(it.first);
             con->close(1001, "Server shutting down or restarting!");
         }
@@ -256,12 +257,16 @@ Autohub::start() {
 
     insteon_network_->set_update_handler(bind(&type::onUpdateDevice, this,
             std::placeholders::_1));
+
+    insteon_network_->set_houselinc_tx(bind(&type::houselincTx, this,
+            std::placeholders::_1));
+
     if (!insteon_network_->connect()) {
         stop();
         return;
     }
-    server s(io_service_, 9761, bind(&type::houseLincRx, this, 
-            std::placeholders::_1));
+    houselinc_server_ = std::make_unique<server>(io_service_, 9761,
+            bind(&type::houselincRx, this, std::placeholders::_1));
 
     TestPlugin();
     startRestbed(); // running in this thread
@@ -459,18 +464,38 @@ Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
     utils::Logger::Instance().Debug(root.toStyledString().c_str());
 }
 
+
+/*
+ * Initial hatchet job to support houselinc application
+ * TODO: replace hatchet job with proper implementation
+ */
 void
-Autohub::houseLincRx(std::vector<unsigned char> buffer){
-        std::ostringstream oss;
-        oss << "The following message was received by the network\n";
-        oss << "\t  - {0x" << utils::ByteArrayToStringStream(
-                buffer, 0, buffer.size()) << "}\n";
-        utils::Logger::Instance().Debug(oss.str().c_str());    
-        insteon_network_->houseLincRx(buffer);
+Autohub::houselincRx(std::vector<unsigned char> buffer) {
+    std::ostringstream oss;
+    oss << "The following message was received by the network\n";
+    oss << "\t  - {0x" << utils::ByteArrayToStringStream(
+            buffer, 0, buffer.size()) << "}\n";
+    utils::Logger::Instance().Debug(oss.str().c_str());
+    if (buffer[0] == 0x60) {
+        houselincTx({0x02, 0x60, 0x23, 0x9A, 0xEB, 0x03, 0x37, 0x9C, 0x06});
+        return;
+    }
+    strand_hub_.post(std::bind([this, buffer](){
+        insteon_network_->internalRawCommand(buffer);
+    }));
+    buffer.insert(buffer.begin(), 0x02);
+    buffer.push_back(0x06);
+    houselincTx(buffer);
+    
+    //insteon_network_->internalRawCommand(buffer);
 }
 
+/*
+ * Initial hatchet job to support houselinc application
+ * TODO: replace hatchet job with proper implementation
+ */
 void
-Autohub::houseLincTx(std::vector<unsigned char> buffer){
-    
+Autohub::houselincTx(std::vector<unsigned char> buffer) {
+    houselinc_server_->SendData(buffer);
 }
 } // namespace ace
