@@ -471,13 +471,14 @@ Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
  */
 void
 Autohub::houselincRx(std::vector<unsigned char> buffer) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::ostringstream oss;
     oss << "The following message was received by the network\n";
     oss << "\t  - {0x" << utils::ByteArrayToStringStream(
             buffer, 0, buffer.size()) << "}\n";
     utils::Logger::Instance().Debug(oss.str().c_str());
     if (buffer[0] == 0x60) {
-        houselincTx({0x02, 0x60, 0x23, 0x9A, 0xEB, 0x03, 0x37, 0x9C, 0x06});
+        houselincTx({0x02, 0x60, 0x26, 0x13, 0xFF, 0x03, 0x37, 0x9C, 0x06});
         return;
     }
     strand_hub_.post(std::bind([this, buffer](){
@@ -496,6 +497,7 @@ Autohub::houselincRx(std::vector<unsigned char> buffer) {
  */
 void
 Autohub::houselincTx(std::vector<unsigned char> buffer) {
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
     houselinc_server_->SendData(buffer);
 }
 } // namespace ace
