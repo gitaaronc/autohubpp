@@ -383,6 +383,7 @@ InsteonDevice::tryGetExtendedInformation() {
         writeDeviceProperty("signal_to_noise_threshold", properties["data_nine"]);
         return true;
     } else {
+        writeDeviceProperty("button_on_level", 0xFF);
         pImpl->ClearPendingCommand();
         return false;
     }
