@@ -92,7 +92,7 @@ public:
     server(boost::asio::io_service& io_service, short port,
             std::function<void(std::vector<unsigned char>) > on_receive)
     : acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
-    socket_(io_service), on_receive_(on_receive) {
+    socket_(io_service), on_receive_(on_receive), client_count_(0) {
         do_accept();
     }
 
@@ -109,26 +109,30 @@ private:
         acceptor_.async_accept(socket_,
                 [this](boost::system::error_code ec) {
                     if (!ec) {
-                        auto client = std::make_shared<session>
-                                (std::move(socket_), on_receive_, 
-                                std::bind(&server::on_disconnect, this,
-                                std::placeholders::_1));
-                        sessions_.push_back(client);
-                        client->start();
+                        if (client_count_ < 1) {
+                            auto client = std::make_shared<session>
+                                    (std::move(socket_), on_receive_,
+                                    std::bind(&server::on_disconnect, this,
+                                    std::placeholders::_1));
+                            sessions_.push_back(client);
+                            client->start();
+                            client_count_++;
+                        }
                     }
-
                     do_accept();
                 });
     }
 
     void on_disconnect(std::shared_ptr<session> client) {
         sessions_.remove(client);
+        client_count_--;
     }
 
     tcp::acceptor acceptor_;
     tcp::socket socket_;
     std::list<std::shared_ptr<session>> sessions_;
     std::function<void(std::vector<unsigned char> buffer) > on_receive_;
+    int client_count_;
 };
 
 #endif /* HOUSELINCSERVER_HPP */

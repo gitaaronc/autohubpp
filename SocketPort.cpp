@@ -200,6 +200,7 @@ SocketPort::recv_buffer(std::vector<unsigned char>& buffer) {
 unsigned int
 SocketPort::send_buffer(std::vector<unsigned char>& buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    socket_port_->cancel();
     unsigned int sent = 0;
     unsigned int to_send = buffer.size();
     std::vector<unsigned char> temp;

@@ -224,7 +224,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
                 "returning.", FUNCTION_NAME_CSTR);
         return;
     }
-     */
+    */
 
     if (!set_level) {
         io_strand_.post(std::bind(&type::command, this,

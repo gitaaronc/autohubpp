@@ -340,7 +340,9 @@ InsteonNetwork::set_houselinc_tx(
 
 void
 InsteonNetwork::internalRawCommand(std::vector<unsigned char> buffer) {
-    msg_proc_->trySend(buffer, false);
+    io_strand_.post(std::bind([=](){
+        msg_proc_->trySend(buffer, false);
+    }));
 }
 
 } // namespace insteon
