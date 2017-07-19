@@ -49,7 +49,7 @@ namespace ace {
             typedef SocketPort type;
 
             SocketPort(boost::asio::io_service& ios) : base(), io_service_(ios),
-            strand_(ios), recv_buffer_has_data_(false) {
+            recv_buffer_has_data_(false) {
                 socket_port_ = std::make_shared<boost::asio::ip::tcp::socket>
                         (io_service_);
             }
@@ -87,8 +87,6 @@ namespace ace {
 
         private:
             boost::asio::io_service& io_service_;
-            boost::asio::strand strand_;
-            
             recv_handler m_recv_handler;
             socket_port_ptr socket_port_;
             std::vector<unsigned char> incoming_buffer_;
