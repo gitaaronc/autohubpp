@@ -477,14 +477,14 @@ Autohub::houselincRx(std::vector<unsigned char> buffer) {
     oss << "\t  - {0x" << utils::ByteArrayToStringStream(
             buffer, 0, buffer.size()) << "}\n";
     utils::Logger::Instance().Debug(oss.str().c_str());
-    if (buffer[0] == 0x60) {
+    /*if (buffer[0] == 0x60) {
         houselincTx({0x02, 0x60, 0x26, 0x13, 0xFF, 0x03, 0x37, 0x9C, 0x06});
         return;
     }
     std::vector<unsigned char> ret = buffer;
     ret.insert(ret.begin(), 0x02);
     ret.push_back(0x06);
-    houselincTx(ret);
+    houselincTx(ret);*/
     strand_hub_.post(std::bind([this, buffer](){
         insteon_network_->internalRawCommand(buffer);
     }));
@@ -499,6 +499,11 @@ Autohub::houselincRx(std::vector<unsigned char> buffer) {
 void
 Autohub::houselincTx(std::vector<unsigned char> buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    std::ostringstream oss;
+    oss << "Writing the following command to the Network!\n";
+    oss << "\t  - {0x" << utils::ByteArrayToStringStream(
+            buffer, 0, buffer.size()) << "}\n";
+    utils::Logger::Instance().Debug(oss.str().c_str());
     houselinc_server_->SendData(buffer);
 }
 } // namespace ace

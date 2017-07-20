@@ -178,17 +178,22 @@ MessageProcessor::processEcho(
         int offset, int& count) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
-    std::vector<unsigned char> message = utils::ArraySubset(
-            message_buffer, offset, sent_message_.size());
+    /*std::vector<unsigned char> message = utils::ArraySubset(
+            message_buffer, offset, sent_message_.size());*/
 
     std::shared_ptr<InsteonMessage> insteon_message(
             std::make_shared<InsteonMessage>());
 
-    if (ace::utils::VectorsEqual(sent_message_, message)) {
+    /*if (ace::utils::VectorsEqual(sent_message_, message)) {
         count = sent_message_.size();
         return true;
-    } else if (insteon_protocol_.processMessage(message_buffer, offset, count,
+    } else*/ if (insteon_protocol_.processMessage(message_buffer, offset, count,
             insteon_message)) {
+                    time_of_last_command_ = std::chrono::system_clock::now();
+                    auto it = message_buffer.begin() + offset - 1;
+                    for (; it < message_buffer.begin() + offset + count; it++)
+                        insteon_message->raw_message.push_back(*it); // copy the buffer
+                   recv_echo_ = insteon_message->raw_message;
         return true;
     }
     return false;
@@ -234,7 +239,7 @@ MessageProcessor::processEcho(int echo_length) {
     }
     int count = 0;
     if (processEcho(read_buffer, offset, count)) {
-        int j = offset + count;
+        int j = offset + count;// < echo_length ? echo_length - 1 : offset + count ;
         unsigned char result = j < read_buffer.size() ? read_buffer[j] : 0x00;
         j += 1;
         if (read_buffer.size() > j) {
@@ -348,6 +353,8 @@ MessageProcessor::send(std::vector<unsigned char> send_buffer,
         status = processEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
             oss << "\t  - EchoStatus::ACK received\n";
+            send_buffer = recv_echo_;
+            send_buffer.push_back(0x06);
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
@@ -411,9 +418,10 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
                 (start - time_of_last_command_).count();
     }
 
-    sent_message_ = send_buffer;
+    recv_echo_.empty();
+    // = send_buffer;
     status = send(send_buffer, retry_on_nak, echo_length);
-    sent_message_.empty();
+    //sent_message_.empty();
     io_port_->set_recv_handler(std::bind(
             &type::processData, this));
     io_port_->async_read_some();

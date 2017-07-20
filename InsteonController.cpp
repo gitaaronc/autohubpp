@@ -218,13 +218,26 @@ InsteonController::onDeviceUnlinked(std::shared_ptr<
 
 void
 InsteonController::onMessage(
-        std::shared_ptr<insteon::InsteonMessage> insteon_message) {
+        std::shared_ptr<insteon::InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    if (im->properties_.size() > 0) {
+        std::ostringstream oss;
+        oss << "The following message was received by this PLM\n";
+        /*oss << "\t  - " << device_name() << " {0x" << utils::int_to_hex(
+                this->insteon_address()) << "}\n";*/
+        oss << "\t  - {0x" << utils::ByteArrayToStringStream(
+                im->raw_message, 0, im->raw_message.size()) << "}\n";
+        for (const auto& it : im->properties_) {
+            oss << "\t  " << it.first << ": "
+                    << utils::int_to_hex(it.second) << "\n";
+        }
+        utils::Logger::Instance().Debug(oss.str().c_str());
+    }
     int insteon_address = 0;
-    switch (insteon_message->message_type_) {
+    switch (im->message_type_) {
         case insteon::InsteonMessageType::DeviceLink:
         {
-            insteon_address = insteon_message->properties_.find("address")->second;
+            insteon_address = im->properties_.find("address")->second;
 
             std::shared_ptr<InsteonDevice> device;
             device = insteon_network_->addDevice(insteon_address);
@@ -240,13 +253,13 @@ InsteonController::onMessage(
             break;
         case insteon::InsteonMessageType::GetIMInfo:
             pImpl_->insteon_identity_.category =
-                    insteon_message->properties_["device_category"];
+                    im->properties_["device_category"];
 
             pImpl_->insteon_identity_.sub_category =
-                    insteon_message->properties_["device_subcategory"];
+                    im->properties_["device_subcategory"];
 
             pImpl_->insteon_identity_.firmware_version =
-                    insteon_message->properties_["device_firmware_version"];
+                    im->properties_["device_firmware_version"];
 
             break;
         case insteon::InsteonMessageType::GetIMConfiguration:
@@ -256,13 +269,13 @@ InsteonController::onMessage(
         case insteon::InsteonMessageType::DeviceLinkRecord:
         case insteon::InsteonMessageType::ALDBRecord:
             utils::Logger::Instance().Info("ALDB record received");
-            processDatabaseRecord(insteon_message);
+            //processDatabaseRecord(im);
             break;
         default:
             utils::Logger::Instance().Info("%s\n\t - unexpected message: {%s}\n",
                     FUNCTION_NAME_CSTR,
-                    ByteArrayToStringStream(insteon_message->raw_message,
-                    0, insteon_message->raw_message.size()).c_str()
+                    ByteArrayToStringStream(im->raw_message,
+                    0, im->raw_message.size()).c_str()
                     );
             break;
 

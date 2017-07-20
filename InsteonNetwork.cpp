@@ -312,7 +312,7 @@ InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
             device = addDevice(insteon_address);
         }
     } else { // route to controller/PLM
-        //insteon_controller_->onMessage(im);
+        insteon_controller_->onMessage(im);
     }
 
 }
@@ -337,9 +337,11 @@ InsteonNetwork::set_houselinc_tx(
 
 void
 InsteonNetwork::internalRawCommand(std::vector<unsigned char> buffer) {
-       io_strand_.post([=](){
-           msg_proc_->trySend(buffer, false);
-       }); 
+    io_strand_.post([ = ](){
+        msg_proc_->trySend(buffer, false);
+        if(houselinc_tx)
+            houselinc_tx(msg_proc_->recv_echo_);
+    });
 }
 
 } // namespace insteon
