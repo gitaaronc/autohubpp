@@ -352,13 +352,17 @@ MessageProcessor::send(std::vector<unsigned char> send_buffer,
         io_port_->send_buffer(send_buffer);
         status = processEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
+            recv_echo_.push_back(0x06);
             oss << "\t  - EchoStatus::ACK received\n";
-            send_buffer = recv_echo_;
-            send_buffer.push_back(0x06);
+            oss << "\t  - ECHO: {0x" << utils::ByteArrayToStringStream(
+            recv_echo_, 0, recv_echo_.size()) << "}\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
+            recv_echo_.push_back(0x15);
             oss << "\t  - EchoStatus::NAK received, no retry on NAK\n";
+            oss << "\t  - ECHO: {0x" << utils::ByteArrayToStringStream(
+            recv_echo_, 0, recv_echo_.size()) << "}\n";
             break;
         }
         if (status == EchoStatus::NAK) {
