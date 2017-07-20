@@ -109,7 +109,7 @@ private:
         acceptor_.async_accept(socket_,
                 [this](boost::system::error_code ec) {
                     if (!ec) {
-                        if (client_count_ < 1) {
+                        if (client_count_ < 5) {
                             auto client = std::make_shared<session>
                                     (std::move(socket_), on_receive_,
                                     std::bind(&server::on_disconnect, this,
@@ -118,6 +118,7 @@ private:
                             client->start();
                             client_count_++;
                         }
+                        socket_.close();
                     }
                     do_accept();
                 });

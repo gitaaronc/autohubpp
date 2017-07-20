@@ -214,17 +214,6 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             return;
         }
     }
-    /*
-    bool actioned = ((unsigned char) im->message_type_
-            == (unsigned char) last_action_);
-    if (!actioned) { //used to prevent acting on duplicate or similar messages
-        last_action_ = im->message_type_;
-    } else {
-        utils::Logger::Instance().Debug("%s\n\t  - command already actioned, "
-                "returning.", FUNCTION_NAME_CSTR);
-        return;
-    }
-    */
 
     if (!set_level) {
         io_strand_.post(std::bind(&type::command, this,

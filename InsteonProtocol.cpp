@@ -454,14 +454,14 @@ bool
 InsteonProtocol::getIMConfiguration(const std::vector<unsigned char>& data,
         int offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
-    if (data.size() < offset + count + 3) return false;
+    if (data.size() < offset + count + 2) return false;
     unsigned char message_id = data[offset];
 
     PropertyKeys properties;
     properties["im_configuration_flags"] = data[offset + 1];
     properties["spare_one"] = data[offset + 2];
-    properties["spare_two"] = data[offset + 3];
-    count += 3;
+    //properties["spare_two"] = data[offset + 3];
+    count += 2;
 
     InsteonMessageType message_type = InsteonMessageType::GetIMConfiguration;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
