@@ -53,20 +53,27 @@ namespace ace {
         private:
             bool standardMessage(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool extendedMessage(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool aldbRecord(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool deviceLinkMessage(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool deviceLinkRecordMessage(const std::vector<unsigned char>& data,
                     int offset, int& count,
                     std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool deviceLinkCleanupMessage(const std::vector<unsigned char>& data,
                     int offset, int& count,
                     std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool getIMConfiguration(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
             bool getIMInfo(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
@@ -76,8 +83,10 @@ namespace ace {
 
             bool getMessageFlagProperty(const std::vector<unsigned char>& data,
                     int offset, int &count, PropertyKeys& properties);
+
             InsteonMessageType getMessageType(const std::vector<unsigned char>& data,
                     int offset, PropertyKeys& properties);
+
             bool imSetButtonEvent(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
 

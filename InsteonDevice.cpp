@@ -259,14 +259,11 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
                     keys["device_firmware_version"]);
 
             break;
-        case InsteonMessageType::DirectMessage:
-            utils::Logger::Instance().Debug("Direct message received");
-            break;
         case InsteonMessageType::DeviceLinkRecord:
             utils::Logger::Instance().Debug("Link record received");
             break;
-        case InsteonMessageType::UnexpectedEchoReceived:
-            utils::Logger::Instance().Debug("Unexpected ECHO received");
+        case InsteonMessageType::DirectMessage:
+            utils::Logger::Instance().Debug("Direct Message Received");
             pImpl->WaitAndSetPendingCommand(command_one, command_two);
             pImpl->TryProcessEcho(EchoStatus::ACK);
             break;

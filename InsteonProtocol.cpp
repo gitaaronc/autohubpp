@@ -171,18 +171,77 @@ InsteonProtocol::processMessage(const std::vector<unsigned char>& data,
             return true;
         case 0x62:
             return directMessage(data, offset, count, insteon_message);
+        case 0x63:
+            if (data.size() < offset + count + 2) return false;
+            return true;
+        case 0x64:
+            if (data.size() < offset + count + 2) return false;
+            return true;
         case 0x65:
             return (data.size() < offset + count) ? false : true;
-        case 0x6b: // TODO set IM configuration 
+        case 0x66:
+            if (data.size() < offset + count + 3) return false;
+            return true;
+        case 0x67:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x68:
+            if (data.size() < offset + count + 1) return false;
+            return true;
+        case 0x69:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x6A:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x6B: // TODO set IM configuration 
             if (data.size() < offset + count + 1) return false;
             count += 1;
             return true;
+        case 0x6C:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x6D:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x6E:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x6F:
+            if (data.size() < offset + count + 9) return false;
+            return true;
+        case 0x70:
+            if (data.size() < offset + count + 1) return false;
+            return true;
+        case 0x71:
+            if (data.size() < offset + count + 2) return false;
+            return true;
+        case 0x72:
+            if (data.size() < offset + count ) return false;
+            return true;
         case 0x73: // get insteon modem configuration
             return getIMConfiguration(data, offset, count, insteon_message);
+        case 0x74:
+            if (data.size() < offset + count ) return false;
+            return true;
         case 0x75: // TODO Read 8 bytes from database
             if (data.size() < offset + count + 2) return false;
             count += 2;
             return true;
+        case 0x76: // TODO Write 8 bytes to Database
+            if (data.size() < offset + count + 10) return false;
+            count += 10;
+            return true;
+        case 0x77:
+            if (data.size() < offset + count ) return false;
+            return true;
+        case 0x78:
+            if (data.size() < offset + count + 1) return false;
+            return true;
+        case 0x79:
+            if (data.size() < offset + count + 3) return false;
+            return true;
+            
     }
     return false;
 }
@@ -496,7 +555,7 @@ InsteonProtocol::directMessage(const std::vector<unsigned char>& data,
         count += 14;
     }
     
-    InsteonMessageType message_type = InsteonMessageType::UnexpectedEchoReceived;
+    InsteonMessageType message_type = InsteonMessageType::DirectMessage;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
     return true;
 }
