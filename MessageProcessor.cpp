@@ -82,7 +82,7 @@ MessageProcessor::connect() {
 
     io_port_ = std::move(io);
     io_port_->set_recv_handler(std::bind(
-            &type::processData, this));
+            &type::onReceive, this));
 
     if (io_port_->open(host, port)) {
         //data_port_->async_read_some();
@@ -90,6 +90,12 @@ MessageProcessor::connect() {
     }
     return false;
 
+}
+
+void
+MessageProcessor::onReceive(){
+    std::lock_guard<std::mutex>_(lock_data_processor_);
+    processData();
 }
 
 void
@@ -329,6 +335,7 @@ EchoStatus
 MessageProcessor::send(std::vector<unsigned char> send_buffer,
         bool retry_on_nak, int echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    std::lock_guard<std::mutex>_(lock_data_processor_);
     std::ostringstream oss;
     processData(); // process any remaining data
 
@@ -427,7 +434,7 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
     status = send(send_buffer, retry_on_nak, echo_length);
     //sent_message_.empty();
     io_port_->set_recv_handler(std::bind(
-            &type::processData, this));
+            &type::onReceive, this));
     io_port_->async_read_some();
     return status;
 }

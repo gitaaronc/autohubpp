@@ -78,6 +78,7 @@ namespace ace {
 
             bool connect();
             void processData();
+            void onReceive();
             EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
                     bool retry_on_nak = true);
             EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
@@ -121,7 +122,7 @@ namespace ace {
             //std::vector<unsigned char> sent_message_;
             std::mutex lock_buffer_;
             std::vector<unsigned char> buffer_;
-            //std::mutex lock_data_processor_; 
+            std::mutex lock_data_processor_; 
             
             std::chrono::system_clock::time_point time_of_last_command_;
             
