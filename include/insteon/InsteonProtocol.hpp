@@ -81,7 +81,7 @@ namespace ace {
             bool imSetButtonEvent(const std::vector<unsigned char>& data, int offset,
                     int &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool unexpectedEchoReceived(const std::vector<unsigned char>& data,
+            bool directMessage(const std::vector<unsigned char>& data,
                     int offset, int& count,
                     std::shared_ptr<InsteonMessage>& insteon_message);
         };

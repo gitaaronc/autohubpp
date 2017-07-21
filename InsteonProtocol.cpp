@@ -170,7 +170,7 @@ InsteonProtocol::processMessage(const std::vector<unsigned char>& data,
             count += 3;
             return true;
         case 0x62:
-            return unexpectedEchoReceived(data, offset, count, insteon_message);
+            return directMessage(data, offset, count, insteon_message);
         case 0x65:
             return (data.size() < offset + count) ? false : true;
         case 0x6b: // TODO set IM configuration 
@@ -469,8 +469,16 @@ InsteonProtocol::getIMConfiguration(const std::vector<unsigned char>& data,
     return true;
 }
 
+/**
+ * directMessage 0x62
+ * @param data
+ * @param offset
+ * @param count
+ * @param insteon_message
+ * @return 
+ */
 bool
-InsteonProtocol::unexpectedEchoReceived(const std::vector<unsigned char>& data,
+InsteonProtocol::directMessage(const std::vector<unsigned char>& data,
         int offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
     if (data.size() < offset + count + 7) return false;
     unsigned char message_id = data[offset];
@@ -482,6 +490,11 @@ InsteonProtocol::unexpectedEchoReceived(const std::vector<unsigned char>& data,
     properties["command_two"] = data[offset + 6];
     
     count += 2;
+    
+    if (properties.find("message_flags_extended")->second == 1){
+        if (data.size() < offset + count + 14) return false;
+        count += 14;
+    }
     
     InsteonMessageType message_type = InsteonMessageType::UnexpectedEchoReceived;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
