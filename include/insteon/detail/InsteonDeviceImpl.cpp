@@ -199,8 +199,9 @@ InsteonDeviceImpl::TrySendReceive(
  */
 void
 InsteonDeviceImpl::WaitAndSetPendingCommand(unsigned char command_one,
-        unsigned char command_two) {
+        unsigned char command_two, bool retry) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    pending_retry_ = !retry ? max_retries_ : pending_retry_;
     { // <<-- TODO build scoped lock MACRO to prevent the need of typing this
         std::lock_guard<std::mutex>_(command_mutex_);
         if (pending_command_ == 0) {

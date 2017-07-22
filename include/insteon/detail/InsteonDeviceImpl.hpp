@@ -76,7 +76,7 @@ public:
             PropertyKeys& properties);
 
     void WaitAndSetPendingCommand(unsigned char command_one,
-            unsigned char command_two);
+            unsigned char command_two, bool retry = true);
 
     //void SetPendingCommand(unsigned char command_one, unsigned char command_two);
 

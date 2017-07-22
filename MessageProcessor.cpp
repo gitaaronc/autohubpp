@@ -253,15 +253,16 @@ MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
         auto it = read_buffer.begin() + offset - 1;
         for (; it < read_buffer.begin() + offset + count; it++)
             insteon_message->raw_message.push_back(*it); // copy the buffer
-        updateWaitItems(insteon_message);
-        if (is_echo) {
-            if (offset + count < read_buffer.size()){
-                insteon_message->raw_message.push_back(*(read_buffer.begin() +
-                offset + count));
-            } else {
-                return false;
+        if (offset + count < read_buffer.size()){
+            auto response = *(read_buffer.begin() + offset + count);
+            if (response == 0x06 || response == 0x15){
+                insteon_message->raw_message.push_back(response);
+                count++;
             }
+        } else if (is_echo){
+            return false;
         }
+        updateWaitItems(insteon_message);
         if (msg_handler_)
             io_strand_.post(std::bind(msg_handler_, insteon_message));
         return true;
