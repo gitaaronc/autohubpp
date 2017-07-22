@@ -89,8 +89,6 @@ namespace ace {
             unsigned char readDeviceProperty(const std::string key);
 
         protected:
-            void getExtendedMessage(std::vector<unsigned char>& send_buffer,
-                    unsigned char cmd1, unsigned char cmd2);
             bool tryCommand(InsteonDeviceCommand command, unsigned char value);
             bool tryGetExtendedInformation();
             bool tryReadWriteALDB();

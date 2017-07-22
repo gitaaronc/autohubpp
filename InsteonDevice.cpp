@@ -264,7 +264,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             break;
         case InsteonMessageType::DirectMessage:
             utils::Logger::Instance().Debug("Direct Message Received");
-            //pImpl->WaitAndSetPendingCommand(command_one, command_two);
+            //pImpl->SetPendingCommand(command_one, command_two);
             //pImpl->TryProcessEcho(EchoStatus::ACK);
             break;
         default:
@@ -337,12 +337,6 @@ InsteonDevice::command(InsteonDeviceCommand command,
     return false;
 }
 
-void
-InsteonDevice::getExtendedMessage(std::vector<unsigned char>& send_buffer,
-        unsigned char cmd1, unsigned char cmd2) {
-    pImpl->GetExtendedMessage(send_buffer, cmd1, cmd2);
-}
-
 /**
  * 
  * @param command Insteon Command #1 field
@@ -359,8 +353,8 @@ InsteonDevice::tryCommand(InsteonDeviceCommand command, unsigned char value) {
 bool
 InsteonDevice::tryGetExtendedInformation() {
     std::vector<unsigned char> send_buffer;
-    getExtendedMessage(send_buffer, 0x2E, 0x00);
     PropertyKeys properties;
+    pImpl->GetExtendedMessage(send_buffer, 0x2E, 0x00);
     pImpl->WaitAndSetPendingCommand(0x2E, 0x00);
     EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x51, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
@@ -386,6 +380,8 @@ InsteonDevice::tryLightStatusRequest() {
     pImpl->WaitAndSetPendingCommand(0x19, 0x02);
     EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x50, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
+        writeDeviceProperty("link_database_delta", properties["command_one"]);
+        writeDeviceProperty("light_status", properties["command_two"]);
         return true;
     } else {
         pImpl->ClearPendingCommand();

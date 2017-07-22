@@ -561,7 +561,20 @@ InsteonProtocol::directMessage(const std::vector<unsigned char>& data,
     
     if (properties.find("message_flags_extended")->second == 1){
         if (data.size() < offset + count + 14) return false;
-        count += 14;
+        properties["data_one"] = data[offset + count++];
+        properties["data_two"] = data[offset + count++];
+        properties["data_three"] = data[offset + count++];
+        properties["data_four"] = data[offset + count++];
+        properties["data_five"] = data[offset + count++];
+        properties["data_six"] = data[offset + count++];
+        properties["data_seven"] = data[offset + count++];
+        properties["data_eight"] = data[offset + count++];
+        properties["data_nine"] = data[offset + count++];
+        properties["data_ten"] = data[offset + count++];
+        properties["data_eleven"] = data[offset + count++];
+        properties["data_twelve"] = data[offset + count++];
+        properties["data_thirteen"] = data[offset + count++];
+        properties["data_fourteen"] = data[offset + count++];
     }
     
     InsteonMessageType message_type = InsteonMessageType::DirectMessage;

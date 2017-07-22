@@ -219,6 +219,21 @@ InsteonDeviceImpl::WaitAndSetPendingCommand(unsigned char command_one,
     WaitAndSetPendingCommand(command_one, command_two);
 }
 
+/*
+void
+InsteonDeviceImpl::SetPendingCommand(unsigned char command_one, 
+        unsigned char command_two){
+    utils::Logger::Instance().Trace(FUNCTION_NAME);
+    { // <<-- TODO build scoped lock MACRO to prevent the need of typing this
+        std::lock_guard<std::mutex>_(command_mutex_);
+        if (pending_command_ == 0) {
+            pending_command_ = command_one;
+            pending_command_two_ = command_two;
+            pending_retry_ = 0;
+        }
+    }
+}
+*/
 /**
  * OnPendingCommandTimeOut
  * 
@@ -244,8 +259,8 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
                 device_name_.c_str(),
                 utils::int_to_hex(insteon_address_).c_str(),
                 command_one, command_two);
-        device_->io_strand_.post(std::bind(&InsteonDeviceImpl::TryCommandInternal, 
-                this, command_one, command_two));
+        device_->io_strand_.post(std::bind(&InsteonDevice::command, 
+                device_, (InsteonDeviceCommand)command_one, command_two));
     } else {
         max_retries_ = max_retries_ - 1 > 0 ? max_retries_ -= 1 : 0;
 
