@@ -264,8 +264,6 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             break;
         case InsteonMessageType::DirectMessage:
             utils::Logger::Instance().Debug("Direct Message Received");
-            pImpl->WaitAndSetPendingCommand(command_one, command_two, false);
-            pImpl->TryProcessEcho(EchoStatus::ACK);
             break;
         default:
             utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"
