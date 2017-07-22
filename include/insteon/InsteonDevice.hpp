@@ -94,6 +94,7 @@ namespace ace {
             bool tryCommand(InsteonDeviceCommand command, unsigned char value);
             bool tryGetExtendedInformation();
             bool tryReadWriteALDB();
+            bool tryLightStatusRequest();
             void statusUpdate(unsigned char status);
             //boost::asio::io_service& io_service_;
             boost::asio::io_service::strand io_strand_;

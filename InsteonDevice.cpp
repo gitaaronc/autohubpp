@@ -327,6 +327,9 @@ InsteonDevice::command(InsteonDeviceCommand command,
         case InsteonDeviceCommand::ALDBReadWrite:
             return tryReadWriteALDB();
             break;
+        case InsteonDeviceCommand::LightStatusRequest:
+            return tryLightStatusRequest();
+            break;
         default:
             return tryCommand(command, command_two);
             break;
@@ -370,6 +373,21 @@ InsteonDevice::tryGetExtendedInformation() {
         return true;
     } else {
         writeDeviceProperty("button_on_level", 0xFF);
+        pImpl->ClearPendingCommand();
+        return false;
+    }
+}
+
+bool
+InsteonDevice::tryLightStatusRequest() {
+    std::vector<unsigned char> send_buffer;
+    PropertyKeys properties;
+    pImpl->GetStandardMessage(send_buffer, 0x19, 0x02);
+    pImpl->WaitAndSetPendingCommand(0x19, 0x02);
+    EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x50, properties);
+    if ((status == EchoStatus::ACK) && (!properties.empty())) {
+        return true;
+    } else {
         pImpl->ClearPendingCommand();
         return false;
     }

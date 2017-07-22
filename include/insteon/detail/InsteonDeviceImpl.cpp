@@ -244,7 +244,8 @@ InsteonDeviceImpl::OnPendingCommandTimeout() {
                 device_name_.c_str(),
                 utils::int_to_hex(insteon_address_).c_str(),
                 command_one, command_two);
-        TryCommandInternal(command_one, command_two);
+        device_->io_strand_.post(std::bind(&InsteonDeviceImpl::TryCommandInternal, 
+                this, command_one, command_two));
     } else {
         max_retries_ = max_retries_ - 1 > 0 ? max_retries_ -= 1 : 0;
 

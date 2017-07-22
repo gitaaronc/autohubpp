@@ -384,7 +384,7 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
     EchoStatus status = EchoStatus::None;
     io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
 
-    auto duration = config_["command_delay"].as<int>(1500);
+    auto duration = config_["command_delay"].as<int>(500);
     auto start = std::chrono::system_clock::now();
     auto difference = std::chrono::duration_cast<std::chrono::milliseconds>
             (start - time_of_last_command_).count();
