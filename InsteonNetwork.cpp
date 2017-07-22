@@ -339,8 +339,6 @@ void
 InsteonNetwork::internalRawCommand(std::vector<unsigned char> buffer) {
     io_strand_.post([ = ](){
         msg_proc_->trySend(buffer, false);
-        if(houselinc_tx)
-            houselinc_tx(msg_proc_->recv_echo_);
     });
 }
 

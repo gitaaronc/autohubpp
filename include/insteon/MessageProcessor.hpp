@@ -87,7 +87,6 @@ namespace ace {
                     PropertyKeys& properties);
 
             void set_message_handler(msg_handler handler);
-            std::vector<unsigned char> recv_echo_;
         protected:
         private:
             void processData();

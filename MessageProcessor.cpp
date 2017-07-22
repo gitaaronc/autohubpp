@@ -154,12 +154,12 @@ MessageProcessor::processData() {
 
                         readData(more_data, 1, false);
                         if (more_data.size() == 0) {
-                        } else {
+                        } else { // TODO prevent to much buffer growth
                             offset--;
                             for (const auto& it : more_data)
                                 read_buffer.push_back(it);
                         }
-                    }
+                    } 
                 } while (++offset < read_buffer.size());
             }
         }
@@ -218,8 +218,8 @@ MessageProcessor::processEcho(int echo_length) {
     int count = 0;
     if (processMessage(read_buffer, offset, count, true)) {
         int j = offset + count;// < echo_length ? echo_length - 1 : offset + count ;
-        unsigned char result = j < read_buffer.size() ? read_buffer[j] : 0x00;
-        j += 1;
+        unsigned char result = read_buffer[j];
+        j++;
         if (read_buffer.size() > j) {
             lock_buffer_.lock();
             auto it = read_buffer.begin() + j;
@@ -229,10 +229,8 @@ MessageProcessor::processEcho(int echo_length) {
             processData();
         }
         if (result == 0x06) {
-            recv_echo_.push_back(0x06);
             status = EchoStatus::ACK;
         } else if (result == 0x15) {
-            recv_echo_.push_back(0x15);
             status = EchoStatus::NAK;
         } else {
             status = EchoStatus::Unknown;
@@ -256,12 +254,16 @@ MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
         for (; it < read_buffer.begin() + offset + count; it++)
             insteon_message->raw_message.push_back(*it); // copy the buffer
         updateWaitItems(insteon_message);
-        if (is_echo){
-            recv_echo_ = insteon_message->raw_message;
-        } else {
-            if (msg_handler_)
-                io_strand_.post(std::bind(msg_handler_, insteon_message));
+        if (is_echo) {
+            if (offset + count < read_buffer.size()){
+                insteon_message->raw_message.push_back(*(read_buffer.begin() +
+                offset + count));
+            } else {
+                return false;
+            }
         }
+        if (msg_handler_)
+            io_strand_.post(std::bind(msg_handler_, insteon_message));
         return true;
     }
     return false;
@@ -337,15 +339,9 @@ MessageProcessor::send(std::vector<unsigned char> send_buffer,
         io_port_->send_buffer(send_buffer);
         status = processEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
-            oss << "\t  - EchoStatus::ACK received\n";
-            oss << "\t  - ECHO: {0x" << utils::ByteArrayToStringStream(
-            recv_echo_, 0, recv_echo_.size()) << "}\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
-            oss << "\t  - EchoStatus::NAK received, no retry on NAK\n";
-            oss << "\t  - ECHO: {0x" << utils::ByteArrayToStringStream(
-            recv_echo_, 0, recv_echo_.size()) << "}\n";
             break;
         }
         if (status == EchoStatus::NAK) {
@@ -402,7 +398,6 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
                 (start - time_of_last_command_).count();
     }
 
-    recv_echo_.clear(); recv_echo_.resize(0);
     status = send(send_buffer, retry_on_nak, echo_length);
     io_port_->set_recv_handler(std::bind(
             &type::onReceive, this));
