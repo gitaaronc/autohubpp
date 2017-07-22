@@ -44,7 +44,7 @@ InsteonDevice::InsteonDevice(int insteon_address,
         boost::asio::io_service::strand& io_strand, YAML::Node config) :
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_strand_(io_strand), config_(config),
-last_action_(InsteonMessageType::Other) {
+last_action_(InsteonMessageType::Other), hack_cmd_(0x19) {
 
     device_properties_["light_status"] = 0;
     command_map_["ping"] = InsteonDeviceCommand::Ping;
@@ -129,12 +129,16 @@ InsteonDevice::ackOfDirectCommand(unsigned char sentCmdOne,
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (!sentCmdOne) {
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-                "\t  - unexpected ACK received {0x%02x ,0x%02x, 0x%02x}",
-                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, recvCmdOne, recvCmdTwo);
+                "\t  - unexpected ACK received {0x%02x ,0x%02x, 0x%02x} "
+                "using hack_cmd_{0x%02x}",
+                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, 
+                recvCmdOne, recvCmdTwo, hack_cmd_);
+        sentCmdOne = hack_cmd_;
     } else {
         utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-                "\t  - ACK received for command{0x%02x, 0x%02x,0x%02x}",
-                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, recvCmdOne, recvCmdTwo);
+                "\t  - ACK received for command{0x%02x, 0x%02x,0x%02x} ",
+                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, 
+                recvCmdOne, recvCmdTwo);
     }
     InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
     switch (command) {
@@ -264,6 +268,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             break;
         case InsteonMessageType::DirectMessage:
             utils::Logger::Instance().Debug("Direct Message Received");
+            hack_cmd_ = command_one;
             break;
         default:
             utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"

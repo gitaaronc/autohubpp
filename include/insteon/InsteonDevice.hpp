@@ -117,6 +117,8 @@ namespace ace {
 
             void loadProperties();
             YAML::Node config_;
+            
+            unsigned char hack_cmd_; // used for unexpected ACK
         };
 
         typedef std::map<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMap;
