@@ -126,7 +126,7 @@ InsteonNetwork::connect() {
                 "successfully!");
 
     // start loading the ALDB from PLM
-    if (config_["PLM"]["load_aldb"].as<bool>(true)) {
+    if (config_["PLM"]["load_aldb"].as<bool>(false)) {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from PLM",
                 FUNCTION_NAME_CSTR);
         insteon_controller_->getDatabaseRecords(0x1F, 0xF8);
@@ -139,7 +139,7 @@ InsteonNetwork::connect() {
     });
 
     // get aldb from each enabled device in the list
-    if (config_["PLM"]["load_aldb"].as<bool>(true)) {
+    if (config_["PLM"]["load_aldb"].as<bool>(false)) {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from known devices",
                 FUNCTION_NAME_CSTR);
         for (const auto& it : device_list_) {
