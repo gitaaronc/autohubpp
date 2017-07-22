@@ -89,7 +89,7 @@ namespace ace {
             unsigned char readDeviceProperty(const std::string key);
 
         protected:
-            bool tryCommand(InsteonDeviceCommand command, unsigned char value);
+            bool tryCommand(unsigned char command, unsigned char value);
             bool tryGetExtendedInformation();
             bool tryReadWriteALDB();
             bool tryLightStatusRequest();

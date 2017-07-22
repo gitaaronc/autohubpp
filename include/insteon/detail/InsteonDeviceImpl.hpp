@@ -53,7 +53,7 @@ public:
 
     void ClearPendingCommand();
 
-    void GetStandardMessage(std::vector<unsigned char>& send_buffer,
+    void BuildDirectStandardMessage(std::vector<unsigned char>& send_buffer,
             unsigned char cmd1, unsigned char cmd2);
     void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
             unsigned char cmd1, unsigned char cmd2,

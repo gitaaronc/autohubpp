@@ -77,7 +77,7 @@ InsteonDeviceImpl::ClearPendingCommand() {
  * @param cmd2:unsigned char    Insteon command field #2
  */
 void
-InsteonDeviceImpl::GetStandardMessage(
+InsteonDeviceImpl::BuildDirectStandardMessage(
         std::vector<unsigned char>& send_buffer,
         unsigned char cmd1, unsigned char cmd2) {
     send_buffer.clear();
@@ -141,7 +141,7 @@ InsteonDeviceImpl::TryCommandInternal(unsigned char command_one,
         unsigned char command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::vector<unsigned char> send_buffer;
-    GetStandardMessage(send_buffer, command_one, command_two);
+    BuildDirectStandardMessage(send_buffer, command_one, command_two);
     EchoStatus status = msgProc_->trySend(send_buffer);
     return TryProcessEcho(status);
 }

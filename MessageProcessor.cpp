@@ -218,8 +218,7 @@ MessageProcessor::processEcho(int echo_length) {
     int count = 0;
     if (processMessage(read_buffer, offset, count, true)) {
         int j = offset + count;// < echo_length ? echo_length - 1 : offset + count ;
-        unsigned char result = read_buffer[j];
-        j++;
+        unsigned char result = read_buffer[j - 1];
         if (read_buffer.size() > j) {
             lock_buffer_.lock();
             auto it = read_buffer.begin() + j;
