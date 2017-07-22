@@ -200,7 +200,6 @@ SerialPort::recv_buffer(std::vector<unsigned char>& buffer) {
 unsigned int
 SerialPort::send_buffer(std::vector<unsigned char>& buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    //serial_port_->cancel();
     unsigned int sent = 0;
     unsigned int to_send = buffer.size();
     std::vector<unsigned char> temp;

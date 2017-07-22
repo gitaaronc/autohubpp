@@ -77,7 +77,6 @@ namespace ace {
             ~MessageProcessor();
 
             bool connect();
-            void processData();
             void onReceive();
             EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
                     bool retry_on_nak = true);
@@ -91,16 +90,14 @@ namespace ace {
             std::vector<unsigned char> recv_echo_;
         protected:
         private:
+            void processData();
             std::string byteArrayToStringStream(const std::vector<unsigned char>&
                     data,
                     int offset, int count);
 
             EchoStatus processEcho(int echo_length);
-            bool processEcho(const std::vector<unsigned char>& message_buffer,
-                    int offset, int& count);
             bool processMessage(const std::vector<unsigned char>& read_buffer,
-                    int offset,
-                    int& count);
+                    int offset, int& count, bool is_echo = false);
 
             void readData(std::vector<unsigned char>& return_buffer,
                     int bytes_expected,
@@ -116,10 +113,8 @@ namespace ace {
             msg_handler msg_handler_;
             InsteonProtocol insteon_protocol_;
 
-            //std::mutex lock_io_;
             std::list<std::shared_ptr<WaitItem>> wait_list_;
             std::mutex mutex_wait_list_;
-            //std::vector<unsigned char> sent_message_;
             std::mutex lock_buffer_;
             std::vector<unsigned char> buffer_;
             std::mutex lock_data_processor_; 

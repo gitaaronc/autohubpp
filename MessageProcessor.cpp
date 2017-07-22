@@ -85,7 +85,6 @@ MessageProcessor::connect() {
             &type::onReceive, this));
 
     if (io_port_->open(host, port)) {
-        //data_port_->async_read_some();
         return true;
     }
     return false;
@@ -178,33 +177,6 @@ MessageProcessor::processData() {
     }
 }
 
-bool
-MessageProcessor::processEcho(
-        const std::vector<unsigned char>& message_buffer,
-        int offset, int& count) {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
-
-    /*std::vector<unsigned char> message = utils::ArraySubset(
-            message_buffer, offset, sent_message_.size());*/
-
-    std::shared_ptr<InsteonMessage> insteon_message(
-            std::make_shared<InsteonMessage>());
-
-    /*if (ace::utils::VectorsEqual(sent_message_, message)) {
-        count = sent_message_.size();
-        return true;
-    } else*/ if (insteon_protocol_.processMessage(message_buffer, offset, count,
-            insteon_message)) {
-                    time_of_last_command_ = std::chrono::system_clock::now();
-                    auto it = message_buffer.begin() + offset - 1;
-                    for (; it < message_buffer.begin() + offset + count; it++)
-                        insteon_message->raw_message.push_back(*it); // copy the buffer
-                   recv_echo_ = insteon_message->raw_message;
-        return true;
-    }
-    return false;
-}
-
 EchoStatus
 MessageProcessor::processEcho(int echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -244,7 +216,7 @@ MessageProcessor::processEcho(int echo_length) {
                 );
     }
     int count = 0;
-    if (processEcho(read_buffer, offset, count)) {
+    if (processMessage(read_buffer, offset, count, true)) {
         int j = offset + count;// < echo_length ? echo_length - 1 : offset + count ;
         unsigned char result = j < read_buffer.size() ? read_buffer[j] : 0x00;
         j += 1;
@@ -257,8 +229,10 @@ MessageProcessor::processEcho(int echo_length) {
             processData();
         }
         if (result == 0x06) {
+            recv_echo_.push_back(0x06);
             status = EchoStatus::ACK;
         } else if (result == 0x15) {
+            recv_echo_.push_back(0x15);
             status = EchoStatus::NAK;
         } else {
             status = EchoStatus::Unknown;
@@ -271,7 +245,7 @@ MessageProcessor::processEcho(int echo_length) {
 
 bool
 MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
-        int offset, int& count) {
+        int offset, int& count, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::shared_ptr<InsteonMessage> insteon_message
             = std::make_shared<InsteonMessage>();
@@ -282,8 +256,12 @@ MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
         for (; it < read_buffer.begin() + offset + count; it++)
             insteon_message->raw_message.push_back(*it); // copy the buffer
         updateWaitItems(insteon_message);
-        if (msg_handler_)
-            io_strand_.post(std::bind(msg_handler_, insteon_message));
+        if (is_echo){
+            recv_echo_ = insteon_message->raw_message;
+        } else {
+            if (msg_handler_)
+                io_strand_.post(std::bind(msg_handler_, insteon_message));
+        }
         return true;
     }
     return false;
@@ -359,14 +337,12 @@ MessageProcessor::send(std::vector<unsigned char> send_buffer,
         io_port_->send_buffer(send_buffer);
         status = processEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
-            recv_echo_.push_back(0x06);
             oss << "\t  - EchoStatus::ACK received\n";
             oss << "\t  - ECHO: {0x" << utils::ByteArrayToStringStream(
             recv_echo_, 0, recv_echo_.size()) << "}\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
-            recv_echo_.push_back(0x15);
             oss << "\t  - EchoStatus::NAK received, no retry on NAK\n";
             oss << "\t  - ECHO: {0x" << utils::ByteArrayToStringStream(
             recv_echo_, 0, recv_echo_.size()) << "}\n";
@@ -410,10 +386,7 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
     // force other sending threads to wait for us to finish
     //std::lock_guard<std::mutex>lock(lock_io_);
     EchoStatus status = EchoStatus::None;
-    {
-        //std::lock_guard<std::mutex>_(lock_data_processor_);
-        io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
-    }
+    io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
 
     auto duration = config_["command_delay"].as<int>(1500);
     auto start = std::chrono::system_clock::now();
@@ -429,10 +402,8 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
                 (start - time_of_last_command_).count();
     }
 
-    recv_echo_.empty();
-    // = send_buffer;
+    recv_echo_.clear(); recv_echo_.resize(0);
     status = send(send_buffer, retry_on_nak, echo_length);
-    //sent_message_.empty();
     io_port_->set_recv_handler(std::bind(
             &type::onReceive, this));
     io_port_->async_read_some();

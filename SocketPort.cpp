@@ -88,16 +88,11 @@ SocketPort::open(const std::string com_port_name, int port = 9761) {
     tcp::endpoint ep(boost::asio::ip::address::from_string(com_port_name),
             port);
 
-
-
     if (socket_port_.get() == NULL)
         return false;
     socket_port_->connect(ep, ec);
     if (ec)
         return false;
-
-
-
 
     async_read_some();
     return true;
@@ -200,7 +195,6 @@ SocketPort::recv_buffer(std::vector<unsigned char>& buffer) {
 unsigned int
 SocketPort::send_buffer(std::vector<unsigned char>& buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    //socket_port_->cancel();
     unsigned int sent = 0;
     unsigned int to_send = buffer.size();
     std::vector<unsigned char> temp;
