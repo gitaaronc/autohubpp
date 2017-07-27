@@ -46,83 +46,85 @@
 #include "../io/SocketPort.h"
 #include "../system/AutoResetEvent.hpp"
 
-namespace ace {
-    namespace insteon {
-        class InsteonMessage;
+namespace ace
+{
+namespace insteon
+{
+class InsteonMessage;
 
-        struct WaitItem {
+struct WaitItem {
 
-            WaitItem(unsigned char message_id) :
-            message_id_(message_id), message_received_(false) {
-            }
-            unsigned char message_id_;
-            bool message_received_;
-            system::AutoResetEvent wait_event_;
-            std::shared_ptr<InsteonMessage> insteon_message_;
-        };
+    WaitItem(unsigned char message_id) :
+    message_id_(message_id), message_received_(false) {
+    }
+    unsigned char message_id_;
+    bool message_received_;
+    system::AutoResetEvent wait_event_;
+    std::shared_ptr<InsteonMessage> insteon_message_;
+};
 
-        typedef std::shared_ptr<InsteonMessage> msg_ptr;
-        typedef std::function<void(msg_ptr) > msg_handler;
+typedef std::shared_ptr<InsteonMessage> msg_ptr;
+typedef std::function<void(msg_ptr) > msg_handler;
 
-        /*
-         * MessageProcessor class is responsible for coordinating
-         * Insteon Messages between the IO and InsteonDevice objects
-         */
-        class MessageProcessor : private boost::noncopyable {
-        public:
-            typedef MessageProcessor type;
+/*
+ * MessageProcessor class is responsible for coordinating
+ * Insteon Messages between the IO and InsteonDevice objects
+ */
+class MessageProcessor : private boost::noncopyable {
+public:
+    typedef MessageProcessor type;
 
-            explicit MessageProcessor(boost::asio::io_service& io_service,
-                    YAML::Node config);
-            ~MessageProcessor();
+    explicit MessageProcessor(boost::asio::io_service& io_service,
+                              YAML::Node config);
+    ~MessageProcessor();
 
-            bool connect();
-            void onReceive();
-            EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
-                    bool retry_on_nak = true);
-            EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
+    bool connect();
+    void onReceive();
+    EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
+                       bool retry_on_nak = true);
+    EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
+                       bool retry_on_nak, int echo_length);
+    EchoStatus trySendReceive(const std::vector<unsigned char>&
+                              send_buffer, int triesLeft, unsigned char receive_message_id,
+                              PropertyKeys& properties);
+
+    void set_message_handler(msg_handler handler);
+protected:
+private:
+    void processData();
+    std::string byteArrayToStringStream(const std::vector<unsigned char>&
+                                        data,
+                                        int offset, int count);
+
+    EchoStatus processEcho(int echo_length);
+    bool processMessage(const std::vector<unsigned char>& read_buffer,
+                        int offset, int& count, bool is_echo = false);
+
+    void readData(std::vector<unsigned char>& return_buffer,
+                  int bytes_expected,
+                  bool is_echo);
+
+    EchoStatus send(std::vector<unsigned char> send_buffer,
                     bool retry_on_nak, int echo_length);
-            EchoStatus trySendReceive(const std::vector<unsigned char>&
-                    send_buffer, bool retry_on_nak, unsigned char receive_message_id,
-                    PropertyKeys& properties);
+    void updateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 
-            void set_message_handler(msg_handler handler);
-        protected:
-        private:
-            void processData();
-            std::string byteArrayToStringStream(const std::vector<unsigned char>&
-                    data,
-                    int offset, int count);
+    std::unique_ptr<io::IOPort> io_port_;
+    boost::asio::io_service& io_service_;
+    boost::asio::io_service::strand io_strand_;
+    msg_handler msg_handler_;
+    InsteonProtocol insteon_protocol_;
 
-            EchoStatus processEcho(int echo_length);
-            bool processMessage(const std::vector<unsigned char>& read_buffer,
-                    int offset, int& count, bool is_echo = false);
+    std::list<std::shared_ptr<WaitItem>> wait_list_;
+    std::mutex mutex_wait_list_;
+    std::mutex lock_buffer_;
+    std::vector<unsigned char> buffer_;
+    std::mutex lock_data_processor_;
 
-            void readData(std::vector<unsigned char>& return_buffer,
-                    int bytes_expected,
-                    bool is_echo);
+    std::chrono::system_clock::time_point time_of_last_command_;
 
-            EchoStatus send(std::vector<unsigned char> send_buffer,
-                    bool retry_on_nak, int echo_length);
-            void updateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
-
-            std::unique_ptr<io::IOPort> io_port_;
-            boost::asio::io_service& io_service_;
-            boost::asio::io_service::strand io_strand_;
-            msg_handler msg_handler_;
-            InsteonProtocol insteon_protocol_;
-
-            std::list<std::shared_ptr<WaitItem>> wait_list_;
-            std::mutex mutex_wait_list_;
-            std::mutex lock_buffer_;
-            std::vector<unsigned char> buffer_;
-            std::mutex lock_data_processor_; 
-            
-            std::chrono::system_clock::time_point time_of_last_command_;
-            
-            YAML::Node config_;
-        };
-    } // namespace insteon
+    YAML::Node config_;
+};
+} // namespace insteon
 } // namespace ace
 #endif /* MESSENGER_HPP */
 

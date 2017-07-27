@@ -61,29 +61,29 @@ int main(int argc, char** argv) {
     }
 
     // get and set logging mode, default is NONE, no logging
-    std::string logging_mode = config["logging_mode"].as<std::string>("NONE"); 
-    std::transform(logging_mode.begin(), logging_mode.end(), 
+    std::string logging_mode = config["logging_mode"].as<std::string>("NONE");
+    std::transform(logging_mode.begin(), logging_mode.end(),
             logging_mode.begin(), ::tolower);
-    if (logging_mode.compare("none") == 0){
+    if (logging_mode.compare("none") == 0) {
         ace::utils::Logger::Instance().SetLoggingMode(
                 ace::utils::Logger::NONE);
-    } else if (logging_mode.compare("info") == 0){
+    } else if (logging_mode.compare("info") == 0) {
         ace::utils::Logger::Instance().SetLoggingMode(
                 ace::utils::Logger::INFO);
-    } else if (logging_mode.compare("warning") == 0){
+    } else if (logging_mode.compare("warning") == 0) {
         ace::utils::Logger::Instance().SetLoggingMode(
                 ace::utils::Logger::WARNING);
-    } else if (logging_mode.compare("debug") == 0){
+    } else if (logging_mode.compare("debug") == 0) {
         ace::utils::Logger::Instance().SetLoggingMode(
                 ace::utils::Logger::DEBUG);
-    } else if (logging_mode.compare("trace") == 0){
+    } else if (logging_mode.compare("trace") == 0) {
         ace::utils::Logger::Instance().SetLoggingMode(
                 ace::utils::Logger::TRACE);
-    } else if (logging_mode.compare("verbose") == 0){
+    } else if (logging_mode.compare("verbose") == 0) {
         ace::utils::Logger::Instance().SetLoggingMode(
                 ace::utils::Logger::VERBOSE);
     }
-    
+
     ace::utils::Logger::Instance().Info("Using Boost version: %d.%d.%d",
             BOOST_VERSION / 100000, (BOOST_VERSION / 100) % 1000,
             BOOST_VERSION % 100);
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     }));
 
     int worker_threads = config["worker_threads"].as<int>(50);
-    
+
     for (int c = 0; c < worker_threads; ++c) {
         ace::utils::Logger::Instance().Debug("Starting Thread: %d", (c + 1));
         threadpool.create_thread([&io_service]() {
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
     std::ofstream ofs(config_file_);
     ofs << config;
     ofs.close();
-    
+
     ace::utils::Logger::Instance().Info("Autohubpp exited cleanly.");
     return 0;
 }

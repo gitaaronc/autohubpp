@@ -26,7 +26,7 @@
  */
 
 #ifndef INSTEONDEVICEBASEIMPL_H
-#define	INSTEONDEVICEBASEIMPL_H
+#define INSTEONDEVICEBASEIMPL_H
 
 #include "../EchoStatus.hpp"
 #include "../PropertyKey.hpp"
@@ -41,9 +41,12 @@
 #include <memory>
 #include <mutex>
 
-namespace ace {
-namespace insteon {
-namespace detail {
+namespace ace
+{
+namespace insteon
+{
+namespace detail
+{
 
 class InsteonDeviceImpl {
     typedef InsteonDeviceImpl type;
@@ -51,39 +54,6 @@ public:
     InsteonDeviceImpl(InsteonDevice* pDevice, int insteon_address);
     ~InsteonDeviceImpl();
 
-    void ClearPendingCommand();
-
-    void BuildDirectStandardMessage(std::vector<unsigned char>& send_buffer,
-            unsigned char cmd1, unsigned char cmd2);
-    void GetExtendedMessage(std::vector<unsigned char>& send_buffer,
-            unsigned char cmd1, unsigned char cmd2,
-            unsigned char d1 = 0, unsigned char d2 = 0, unsigned char d3 = 0,
-            unsigned char d4 = 0, unsigned char d5 = 0, unsigned char d6 = 0,
-            unsigned char d7 = 0, unsigned char d8 = 0, unsigned char d9 = 0,
-            unsigned char d10 = 0, unsigned char d11 = 0, unsigned char d12 = 0,
-            unsigned char d13 = 0);
-    void CommandAckProcessor(const std::shared_ptr<InsteonMessage>&
-            insteon_message);
-
-    void
-    set_message_proc(std::shared_ptr<MessageProcessor> messenger) {
-        msgProc_ = messenger;
-    }
-
-    bool TryCommandInternal(unsigned char command_one, unsigned char command_two);
-    EchoStatus TrySendReceive(std::vector<unsigned char> send_buffer,
-            bool retry_on_nak, unsigned char receive_message_id,
-            PropertyKeys& properties);
-
-    void WaitAndSetPendingCommand(unsigned char command_one,
-            unsigned char command_two);
-
-    //void SetPendingCommand(unsigned char command_one, unsigned char command_two);
-
-    void OnPendingCommandTimeout();
-
-    bool TryProcessEcho(EchoStatus status = EchoStatus::Unknown);
-    
     unsigned char
     HighAddress() {
         return insteon_address_ >> 16 & 0xFF;
@@ -100,25 +70,15 @@ public:
     }
 
     InsteonDevice* device_;
-    std::shared_ptr<MessageProcessor> msgProc_;
 
-    system::AutoResetEvent ack_event_;
-    std::unique_ptr<system::Timer> ack_timer_;
-
-    std::mutex command_mutex_;
-    unsigned char pending_command_;
-    unsigned char pending_command_two_;
-    int pending_retry_;
-    int max_retries_;
-    
     int insteon_address_;
     std::string device_name_;
     bool device_disabled_;
-    
+
 };
 }
 }
 }
 
-#endif	/* INSTEONDEVICEBASEIMPL_H */
+#endif /* INSTEONDEVICEBASEIMPL_H */
 

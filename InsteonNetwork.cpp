@@ -275,7 +275,7 @@ InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     int insteon_address = 0;
 
-    if(houselinc_tx){
+    if (houselinc_tx) {
         houselinc_tx(im->raw_message);
     }
     /*if (im->properties_.size() > 0) {

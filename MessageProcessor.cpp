@@ -92,7 +92,7 @@ MessageProcessor::connect() {
 }
 
 void
-MessageProcessor::onReceive(){
+MessageProcessor::onReceive() {
     std::lock_guard<std::mutex>_(lock_data_processor_);
     processData();
 }
@@ -124,7 +124,7 @@ MessageProcessor::processData() {
                 if (last != offset - 1) {
                     utils::Logger::Instance().Info(
                             "%s\n\t  - skipping %d bytes "
-                            "[last:offset][%d:%d]: {%s}\n", FUNCTION_NAME_CSTR, 
+                            "[last:offset][%d:%d]: {%s}\n", FUNCTION_NAME_CSTR,
                             offset - last - 1, last, offset - 2,
                             utils::ByteArrayToStringStream(read_buffer,
                             last, offset - last - 1).c_str()
@@ -134,7 +134,7 @@ MessageProcessor::processData() {
                     if (processMessage(read_buffer, offset, count)) {
                         utils::Logger::Instance().Info("%s\n"
                                 "\t  - message parsed [begin:end]"
-                                "[%d:%d]: {%s}", FUNCTION_NAME_CSTR, 
+                                "[%d:%d]: {%s}", FUNCTION_NAME_CSTR,
                                 offset - 1, offset - 1 + count,
                                 utils::ByteArrayToStringStream(read_buffer,
                                 offset - 1, count + 1).c_str());
@@ -146,7 +146,7 @@ MessageProcessor::processData() {
 
                         utils::Logger::Instance().Info(
                                 "%s\n\t  - working with %d bytes: (%d:%d) {%s}\n",
-                                FUNCTION_NAME_CSTR, read_buffer.size() - last, 
+                                FUNCTION_NAME_CSTR, read_buffer.size() - last,
                                 last, read_buffer.size() - 1,
                                 utils::ByteArrayToStringStream(read_buffer,
                                 last, read_buffer.size() - last).c_str()
@@ -159,7 +159,7 @@ MessageProcessor::processData() {
                             for (const auto& it : more_data)
                                 read_buffer.push_back(it);
                         }
-                    } 
+                    }
                 } while (++offset < read_buffer.size());
             }
         }
@@ -217,7 +217,7 @@ MessageProcessor::processEcho(int echo_length) {
     }
     int count = 0;
     if (processMessage(read_buffer, offset, count, true)) {
-        int j = offset + count;// < echo_length ? echo_length - 1 : offset + count ;
+        int j = offset + count; // < echo_length ? echo_length - 1 : offset + count ;
         unsigned char result = read_buffer[j - 1];
         if (read_buffer.size() > j) {
             lock_buffer_.lock();
@@ -252,13 +252,13 @@ MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
         auto it = read_buffer.begin() + offset - 1;
         for (; it < read_buffer.begin() + offset + count; it++)
             insteon_message->raw_message.push_back(*it); // copy the buffer
-        if (offset + count < read_buffer.size()){
+        if (offset + count < read_buffer.size()) {
             auto response = *(read_buffer.begin() + offset + count);
-            if (response == 0x06 || response == 0x15){
+            if (response == 0x06 || response == 0x15) {
                 insteon_message->raw_message.push_back(response);
                 count++;
             }
-        } else if (is_echo){
+        } else if (is_echo) {
             return false;
         }
         updateWaitItems(insteon_message);
@@ -419,7 +419,7 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
  */
 EchoStatus
 MessageProcessor::trySendReceive(const std::vector<unsigned char>& send_buffer,
-        bool retry_on_nak, unsigned char receive_message_id, PropertyKeys&
+        int triesLeft, unsigned char receive_message_id, PropertyKeys&
         properties) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
@@ -430,7 +430,7 @@ MessageProcessor::trySendReceive(const std::vector<unsigned char>& send_buffer,
         // always push to the back as IM responses should be in order of sent message
         wait_list_.push_back(item);
     }
-    EchoStatus status = trySend(send_buffer, retry_on_nak);
+    EchoStatus status = trySend(send_buffer, triesLeft >= 0);
     if (status == EchoStatus::ACK) { // got the echo
         if (!item->insteon_message_) { // still need ACK
             if (item->wait_event_.WaitOne(4000)) { // wait here for ACK
@@ -438,7 +438,16 @@ MessageProcessor::trySendReceive(const std::vector<unsigned char>& send_buffer,
                         FUNCTION_NAME_CSTR);
             } else { // timeout signaled, no event
                 utils::Logger::Instance().Info("%s\n\t  - Timeout signaled: no "
-                        "ACK received", FUNCTION_NAME_CSTR);
+                        "ACK received\n\t  - Retrying command", FUNCTION_NAME_CSTR);
+                if (--triesLeft >= 0) {
+                    {
+                        std::lock_guard<std::mutex>lock(mutex_wait_list_);
+                        wait_list_.remove(item);
+                    }
+                    return trySendReceive(send_buffer, triesLeft,
+                            receive_message_id, properties);
+                }
+
             }
         }
         if (item->insteon_message_) {

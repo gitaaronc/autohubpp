@@ -42,88 +42,101 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace Json {
-    class Value;
+namespace Json
+{
+class Value;
 }
 
-namespace ace {
+namespace ace
+{
 
-    namespace insteon {
-        class InsteonMessage;
-        class MessageProcessor;
+namespace insteon
+{
+class InsteonMessage;
+class MessageProcessor;
 
-        namespace detail {
-            class InsteonDeviceImpl;
-        }
+namespace detail
+{
+class InsteonDeviceImpl;
+}
 
-        // Implements Insteon Device functions and stores attributes
+// Implements Insteon Device functions and stores attributes
 
-        class InsteonDevice {
-            typedef InsteonDevice type;
-        public:
-            InsteonDevice() = delete;
-            InsteonDevice(int insteon_address,
-                    boost::asio::io_service::strand& io_strand,
-                    YAML::Node config);
-            InsteonDevice(const InsteonDevice& rhs) = delete;
-            InsteonDevice(InsteonDevice&& rhs) noexcept = delete;
-            InsteonDevice& operator=(const InsteonDevice& rhs) = delete;
-            InsteonDevice& operator=(InsteonDevice&& rhs) noexcept = delete;
+class InsteonDevice {
+    typedef InsteonDevice type;
+public:
+    InsteonDevice() = delete;
+    InsteonDevice(int insteon_address,
+                  boost::asio::io_service::strand& io_strand,
+                  YAML::Node config);
+    InsteonDevice(const InsteonDevice& rhs) = delete;
+    InsteonDevice(InsteonDevice&& rhs) noexcept = delete;
+    InsteonDevice& operator=(const InsteonDevice& rhs) = delete;
+    InsteonDevice& operator=(InsteonDevice&& rhs) noexcept = delete;
 
-            virtual ~InsteonDevice();
-            virtual void OnMessage(std::shared_ptr<InsteonMessage> im);
-            Json::Value SerializeJson();
-            void SerializeYAML();
+    virtual ~InsteonDevice();
+    virtual void OnMessage(std::shared_ptr<InsteonMessage> im);
+    Json::Value SerializeJson();
+    void SerializeYAML();
 
-            void set_message_proc(std::shared_ptr<MessageProcessor> messenger);
-            void set_update_handler(
-                    std::function<void(Json::Value json) > callback);
-            /* member variables, setters and getters */
-            int insteon_address(); // returns insteon address assigned to this device
-            std::string device_name(); // returns the name assigned to this device
-            bool device_disabled();
+    void set_message_proc(std::shared_ptr<MessageProcessor> messenger);
+    void set_update_handler(
+                            std::function<void(Json::Value json) > callback);
+    /* member variables, setters and getters */
+    int insteon_address(); // returns insteon address assigned to this device
+    std::string device_name(); // returns the name assigned to this device
+    bool device_disabled();
 
-            bool command(InsteonDeviceCommand command, unsigned char command_two);
-            void internalReceiveCommand(std::string command, unsigned char command_two);
-            void writeDeviceProperty(const std::string key, const unsigned int value);
-            unsigned char readDeviceProperty(const std::string key);
+    bool command(InsteonDeviceCommand command, unsigned char command_two);
+    void internalReceiveCommand(std::string command, unsigned char command_two);
+    void writeDeviceProperty(const std::string key, const unsigned int value);
+    unsigned char readDeviceProperty(const std::string key);
 
-        protected:
-            bool tryCommand(unsigned char command, unsigned char value);
-            bool tryGetExtendedInformation();
-            bool tryReadWriteALDB();
-            bool tryLightStatusRequest();
-            void statusUpdate(unsigned char status);
-            //boost::asio::io_service& io_service_;
-            boost::asio::io_service::strand io_strand_;
+protected:
+    bool tryCommand(unsigned char command, unsigned char value);
+    bool tryGetExtendedInformation();
+    bool tryReadWriteALDB();
+    bool tryLightStatusRequest();
+    void statusUpdate(unsigned char status);
+    //boost::asio::io_service& io_service_;
+    boost::asio::io_service::strand io_strand_;
 
-            std::map<std::string, InsteonDeviceCommand> command_map_;
+    std::map<std::string, InsteonDeviceCommand> command_map_;
 
-        private:
-            friend class detail::InsteonDeviceImpl;
-            std::unique_ptr<detail::InsteonDeviceImpl> pImpl;
+private:
+    friend class detail::InsteonDeviceImpl;
+    std::unique_ptr<detail::InsteonDeviceImpl> pImpl;
+    std::shared_ptr<MessageProcessor> msgProc_;
 
-            std::function<void(Json::Value) > onStatusUpdate;
+    std::function<void(Json::Value) > onStatusUpdate;
 
-            InsteonMessageType last_action_;
-            void ackOfDirectCommand(unsigned char sentCmdOne, unsigned char recvCmdOne,
-                    unsigned char recvCmdTwo);
+    InsteonMessageType last_action_;
+    void ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im);
+    void BuildDirectStandardMessage(std::vector<unsigned char>& send_buffer,
+                                    unsigned char cmd1, unsigned char cmd2);
+    void BuildDirectExtendedMessage(std::vector<unsigned char>& send_buffer,
+                                    unsigned char cmd1, unsigned char cmd2,
+                                    unsigned char d1 = 0, unsigned char d2 = 0, unsigned char d3 = 0,
+                                    unsigned char d4 = 0, unsigned char d5 = 0, unsigned char d6 = 0,
+                                    unsigned char d7 = 0, unsigned char d8 = 0, unsigned char d9 = 0,
+                                    unsigned char d10 = 0, unsigned char d11 = 0, unsigned char d12 = 0,
+                                    unsigned char d13 = 0);
 
-            void device_name(std::string device_name);
-            void device_disabled(bool disabled);
+    void device_name(std::string device_name);
+    void device_disabled(bool disabled);
 
-            PropertyKeys device_properties_;
-            std::mutex property_lock_;
+    PropertyKeys device_properties_;
+    std::mutex property_lock_;
 
-            void loadProperties();
-            YAML::Node config_;
-            
-            unsigned char hack_cmd_; // used for unexpected ACK
-        };
+    void loadProperties();
+    YAML::Node config_;
 
-        typedef std::map<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMap;
-        typedef std::pair<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMapPair;
-    } // namespace insteon
+    unsigned char hack_cmd_; // used for unexpected ACK
+};
+
+typedef std::map<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMap;
+typedef std::pair<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMapPair;
+} // namespace insteon
 } // namespace ace
 #endif /* INSTEONDEVICEBASE_H */
 

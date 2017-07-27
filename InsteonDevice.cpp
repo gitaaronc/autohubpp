@@ -75,13 +75,13 @@ InsteonDevice::internalReceiveCommand(std::string command,
         io_strand_.post(std::bind(&type::command, this, it->second,
                 command_two));
     } else { // support for commands not native to INSTEON
-        
-        std::string other_cmd = command; 
-        std::transform(other_cmd.begin(), other_cmd.end(), 
+
+        std::string other_cmd = command;
+        std::transform(other_cmd.begin(), other_cmd.end(),
                 other_cmd.begin(), ::tolower);
-        
-        if (other_cmd.compare("toggle") == 0){
-            if(readDeviceProperty("light_status") == 0x00){
+
+        if (other_cmd.compare("toggle") == 0) {
+            if (readDeviceProperty("light_status") == 0x00) {
                 io_strand_.post(std::bind(&type::command, this,
                         InsteonDeviceCommand::On, 0xFF));
             } else {
@@ -131,23 +131,16 @@ InsteonDevice::device_disabled(bool disabled) {
  * and for the time being Houselinc through autohubpp
  */
 void
-InsteonDevice::ackOfDirectCommand(unsigned char sentCmdOne,
-        unsigned char recvCmdOne, unsigned char recvCmdTwo) {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (!sentCmdOne) {
-        utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-                "\t  - unexpected ACK received {0x%02x ,0x%02x, 0x%02x} "
-                "using hack_cmd_{0x%02x}",
-                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, 
-                recvCmdOne, recvCmdTwo, hack_cmd_);
-        sentCmdOne = hack_cmd_;
-    } else {
-        utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
-                "\t  - ACK received for command{0x%02x, 0x%02x,0x%02x} ",
-                FUNCTION_NAME_CSTR, device_name().c_str(), sentCmdOne, 
-                recvCmdOne, recvCmdTwo);
-    }
-    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (sentCmdOne);
+InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
+    unsigned char recvCmdOne = static_cast<unsigned char> (
+            im->properties_["command_one"]);
+    unsigned char recvCmdTwo = static_cast<unsigned char> (
+            im->properties_["command_two"]);
+    utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
+            "\t  - ACK received for command{0x%02x, 0x%02x,0x%02x} ",
+            FUNCTION_NAME_CSTR, device_name().c_str(), hack_cmd_,
+            recvCmdOne, recvCmdTwo);
+    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (hack_cmd_);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
             writeDeviceProperty("device_engine_version", recvCmdTwo);
@@ -235,7 +228,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
 
     switch (im->message_type_) {
         case InsteonMessageType::Ack: // response to direct command
-            pImpl->CommandAckProcessor(im);
+            ackOfDirectCommand(im);
             break;
             // device goes to set level at set ramp rate
         case InsteonMessageType::OnBroadcast:
@@ -343,7 +336,7 @@ InsteonDevice::command(InsteonDeviceCommand command,
         case InsteonDeviceCommand::FastOn:
         case InsteonDeviceCommand::On:
         case InsteonDeviceCommand::Off:
-            return tryCommand(static_cast<unsigned char>(command), command_two);
+            return tryCommand(static_cast<unsigned char> (command), command_two);
     }
     return false;
 }
@@ -357,17 +350,23 @@ InsteonDevice::command(InsteonDeviceCommand command,
 bool
 InsteonDevice::tryCommand(unsigned char command, unsigned char value) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    pImpl->WaitAndSetPendingCommand((unsigned char) command, value);
-    return pImpl->TryCommandInternal((unsigned char) command, value);
+    std::vector<unsigned char> send_buffer;
+    PropertyKeys properties;
+
+    BuildDirectStandardMessage(send_buffer, command, value);
+    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
+    if ((status == EchoStatus::ACK) && (!properties.empty())) {
+        return true;
+    }
+    return false;
 }
 
 bool
 InsteonDevice::tryGetExtendedInformation() {
     std::vector<unsigned char> send_buffer;
     PropertyKeys properties;
-    pImpl->GetExtendedMessage(send_buffer, 0x2E, 0x00);
-    pImpl->WaitAndSetPendingCommand(0x2E, 0x00);
-    EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x51, properties);
+    BuildDirectExtendedMessage(send_buffer, 0x2E, 0x00);
+    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x51, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
         writeDeviceProperty("x10_house_code", properties["data_five"]);
         writeDeviceProperty("x10_unit_code", properties["data_six"]);
@@ -378,7 +377,6 @@ InsteonDevice::tryGetExtendedInformation() {
         return true;
     }
     writeDeviceProperty("button_on_level", 0xFF);
-    pImpl->ClearPendingCommand();
     return false;
 }
 
@@ -386,29 +384,25 @@ bool
 InsteonDevice::tryLightStatusRequest() {
     std::vector<unsigned char> send_buffer;
     PropertyKeys properties;
-    pImpl->BuildDirectStandardMessage(send_buffer, 0x19, 0x02);
-    pImpl->WaitAndSetPendingCommand(0x19, 0x02);
-    EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x50, properties);
+    BuildDirectStandardMessage(send_buffer, 0x19, 0x02);
+    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
         writeDeviceProperty("link_database_delta", properties["command_one"]);
         writeDeviceProperty("light_status", properties["command_two"]);
         return true;
     }
-    pImpl->ClearPendingCommand();
     return false;
 }
 
 bool
 InsteonDevice::tryReadWriteALDB() {
     std::vector<unsigned char> send_buffer;
-    pImpl->GetExtendedMessage(send_buffer, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+    BuildDirectExtendedMessage(send_buffer, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
     PropertyKeys properties;
-    pImpl->WaitAndSetPendingCommand(0x2F, 0x00);
-    EchoStatus status = pImpl->TrySendReceive(send_buffer, true, 0x50, properties);
+    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
         return true;
     }
-    pImpl->ClearPendingCommand();
     return false;
 }
 
@@ -423,7 +417,7 @@ InsteonDevice::statusUpdate(unsigned char status) {
 void
 InsteonDevice::set_message_proc(
         std::shared_ptr<MessageProcessor> messenger) {
-    pImpl->set_message_proc(messenger);
+    msgProc_ = messenger;
 }
 
 void
@@ -447,6 +441,51 @@ InsteonDevice::readDeviceProperty(const std::string key) {
     }
     return 0;
 }
+
+/**
+ * BuildDirectStandardMessage
+ * 
+ * Creates an Insteon Standard(0x62) Message
+ * @param &send_buffer   Reference to a vector of unsigned char
+ * @param cmd1:unsigned char    Insteon command field #1
+ * @param cmd2:unsigned char    Insteon command field #2
+ */
+void
+InsteonDevice::BuildDirectStandardMessage(
+        std::vector<unsigned char>& send_buffer,
+        unsigned char cmd1, unsigned char cmd2) {
+    send_buffer.clear();
+    unsigned char max_hops = 3;
+    unsigned char message_flags = 0;
+    max_hops = readDeviceProperty("message_flags_max_hops") > 0
+            ? readDeviceProperty("message_flags_max_hops") : max_hops;
+    message_flags = (max_hops << 2) | max_hops;
+    send_buffer = {0x62, pImpl->HighAddress(), pImpl->MiddleAddress(),
+        pImpl->LowAddress(), message_flags, cmd1, cmd2};
+}
+
+/* 62 26 e4 c2 1f 2e 00 01 06 05 00 00 00 00 00 00 00 00 00 00 c6 */
+void
+InsteonDevice::BuildDirectExtendedMessage(
+        std::vector<unsigned char>& send_buffer, unsigned char cmd1,
+        unsigned char cmd2, unsigned char d1, unsigned char d2, unsigned char d3,
+        unsigned char d4, unsigned char d5, unsigned char d6, unsigned char d7,
+        unsigned char d8, unsigned char d9, unsigned char d10, unsigned char d11,
+        unsigned char d12, unsigned char d13) {
+    send_buffer.clear();
+    unsigned char max_hops = 3;
+    unsigned char message_flags = 0;
+    max_hops = readDeviceProperty("message_flags_max_hops") > 0
+            ? readDeviceProperty("message_flags_max_hops") : max_hops;
+    message_flags = 16 | (max_hops << 2) | max_hops;
+    send_buffer = {0x62, pImpl->HighAddress(), pImpl->MiddleAddress(),
+        pImpl->LowAddress(), message_flags, cmd1, cmd2, d1, d2, d3, d4, d5, d6,
+        d7, d8, d9, d10, d11, d12, d13};
+
+    send_buffer.insert(send_buffer.end(), utils::GetI2CS(send_buffer,
+            5, send_buffer.size()));
+}
+
 
 }
 }

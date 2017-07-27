@@ -464,7 +464,6 @@ Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
     utils::Logger::Instance().Debug(root.toStyledString().c_str());
 }
 
-
 /*
  * Initial hatchet job to support houselinc application
  * TODO: replace hatchet job with proper implementation
@@ -477,7 +476,7 @@ Autohub::houselincRx(std::vector<unsigned char> buffer) {
     oss << "\t  - {0x" << utils::ByteArrayToStringStream(
             buffer, 0, buffer.size()) << "}\n";
     utils::Logger::Instance().Debug(oss.str().c_str());
-    strand_hub_.post(std::bind([this, buffer](){
+    strand_hub_.post(std::bind([this, buffer]() {
         insteon_network_->internalRawCommand(buffer);
     }));
 }
