@@ -242,7 +242,10 @@ InsteonNetwork::internalReceiveCommand(std::string json) {
     device_id = root.get("device_id", "").asString();
 
     command = root.get("command", "").asString();
-    command_two = root.get("command_two", 0).asInt();
+    command_two = root.get("command_two", 0).asInt() <= 0 ? 0x00 :
+            root.get("command_two", 0).asInt() >= 255 ? 0xFF :
+            root.get("command_two", 0).asInt();
+    
     device = getDevice(std::stoi(device_id));
     if (device) {
         device->internalReceiveCommand(command, command_two);
