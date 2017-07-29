@@ -44,7 +44,7 @@ InsteonDevice::InsteonDevice(int insteon_address,
         boost::asio::io_service::strand& io_strand, YAML::Node config) :
 pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_strand_(io_strand), config_(config),
-last_action_(InsteonMessageType::Other), hack_cmd_(0x19) {
+last_action_(InsteonMessageType::Other), direct_cmd_(0x19) {
 
     device_properties_["light_status"] = 0;
     command_map_["ping"] = InsteonDeviceCommand::Ping;
@@ -138,9 +138,9 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
             im->properties_["command_two"]);
     utils::Logger::Instance().Debug("%s\n\t  - {%s}\n"
             "\t  - ACK received for command{0x%02x, 0x%02x,0x%02x} ",
-            FUNCTION_NAME_CSTR, device_name().c_str(), hack_cmd_,
+            FUNCTION_NAME_CSTR, device_name().c_str(), direct_cmd_,
             recvCmdOne, recvCmdTwo);
-    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (hack_cmd_);
+    InsteonDeviceCommand command = static_cast<InsteonDeviceCommand> (direct_cmd_);
     switch (command) {
         case InsteonDeviceCommand::GetInsteonEngineVersion:
             writeDeviceProperty("device_engine_version", recvCmdTwo);
@@ -157,8 +157,10 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, 0x00));
             break;
         case InsteonDeviceCommand::On:
-        case InsteonDeviceCommand::FastOn:
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, recvCmdTwo));
+            break;
+        case InsteonDeviceCommand::FastOn:
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, 0xFF));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
             writeDeviceProperty("link_database_delta", recvCmdOne);
@@ -268,7 +270,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             break;
         case InsteonMessageType::DirectMessage:
             utils::Logger::Instance().Debug("Direct Message Received");
-            hack_cmd_ = command_one;
+            direct_cmd_ = command_one;
             break;
         default:
             utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"
@@ -332,11 +334,13 @@ InsteonDevice::command(InsteonDeviceCommand command,
             return tryLightStatusRequest();
         case InsteonDeviceCommand::Brighten:
         case InsteonDeviceCommand::Dim:
-        case InsteonDeviceCommand::FastOff:
-        case InsteonDeviceCommand::FastOn:
         case InsteonDeviceCommand::On:
-        case InsteonDeviceCommand::Off:
             return tryCommand(static_cast<unsigned char> (command), command_two);
+        case InsteonDeviceCommand::FastOn:
+            return tryCommand(static_cast<unsigned char> (command), 0xFF);
+        case InsteonDeviceCommand::Off:
+        case InsteonDeviceCommand::FastOff:
+            return tryCommand(static_cast<unsigned char> (command), 0x00);
     }
     return false;
 }

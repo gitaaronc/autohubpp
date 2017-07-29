@@ -125,13 +125,13 @@ private:
     void device_name(std::string device_name);
     void device_disabled(bool disabled);
 
-    PropertyKeys device_properties_;
-    std::mutex property_lock_;
+    PropertyKeys device_properties_; // properties of this device
+    std::mutex property_lock_; // mutex lock for access to device_properties
 
-    void loadProperties();
-    YAML::Node config_;
+    void loadProperties(); // loads properties of this devices from config
+    YAML::Node config_; // YAML node used to store configuration of this device
 
-    unsigned char hack_cmd_; // used for unexpected ACK
+    unsigned char direct_cmd_; // the last command sent by/to this device
 };
 
 typedef std::map<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMap;

@@ -262,6 +262,8 @@ Autohub::start() {
             std::placeholders::_1));
 
     if (!insteon_network_->connect()) {
+        utils::Logger::Instance().Info("Unable to connect to PLM.\n"
+        "Shutting down now\n");
         stop();
         return;
     }
