@@ -50,13 +50,13 @@ namespace insteon
 
 std::string
 ByteArrayToStringStream(
-        const std::vector<unsigned char>& data, int offset, int count) {
+        const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::stringstream strStream;
     for (int i = offset; i < offset + count; ++i) {
         if (i < data.size()) {
             strStream << std::hex << std::setw(2) << std::setfill('0')
-                    << (unsigned int) data[i];
+                    << (uint16_t) data[i];
         }
     }
     return strStream.str();
@@ -94,18 +94,18 @@ InsteonController::getAddress() {
 }
 
 void
-InsteonController::getDatabaseRecords(unsigned char one, unsigned char two) {
+InsteonController::getDatabaseRecords(uint8_t one, uint8_t two) {
     is_loading_database_ = true;
     if ((one == 0x1C) && (two == 0x00)) {
         is_loading_database_ = false;
         insteon_network_->cv_load_db_.notify_one();
         return;
     }
-    std::vector<unsigned char> send_buffer = {0x75};
+    std::vector<uint8_t> send_buffer = {0x75};
     send_buffer.push_back(one);
     send_buffer.push_back(two);
 
-    //std::vector<unsigned char> send_buffer = {0x69};
+    //std::vector<uint8_t> send_buffer = {0x69};
     //insteon_network_->io_service_.post(std::bind(
     //        &type::InternalSend, this, send_buffer));
     insteon_network_->msg_proc_->trySend(send_buffer, false);
@@ -113,33 +113,33 @@ InsteonController::getDatabaseRecords(unsigned char one, unsigned char two) {
 
 void
 InsteonController::getIMConfiguration() {
-    std::vector<unsigned char> send_buffer = {0x73};
+    std::vector<uint8_t> send_buffer = {0x73};
     insteon_network_->msg_proc_->trySend(send_buffer);
 }
 
 bool InsteonController::enableMonitorMode() {
-    std::vector<unsigned char> send_buffer = {0x6B, 0x20};
+    std::vector<uint8_t> send_buffer = {0x6B, 0x20};
     if (insteon_network_->msg_proc_->trySend(send_buffer) == EchoStatus::ACK)
         return true;
     return false;
 }
 
 void
-InsteonController::enterLinkMode(InsteonLinkMode mode, unsigned char group) {
+InsteonController::enterLinkMode(InsteonLinkMode mode, uint8_t group) {
     if (!tryEnterLinkMode(mode, group)) {
         return; // TODO add exception handling
     }
 }
 
 void
-InsteonController::internalSend(const std::vector<unsigned char>& buffer) {
+InsteonController::internalSend(const std::vector<uint8_t>& buffer) {
     insteon_network_->msg_proc_->trySend(buffer);
 }
 
 bool
-InsteonController::tryEnterLinkMode(InsteonLinkMode mode, unsigned char group) {
+InsteonController::tryEnterLinkMode(InsteonLinkMode mode, uint8_t group) {
     pImpl_->LinkingMode_ = mode;
-    std::vector<unsigned char> send_buffer = {0x64, (unsigned char) mode, group};
+    std::vector<uint8_t> send_buffer = {0x64, (uint8_t) mode, group};
     if (insteon_network_->msg_proc_->trySend(send_buffer) != insteon::EchoStatus
             ::ACK) {
         return false;
@@ -161,15 +161,15 @@ InsteonController::tryCancelLinkMode() {
     pImpl_->timer_->Stop();
     pImpl_->IsInLinkingMode_ = false;
     pImpl_->LinkingMode_ = InsteonLinkMode::Contoller;
-    std::vector<unsigned char> send_buffer = {0x65};
+    std::vector<uint8_t> send_buffer = {0x65};
     return insteon_network_->msg_proc_->trySend(send_buffer) ==
             insteon::EchoStatus::ACK;
 }
 
 void
 InsteonController::groupCommand(InsteonControllerGroupCommands command,
-        unsigned char group) {
-    unsigned char value = 0;
+        uint8_t group) {
+    uint8_t value = 0;
     if (command == InsteonControllerGroupCommands::StopDimming)
         return; // Add exception handling
     if (command == InsteonControllerGroupCommands::On)
@@ -179,21 +179,21 @@ InsteonController::groupCommand(InsteonControllerGroupCommands command,
 
 void
 InsteonController::groupCommand(InsteonControllerGroupCommands command,
-        unsigned char group, unsigned char value) {
-    unsigned char cmd = (unsigned char) command;
-    std::vector<unsigned char> send_buffer = {0x61, group, cmd, value};
+        uint8_t group, uint8_t value) {
+    uint8_t cmd = (uint8_t) command;
+    std::vector<uint8_t> send_buffer = {0x61, group, cmd, value};
     insteon_network_->msg_proc_->trySend(send_buffer);
 }
 
 bool
 InsteonController::tryGroupCommand(InsteonControllerGroupCommands command,
-        unsigned char group) {
+        uint8_t group) {
     return false;
 }
 
 bool
 InsteonController::tryGroupCommand(InsteonControllerGroupCommands command,
-        unsigned char group, unsigned char value) {
+        uint8_t group, uint8_t value) {
     return false;
 }
 
@@ -233,7 +233,7 @@ InsteonController::onMessage(
         }
         utils::Logger::Instance().Debug(oss.str().c_str());
     }
-    int insteon_address = 0;
+    uint32_t insteon_address = 0;
     switch (im->message_type_) {
         case insteon::InsteonMessageType::DeviceLink:
         {
@@ -286,17 +286,17 @@ void
 InsteonController::processDatabaseRecord(
         std::shared_ptr<insteon::InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    int address = 0;
+    uint32_t address = 0;
     address = im->properties_["link_address"];
     if (address > 0)
         insteon_network_->addDevice(address);
     bool get_next = false;
-    int has_flags = im->properties_["link_record_flags"];
+    uint32_t has_flags = im->properties_["link_record_flags"];
     get_next = has_flags > 0;
     if (get_next) {
-        unsigned int temp = 0;
-        unsigned char one = im->properties_["db_address_MSB"];
-        unsigned char two = im->properties_["db_address_LSB"];
+        uint16_t temp = 0;
+        uint8_t one = im->properties_["db_address_MSB"];
+        uint8_t two = im->properties_["db_address_LSB"];
 
         utils::Logger::Instance().Debug("Database record found.\n"
                 "\t  Memory location MSB: %d\n"

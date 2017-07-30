@@ -29,6 +29,7 @@
 #define AUTOHUB_HPP
 
 #include <memory>
+#include <cstdint>
 
 #include <boost/asio/io_service.hpp>
 
@@ -66,7 +67,7 @@ namespace ace {
     }
 
     struct connection_data {
-        int session_id;
+        uint32_t session_id;
         std::string name;
         bool authenticated;
     };
@@ -106,7 +107,7 @@ namespace ace {
         con_list wspp_connections_;
         std::mutex wspp_connections_mutex_;
         std::thread wspp_server_thread_;
-        int wspp_next_id_;
+        uint32_t wspp_next_id_;
 
         restbed::Service restbed_;
         void startRestbed();
@@ -121,8 +122,8 @@ namespace ace {
         std::map<std::string, std::shared_ptr<restbed::Session> > rest_sessions_;
 
         std::unique_ptr<server> houselinc_server_;
-        void houselincRx(std::vector<unsigned char> buffer);
-        void houselincTx(std::vector<unsigned char> buffer);
+        void houselincRx(std::vector<uint8_t> buffer);
+        void houselincTx(std::vector<uint8_t> buffer);
         
         std::map<std::string, std::shared_ptr<DynamicLibrary>> dynamicLibraryMap_;
     };

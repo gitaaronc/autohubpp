@@ -10,6 +10,8 @@
 
 #include <memory>
 #include <iostream>
+#include <cstdint>
+
 #include <yaml-cpp/yaml.h>
 
 namespace ace {

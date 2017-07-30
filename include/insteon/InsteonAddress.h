@@ -27,37 +27,39 @@
 #ifndef INSTEONADDRESS_H
 #define	INSTEONADDRESS_H
 
+#include <cstdint>
+
 namespace ace {
     namespace insteon {
         struct InsteonAddress{
             InsteonAddress()
             : address_high_(0), address_middle_(0), address_low_(0){
             }
-            unsigned char address_high_ : 8;
-            unsigned char address_middle_ : 8;
-            unsigned char address_low_ : 8;
-            void setAddress(int value){
+            uint8_t address_high_ : 8;
+            uint8_t address_middle_ : 8;
+            uint8_t address_low_ : 8;
+            void setAddress(uint32_t value){
                 address_high_ = value >> 16 & 0xFF;
                 address_middle_ = value >> 8 & 0xFF;
                 address_low_ = value & 0xFF;
             }
-            int getAddress(){
+            uint32_t getAddress(){
                 return address_high_ << 16 | address_middle_ << 8 | address_low_;
             }
         };
         
         struct InsteonIdentity{
-            unsigned char category : 8;
-            unsigned char sub_category : 8;
-            unsigned char firmware_version : 8;
+            uint8_t category : 8;
+            uint8_t sub_category : 8;
+            uint8_t firmware_version : 8;
             InsteonIdentity()
             : category(0), sub_category(0), firmware_version(0){}
-            void setIdentity(int value){
+            void setIdentity(uint32_t value){
                 category = value >> 16 & 0xFF;
                 sub_category = value >> 8 & 0xFF;
                 firmware_version = value & 0xFF;
             }
-            int getIdentity(){
+            uint32_t getIdentity(){
                 return category << 16 | sub_category << 8 | firmware_version;
             }
         };

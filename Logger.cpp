@@ -46,7 +46,7 @@ stream << "\033[1;31mMessage Flags: 0b" << x << "\033[0m";*/
 
 std::string
 Logger::ByteArrayToStringStream(
-        const std::vector<unsigned char>& data, int offset, int count) {
+        const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
     std::stringstream strStream;
     std::cout << FUNCTION_NAME << std::endl;
     for (int i = offset; i < offset + count; ++i) {
@@ -74,7 +74,7 @@ Logger::PrintTime() {
 
 void
 Logger::hexout(const char& c) {
-    unsigned char uc = static_cast<unsigned char> (c);
+    uint8_t uc = static_cast<uint8_t> (c);
     oss_ << std::setw(2) << std::setfill('0') << (unsigned int) uc
             << ' ';
 }
@@ -82,7 +82,7 @@ Logger::hexout(const char& c) {
 void
 Logger::hexoutp(const char& c) {
     //lock_.lock();
-    unsigned char uc = static_cast<unsigned char> (c);
+    uint8_t uc = static_cast<uint8_t> (c);
     std::ios::fmtflags f(oss_.flags());
     oss_ << std::hex << std::setw(2) << std::setfill('0')
             << (unsigned int) uc;
@@ -91,18 +91,18 @@ Logger::hexoutp(const char& c) {
 }
 
 void
-Logger::hexdump(const std::vector<unsigned char> &s,
-        unsigned int line_len) {
+Logger::hexdump(const std::vector<uint8_t> &s,
+        uint32_t line_len) {
     if (logging_mode_ < LOGGING::VERBOSE)
         return;
     lock_.lock();
     oss_ << "\033[1;36m[HEX DUMP] Displaying: " << s.size()
             << " bytes. " << Now() << std::endl;
     const std::string::size_type slen(s.size());
-    int i(0);
+    uint32_t i(0);
     std::string::size_type pos(0);
     const std::streamsize lines(slen / line_len);
-    const unsigned int chars(slen % line_len);
+    const uint32_t chars(slen % line_len);
     std::ios::fmtflags f(oss_.flags());
 
     oss_ << ":------: 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F"

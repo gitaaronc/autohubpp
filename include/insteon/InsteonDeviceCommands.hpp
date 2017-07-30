@@ -28,11 +28,13 @@
 #ifndef INSTEONDEVICECOMMANDS_H
 #define	INSTEONDEVICECOMMANDS_H
 
+#include <cstdint>
+
 namespace ace {
 namespace insteon {
 // A set of commands that can be sent to an INSTEON device
 
-enum class InsteonDeviceCommand_ : unsigned char {
+enum class InsteonDeviceCommand_ : uint8_t {
     //Reserved = 0x00,
     ProductDataRequest = 0x03,
             EnterLinkingMode = 0x09,

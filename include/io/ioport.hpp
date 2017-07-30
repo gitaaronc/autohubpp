@@ -31,6 +31,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <cstdint>
 
 namespace ace {
 namespace io {
@@ -45,12 +46,12 @@ public:
     }
     
     virtual void async_read_some() = 0;
-    virtual bool open(const std::string, int) = 0;
+    virtual bool open(const std::string, uint32_t) = 0;
     virtual void set_recv_handler(std::function<void() >) = 0;
-    virtual std::size_t recv_with_timeout(std::vector<unsigned char>&, int) = 0;
+    virtual std::size_t recv_with_timeout(std::vector<uint8_t>&, uint32_t) = 0;
     // takes a buffer by reference, should place new data on the back
-    virtual unsigned int recv_buffer(std::vector<unsigned char>&) = 0;
-    virtual unsigned int send_buffer(std::vector<unsigned char>&) = 0;
+    virtual uint16_t recv_buffer(std::vector<uint8_t>&) = 0;
+    virtual uint16_t send_buffer(std::vector<uint8_t>&) = 0;
 };
 }
 }

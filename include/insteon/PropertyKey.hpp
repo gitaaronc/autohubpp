@@ -30,105 +30,15 @@
 
 #include <vector>
 #include <map>
+#include <cstdint>
 
 namespace ace {
     namespace insteon {
 
-        // TODO - REMOVE DEPRECATED in favor of map<string,int> vs map<int,int>
-        enum class PropertyKey_ : int {
-            Address = 1,
-                    ButtonRampRate,
-                    ButtonOnLevel,
-                    Cmd1,
-                    Cmd2,
-                    Data1,
-                    Data2,
-                    Data3,
-                    Data4,
-                    Data5,
-                    Data6,
-                    Data7,
-                    Data8,
-                    Data9,
-                    Data10,
-                    Data11,
-                    Data12,
-                    Data13,
-                    Data14,
-                    DevCat,
-                    DevEngineVersion,
-                    DevFirmwareVersion,
-                    DevSubCat,
-                    // ---- Responses to 0x1f00 
-                    EnableBeepOnButtonPress,
-                    EnableBlinkOnError, 
-                    EnableBlinkOnTraffic,
-                    EnableLED, 
-                    EnableProgrammingLock,
-                    EnableResumeDim, 
-                    EnableLoadSense, 
-                    EnableUnknown3,
-                    // -----------------------
-                    FromAddress,
-                    GlobalLedBrightness,
-                    Group, // 
-                    IMConfigurationFlags,
-                    IMSetButtonEvent,
-                    IncrementDirection,
-                    LightStatus, // current status of relay ON | OFF
-                    LinkAddress,
-                    LinkData1,
-                    LinkData2,
-                    LinkData3,
-                    LinkDatabaseDelta,
-                    LinkGroup,
-                    LinkRecordFlags,
-                    LinkStatus, //
-                    LinkType,
-                    MessageFlagsMaxHops,
-                    MessageFlagsRemainingHops,
-                    MessageFlagsExtendedFlag,
-                    MessageFlagsAcknowledge,
-                    MessageFlagsGroup,
-                    MessageFlagsBroadcast,
-                    ResponderCmd1,
-                    ResponderCount,
-                    ResponderGroup, //
-                    ResponderErrorCount,
-                    ToAddress,
-                    SentCommandOne,
-                    SentCommandTwo,
-                    SignalToNoiseThreshold,
-                    Spare1,
-                    Spare2,
-                    X10HouseCode,
-                    X10UnitCode//
-        };
-
-        typedef PropertyKey_ PropertyKey_deprecated; // TODO - REMOVE DEPRECATED
-        /**
-         * mapPropertyKeyInt
-         * 
-         * std::map<std::pair(PropertyKey, unsigned int)>
-         * 
-         * @param PropertyKey           The Property Key
-         * @param unsigned int         The integer value 
-         */
-        // TODO - REMOVE DEPRECATED
-        typedef std::map<PropertyKey_deprecated, unsigned int> PropertyKeys_deprecated;
-        
         // TODO consider replacing with YAML::Node
         // PropertyKeys string as Key, more room for error vs int
-        typedef std::map<std::string, unsigned int> PropertyKeys; 
+        typedef std::map<std::string, uint32_t> PropertyKeys; 
         
-        // TODO - REMOVE DEPRECATED
-        class PropertyKeyNames_deprecated {
-        public:
-            PropertyKeyNames_deprecated();
-            std::string GetPropertyName(PropertyKey_deprecated key);
-        private:
-            std::map<PropertyKey_deprecated, std::string> property_name_;
-        };
     } // namespace insteon
 } // namespace ace
 #endif	/* PROPERTYKEY_HPP */

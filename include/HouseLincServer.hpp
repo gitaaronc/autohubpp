@@ -25,6 +25,7 @@
 #include <utility>
 #include <functional>
 #include <vector>
+#include <cstdint>
 
 #include <boost/asio.hpp>
 
@@ -35,7 +36,7 @@ class session
 public:
 
     session(tcp::socket socket, std::function<void(
-            std::vector<unsigned char>) > on_receive,
+            std::vector<uint8_t>) > on_receive,
             std::function<void(std::shared_ptr<session>) > on_disconnect)
     : socket_(std::move(socket)), on_receive_(on_receive),
     on_disconnect_(on_disconnect) {
@@ -45,7 +46,7 @@ public:
         do_read();
     }
 
-    void do_write(std::vector<unsigned char>buffer) {
+    void do_write(std::vector<uint8_t>buffer) {
         auto self(shared_from_this());
         boost::asio::async_write(socket_, boost::asio::buffer(buffer, buffer.size()),
                 [this, self](boost::system::error_code ec, std::size_t /*length*/) {
@@ -63,7 +64,7 @@ private:
         socket_.async_read_some(boost::asio::buffer(data_, max_length),
                 [this, self](boost::system::error_code ec, std::size_t length) {
                     if (!ec) {
-                        std::vector<unsigned char> data;
+                        std::vector<uint8_t> data;
                         for (int i = 1; i < length; i++) {
                             data.push_back(data_[i]);
                         }
@@ -81,8 +82,8 @@ private:
     enum {
         max_length = 1024
     };
-    unsigned char data_[max_length];
-    std::function<void(std::vector<unsigned char> buffer) > on_receive_;
+    uint8_t data_[max_length];
+    std::function<void(std::vector<uint8_t> buffer) > on_receive_;
     std::function<void(std::shared_ptr<session>) > on_disconnect_;
 };
 
@@ -90,13 +91,13 @@ class server {
 public:
 
     server(boost::asio::io_service& io_service, short port,
-            std::function<void(std::vector<unsigned char>) > on_receive)
+            std::function<void(std::vector<uint8_t>) > on_receive)
     : acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
     socket_(io_service), on_receive_(on_receive), client_count_(0) {
         do_accept();
     }
 
-    void SendData(std::vector<unsigned char> buffer) {
+    void SendData(std::vector<uint8_t> buffer) {
         ace::utils::Logger::Instance().Trace(FUNCTION_NAME);
         for (auto client : sessions_) {
             client->do_write(buffer);
@@ -132,8 +133,8 @@ private:
     tcp::acceptor acceptor_;
     tcp::socket socket_;
     std::list<std::shared_ptr<session>> sessions_;
-    std::function<void(std::vector<unsigned char> buffer) > on_receive_;
-    int client_count_;
+    std::function<void(std::vector<uint8_t> buffer) > on_receive_;
+    uint32_t client_count_;
 };
 
 #endif /* HOUSELINCSERVER_HPP */

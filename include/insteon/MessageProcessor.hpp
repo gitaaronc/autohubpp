@@ -33,6 +33,8 @@
 #include <mutex>
 #include <string>
 #include <list>
+#include <cstdint>
+
 
 #include <boost/asio.hpp>
 
@@ -54,10 +56,10 @@ class InsteonMessage;
 
 struct WaitItem {
 
-    WaitItem(unsigned char message_id) :
+    WaitItem(uint8_t message_id) :
     message_id_(message_id), message_received_(false) {
     }
-    unsigned char message_id_;
+    uint8_t message_id_;
     bool message_received_;
     system::AutoResetEvent wait_event_;
     std::shared_ptr<InsteonMessage> insteon_message_;
@@ -80,32 +82,32 @@ public:
 
     bool connect();
     void onReceive();
-    EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
+    EchoStatus trySend(const std::vector<uint8_t>& send_buffer,
                        bool retry_on_nak = true);
-    EchoStatus trySend(const std::vector<unsigned char>& send_buffer,
-                       bool retry_on_nak, int echo_length);
-    EchoStatus trySendReceive(const std::vector<unsigned char>&
-                              send_buffer, int triesLeft, unsigned char receive_message_id,
+    EchoStatus trySend(const std::vector<uint8_t>& send_buffer,
+                       bool retry_on_nak, uint32_t echo_length);
+    EchoStatus trySendReceive(const std::vector<uint8_t>&
+                              send_buffer, uint8_t triesLeft, uint8_t receive_message_id,
                               PropertyKeys& properties);
 
     void set_message_handler(msg_handler handler);
 protected:
 private:
     void processData();
-    std::string byteArrayToStringStream(const std::vector<unsigned char>&
+    std::string byteArrayToStringStream(const std::vector<uint8_t>&
                                         data,
-                                        int offset, int count);
+                                        uint32_t offset, uint32_t count);
 
     EchoStatus processEcho(int echo_length);
-    bool processMessage(const std::vector<unsigned char>& read_buffer,
-                        int offset, int& count, bool is_echo = false);
+    bool processMessage(const std::vector<uint8_t>& read_buffer,
+                        uint32_t offset, int& count, bool is_echo = false);
 
-    void readData(std::vector<unsigned char>& return_buffer,
-                  int bytes_expected,
+    void readData(std::vector<uint8_t>& return_buffer,
+                  uint32_t bytes_expected,
                   bool is_echo);
 
-    EchoStatus send(std::vector<unsigned char> send_buffer,
-                    bool retry_on_nak, int echo_length);
+    EchoStatus send(std::vector<uint8_t> send_buffer,
+                    bool retry_on_nak, uint32_t echo_length);
     void updateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 
     std::unique_ptr<io::IOPort> io_port_;
@@ -117,7 +119,7 @@ private:
     std::list<std::shared_ptr<WaitItem>> wait_list_;
     std::mutex mutex_wait_list_;
     std::mutex lock_buffer_;
-    std::vector<unsigned char> buffer_;
+    std::vector<uint8_t> buffer_;
     std::mutex lock_data_processor_;
 
     std::chrono::system_clock::time_point time_of_last_command_;

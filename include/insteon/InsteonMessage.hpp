@@ -32,6 +32,8 @@
 #include "PropertyKey.hpp"
 
 #include <vector>
+#include <cstdint>
+
 namespace ace {
     namespace insteon {
 
@@ -47,8 +49,8 @@ namespace ace {
             properties_(properties) {
 
             };
-            int message_id_;
-            std::vector<unsigned char> raw_message;
+            uint32_t message_id_;
+            std::vector<uint8_t> raw_message;
             PropertyKeys properties_;
             InsteonMessageType message_type_;
         };

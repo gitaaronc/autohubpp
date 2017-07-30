@@ -33,6 +33,7 @@
 
 #include <vector>
 #include <mutex>
+#include <cstdint>
 
 namespace ace {
 namespace utils {
@@ -63,12 +64,12 @@ public:
 
     void
     hexdump(const std::string& s,
-            const std::vector<unsigned char>& d) {
+            const std::vector<uint8_t>& d) {
         Debug(s.data());
         hexdump(d);
     }
-    void hexdump(const std::vector<unsigned char> &s,
-            unsigned int line_len = 16);
+    void hexdump(const std::vector<uint8_t> &s,
+            uint32_t line_len = 16);
     void hexoutp(const char& c);
     void PrintTime();
     void SetLoggingMode(LOGGING logging_mode);
@@ -83,7 +84,7 @@ public:
     }
     void Trace(const char *data, ...);
     std::string ByteArrayToStringStream(
-            const std::vector<unsigned char>& data, int offset, int count);
+            const std::vector<uint8_t>& data, uint32_t offset, uint32_t count);
 protected:
     std::ostringstream oss_;
     std::ofstream ofs_;

@@ -31,9 +31,9 @@ namespace ace
 namespace utils
 {
 
-std::vector<unsigned char>
-ArraySubset(const std::vector<unsigned char>& data, int offset, int count) {
-    std::vector<unsigned char> return_buffer;
+std::vector<uint8_t>
+ArraySubset(const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
+    std::vector<uint8_t> return_buffer;
     if (count > data.size() - offset)
         count = data.size() - offset;
     return_buffer.insert(return_buffer.end(), data.begin() + offset,
@@ -42,24 +42,24 @@ ArraySubset(const std::vector<unsigned char>& data, int offset, int count) {
 }
 
 /**
- * Checks whether or not the contents of two unsigned char vector arrays are equal
+ * Checks whether or not the contents of two uint8_t vector arrays are equal
  * NOTE: Will return true if both vectors are zero size
  * @param source_one
  * @param source_two
  * @return true if contents are the same
  */
 bool
-VectorsEqual(const std::vector<unsigned char>& source_one,
-        const std::vector<unsigned char>& source_two) {
+VectorsEqual(const std::vector<uint8_t>& source_one,
+        const std::vector<uint8_t>& source_two) {
     if (source_one.size() != source_two.size()) return false;
     return std::equal(source_one.begin(), source_one.end(), source_two.begin());
 }
 
-unsigned char
-GetI2CS(const std::vector<unsigned char>& data, unsigned int first_byte,
-        unsigned int last_byte) {
-    unsigned char count = last_byte - first_byte;
-    unsigned char i2cs = 0;
+uint8_t
+GetI2CS(const std::vector<uint8_t>& data, uint32_t first_byte,
+        uint32_t last_byte) {
+    uint8_t count = last_byte - first_byte;
+    uint8_t i2cs = 0;
     if ((data.size() < count) || (count <= 0)) return 0;
     for (int i = first_byte; i < last_byte; i++) {
         i2cs += data[i];
@@ -70,7 +70,7 @@ GetI2CS(const std::vector<unsigned char>& data, unsigned int first_byte,
 
 std::string
 ByteArrayToStringStream(
-        const std::vector<unsigned char>& data, int offset, int count) {
+        const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
     std::stringstream strStream;
     strStream.str("");
     for (int i = offset; i < offset + count; ++i) {

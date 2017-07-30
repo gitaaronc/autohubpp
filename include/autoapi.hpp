@@ -26,6 +26,7 @@
  */
 #include <memory>
 #include <functional>
+#include <cstdint>
 
 #include "Autohub.hpp"
 

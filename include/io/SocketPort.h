@@ -34,6 +34,7 @@
 #include <functional>
 #include <mutex>
 #include <condition_variable>
+#include <cstdint>
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
@@ -71,12 +72,12 @@ namespace ace {
 
             void close();
 
-            std::size_t recv_with_timeout(std::vector<unsigned char>& buffer,
-                    int msTimeout = 50) override;
+            std::size_t recv_with_timeout(std::vector<uint8_t>& buffer,
+                    uint32_t msTimeout = 50) override;
 
-            unsigned int recv_buffer(std::vector<unsigned char>& buffer) override;
+            uint16_t recv_buffer(std::vector<uint8_t>& buffer) override;
 
-            unsigned int send_buffer(std::vector<unsigned char>& buffer) override;
+            uint16_t send_buffer(std::vector<uint8_t>& buffer) override;
         protected:
 
             void on_async_receive_some(const boost::system::error_code& ec,
@@ -89,8 +90,8 @@ namespace ace {
             boost::asio::io_service& io_service_;
             recv_handler m_recv_handler;
             socket_port_ptr socket_port_;
-            std::vector<unsigned char> incoming_buffer_;
-            std::vector<unsigned char> recv_buffer_;
+            std::vector<uint8_t> incoming_buffer_;
+            std::vector<uint8_t> recv_buffer_;
             bool recv_buffer_has_data_;
             std::mutex recv_buffer_mutex_;
         };

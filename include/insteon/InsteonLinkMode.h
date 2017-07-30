@@ -8,9 +8,11 @@
 #ifndef INSTEONLINKMODE_H
 #define	INSTEONLINKMODE_H
 
+#include <cstdint>
+
 namespace ace {
     namespace insteon {
-        enum class InsteonLinkMode : unsigned char {
+        enum class InsteonLinkMode : uint8_t {
             Responder = 0x00,
             Contoller = 0x01,
             Either = 0x02,

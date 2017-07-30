@@ -44,12 +44,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/InsteonProtocol.o \
 	${OBJECTDIR}/Logger.o \
 	${OBJECTDIR}/MessageProcessor.o \
-	${OBJECTDIR}/PropertyKeyNames.o \
 	${OBJECTDIR}/SerialPort.o \
 	${OBJECTDIR}/SocketPort.o \
 	${OBJECTDIR}/autoapi.o \
 	${OBJECTDIR}/config.o \
-	${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o \
 	${OBJECTDIR}/include/system/Timer.o \
 	${OBJECTDIR}/include/utils/utils.o \
 	${OBJECTDIR}/jsoncpp.o \
@@ -125,11 +123,6 @@ ${OBJECTDIR}/MessageProcessor.o: nbproject/Makefile-${CND_CONF}.mk MessageProces
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/websocketpp -I/usr/include/restbed -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/MessageProcessor.o MessageProcessor.cpp
 
-${OBJECTDIR}/PropertyKeyNames.o: nbproject/Makefile-${CND_CONF}.mk PropertyKeyNames.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/websocketpp -I/usr/include/restbed -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PropertyKeyNames.o PropertyKeyNames.cpp
-
 ${OBJECTDIR}/SerialPort.o: nbproject/Makefile-${CND_CONF}.mk SerialPort.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -149,11 +142,6 @@ ${OBJECTDIR}/config.o: nbproject/Makefile-${CND_CONF}.mk config.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/websocketpp -I/usr/include/restbed -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/config.o config.cpp
-
-${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o: nbproject/Makefile-${CND_CONF}.mk include/insteon/detail/InsteonDeviceImpl.cpp 
-	${MKDIR} -p ${OBJECTDIR}/include/insteon/detail
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_FILESYSTEM_NO_DEPRECATED -DBOOST_LOG_DYN_LINK -I/usr/include/websocketpp -I/usr/include/restbed -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/include/insteon/detail/InsteonDeviceImpl.o include/insteon/detail/InsteonDeviceImpl.cpp
 
 ${OBJECTDIR}/include/system/Timer.o: nbproject/Makefile-${CND_CONF}.mk include/system/Timer.cpp 
 	${MKDIR} -p ${OBJECTDIR}/include/system

@@ -31,7 +31,7 @@
 namespace ace {
     namespace insteon {
 
-        enum class InsteonMessageType : int {
+        enum class InsteonMessageType : uint32_t {
             Other = 0,
                     Ack,
                     ALDBRecord,

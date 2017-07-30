@@ -45,7 +45,7 @@ void
 SerialPort::async_read_some() {
     if (serial_port_.get() == NULL || !serial_port_->is_open()) return;
     incoming_buffer_.resize(0);
-    std::vector<unsigned char>().swap(incoming_buffer_);
+    std::vector<uint8_t>().swap(incoming_buffer_);
     incoming_buffer_.resize(512);
 
     if (recv_buffer_has_data_ && m_recv_handler) {
@@ -83,7 +83,7 @@ SerialPort::on_async_receive_some(const boost::system::error_code& ec,
 }
 
 bool
-SerialPort::open(const std::string com_port_name, int baud_rate) {
+SerialPort::open(const std::string com_port_name, uint32_t baud_rate) {
     boost::system::error_code ec;
     if (serial_port_.get() == NULL)
         return false;
@@ -130,11 +130,11 @@ SerialPort::close() {
  * @return Returns the number of bytes transferred to the buffer
  */
 std::size_t
-SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
-        int msTimeout) {
+SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
+        uint32_t msTimeout) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    unsigned int rVal = 0;
-    std::vector<unsigned char> data;
+    uint16_t rVal = 0;
+    std::vector<uint8_t> data;
     data.resize(512);
 
     boost::system::error_code ec;
@@ -181,30 +181,30 @@ SerialPort::recv_with_timeout(std::vector<unsigned char>& buffer,
  * @param buffer 
  * @return returns the number of bytes read from the buffer
  */
-unsigned int
-SerialPort::recv_buffer(std::vector<unsigned char>& buffer) {
-    unsigned int rVal = 0;
+uint16_t
+SerialPort::recv_buffer(std::vector<uint8_t>& buffer) {
+    uint16_t rVal = 0;
     std::lock_guard<std::mutex>_(recv_buffer_mutex_);
     for (const auto& it : recv_buffer_)
         buffer.push_back(it);
 
     rVal = recv_buffer_.size();
     recv_buffer_.resize(0);
-    std::vector<unsigned char>().swap(recv_buffer_);
+    std::vector<uint8_t>().swap(recv_buffer_);
 
     recv_buffer_has_data_ = false;
 
     return rVal;
 }
 
-unsigned int
-SerialPort::send_buffer(std::vector<unsigned char>& buffer) {
+uint16_t
+SerialPort::send_buffer(std::vector<uint8_t>& buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    unsigned int sent = 0;
-    unsigned int to_send = buffer.size();
-    std::vector<unsigned char> temp;
+    uint16_t sent = 0;
+    uint16_t to_send = buffer.size();
+    std::vector<uint8_t> temp;
     while (sent < to_send) {
-        std::vector<unsigned char>().swap(temp);
+        std::vector<uint8_t>().swap(temp);
         std::copy(buffer.begin() + sent, buffer.end(),
                 std::back_inserter(temp));
         sent += serial_port_->write_some(boost::asio::buffer(

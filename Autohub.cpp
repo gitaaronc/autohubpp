@@ -350,7 +350,7 @@ void
 Autohub::restGetDevice(const std::shared_ptr<restbed::Session> session) {
     const auto request = session->get_request();
     const std::string device = request->get_path_parameter("device");
-    int device_id = 0;
+    uint32_t device_id = 0;
     device_id = std::stoi(device);
     Json::Value root;
     root = insteon_network_->serializeJson(device_id);
@@ -428,7 +428,7 @@ Autohub::restPostCommand(const std::shared_ptr<restbed::Session> session) {
         for (const auto& it : headers) {
             utils::Logger::Instance().Debug(it.second.c_str());
         }
-        int content_length = 0;
+        uint32_t content_length = 0;
         request->get_header("Content-Length", content_length);
         session->fetch(content_length, std::bind(&Autohub::restProcessJson, this,
                 std::placeholders::_1, std::placeholders::_2));
@@ -471,7 +471,7 @@ Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
  * TODO: replace hatchet job with proper implementation
  */
 void
-Autohub::houselincRx(std::vector<unsigned char> buffer) {
+Autohub::houselincRx(std::vector<uint8_t> buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::ostringstream oss;
     oss << "The following message was received by the network\n";
@@ -488,7 +488,7 @@ Autohub::houselincRx(std::vector<unsigned char> buffer) {
  * TODO: replace hatchet job with proper implementation
  */
 void
-Autohub::houselincTx(std::vector<unsigned char> buffer) {
+Autohub::houselincTx(std::vector<uint8_t> buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::ostringstream oss;
     oss << "Writing the following command to the Network!\n";

@@ -33,6 +33,7 @@
 #include "../../system/Timer.hpp"
 
 #include <memory>
+#include <cstdint>
 
 namespace ace {
     namespace system{

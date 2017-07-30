@@ -31,6 +31,8 @@
 #include "InsteonControllerGroupCommands.h"
 #include "PropertyKey.hpp"
 
+#include <cstdint>
+
 #include <boost/asio.hpp>
 
 namespace ace {
@@ -51,18 +53,18 @@ namespace ace {
             ~InsteonController();
         public:
 
-            int getAddress();
+            uint32_t getAddress();
 
-            void enterLinkMode(InsteonLinkMode mode, unsigned char group);
+            void enterLinkMode(InsteonLinkMode mode, uint8_t group);
 
             void cancelLinkMode();
 
             void groupCommand(InsteonControllerGroupCommands command,
-                    unsigned char group);
+                    uint8_t group);
 
             void groupCommand(InsteonControllerGroupCommands command,
-                    unsigned char group, unsigned char value);
-            void getDatabaseRecords(unsigned char one, unsigned char two);
+                    uint8_t group, uint8_t value);
+            void getDatabaseRecords(uint8_t one, uint8_t two);
             void getIMConfiguration();
 
             bool enableMonitorMode();
@@ -71,7 +73,7 @@ namespace ace {
                     insteon_message);
             bool is_loading_database_;
         private:
-            void internalSend(const std::vector<unsigned char>& buffer);
+            void internalSend(const std::vector<uint8_t>& buffer);
 
             void onTimerEvent();
 
@@ -84,15 +86,15 @@ namespace ace {
 
             void setAddress(int address);
 
-            bool tryEnterLinkMode(InsteonLinkMode mode, unsigned char group);
+            bool tryEnterLinkMode(InsteonLinkMode mode, uint8_t group);
 
             bool tryCancelLinkMode();
 
             bool tryGroupCommand(InsteonControllerGroupCommands command,
-                    unsigned char group);
+                    uint8_t group);
 
             bool tryGroupCommand(InsteonControllerGroupCommands command,
-                    unsigned char group, unsigned char value);
+                    uint8_t group, uint8_t value);
 
             std::unique_ptr<detail::InsteonController_impl> pImpl_;
 

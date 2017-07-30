@@ -160,8 +160,6 @@
       </item>
       <item path="MessageProcessor.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="PropertyKeyNames.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SocketPort.cpp" ex="false" tool="1" flavor2="0">
@@ -227,16 +225,6 @@
       <item path="include/insteon/PropertyKey.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/insteon/detail/InsteonController_impl.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="include/insteon/detail/InsteonDeviceImpl.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="include/insteon/detail/InsteonDeviceImpl.hpp"
             ex="false"
             tool="3"
             flavor2="0">
@@ -345,8 +333,6 @@
       </item>
       <item path="MessageProcessor.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="PropertyKeyNames.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="SerialPort.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SocketPort.cpp" ex="false" tool="1" flavor2="0">
@@ -412,16 +398,6 @@
       <item path="include/insteon/PropertyKey.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/insteon/detail/InsteonController_impl.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="include/insteon/detail/InsteonDeviceImpl.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="include/insteon/detail/InsteonDeviceImpl.hpp"
             ex="false"
             tool="3"
             flavor2="0">

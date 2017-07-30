@@ -32,14 +32,15 @@
 #include <string>
 #include <iomanip>
 #include <vector>
+#include <cstdint>
 
 namespace ace {
     namespace utils {
-        std::vector<unsigned char> ArraySubset(
-                const std::vector<unsigned char>& data, int offset, int count);
+        std::vector<uint8_t> ArraySubset(
+                const std::vector<uint8_t>& data, uint32_t offset, uint32_t count);
 
-        bool VectorsEqual(const std::vector<unsigned char>& source_one,
-                const std::vector<unsigned char>& source_two);
+        bool VectorsEqual(const std::vector<uint8_t>& source_one,
+                const std::vector<uint8_t>& source_two);
 
         // Thanks to: http://stackoverflow.com/questions/5100718/int-to-hex-string-in-c
         template< typename T >
@@ -51,11 +52,11 @@ namespace ace {
             return stream.str();
         }
 
-        unsigned char GetI2CS(const std::vector<unsigned char>& data,
-                unsigned int first_byte, unsigned int last_byte);
+        uint8_t GetI2CS(const std::vector<uint8_t>& data,
+                uint32_t first_byte, uint32_t last_byte);
 
         std::string ByteArrayToStringStream(
-                const std::vector<unsigned char>& data, int offset, int count);
+                const std::vector<uint8_t>& data, uint32_t offset, uint32_t count);
     }
 }
 

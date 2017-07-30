@@ -62,7 +62,7 @@ MessageProcessor::connect() {
 
     std::string plm_type = config_["type"].as<std::string>("serial");
     std::string host;
-    int port = 0;
+    uint32_t port = 0;
     std::unique_ptr<io::IOPort> io;
 
     std::transform(plm_type.begin(), plm_type.end(),
@@ -102,7 +102,7 @@ MessageProcessor::processData() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     // force other thread to wait
     //std::lock_guard<std::mutex>_(lock_data_processor_);
-    std::vector<unsigned char> read_buffer;
+    std::vector<uint8_t> read_buffer;
     {
         // move the object buffer to the back of local buffer
         std::lock_guard<std::mutex>_(lock_buffer_);
@@ -111,14 +111,14 @@ MessageProcessor::processData() {
                 read_buffer.push_back(it);
             }
             buffer_.resize(0);
-            std::vector<unsigned char>().swap(buffer_);
+            std::vector<uint8_t>().swap(buffer_);
         }
     }
     // get data from the io port while looking for a complete message
     if ((io_port_->recv_buffer(read_buffer) > 0) || (read_buffer.size() > 0)) {
-        int count = 0;
-        int offset = 0;
-        int last = 0;
+        uint32_t count = 0;
+        uint32_t offset = 0;
+        uint32_t last = 0;
         while (offset < read_buffer.size()) { // iterate buffer looking for STX
             if (read_buffer[offset++] == 0x02) { // got STX
                 if (last != offset - 1) {
@@ -142,7 +142,7 @@ MessageProcessor::processData() {
                         last = offset;
                         break; // found a message, get out of do while loop
                     } else { // still looking
-                        std::vector<unsigned char> more_data{};
+                        std::vector<uint8_t> more_data{};
 
                         utils::Logger::Instance().Info(
                                 "%s\n\t  - working with %d bytes: (%d:%d) {%s}\n",
@@ -182,7 +182,7 @@ MessageProcessor::processEcho(int echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     EchoStatus status = EchoStatus::None;
 
-    std::vector<unsigned char> read_buffer;
+    std::vector<uint8_t> read_buffer;
     readData(read_buffer, echo_length, true);
     if (read_buffer.size() == 0) {
         return EchoStatus::None;
@@ -200,7 +200,7 @@ MessageProcessor::processEcho(int echo_length) {
         return EchoStatus::NAK;
 
     }
-    int offset = 0;
+    uint32_t offset = 0;
     while (offset < read_buffer.size())
         if (read_buffer[offset++] == 0x02)
             break;
@@ -215,10 +215,10 @@ MessageProcessor::processEcho(int echo_length) {
                 read_buffer, 0, offset - 1).c_str()
                 );
     }
-    int count = 0;
+    uint32_t count = 0;
     if (processMessage(read_buffer, offset, count, true)) {
-        int j = offset + count; // < echo_length ? echo_length - 1 : offset + count ;
-        unsigned char result = read_buffer[j - 1];
+        uint32_t j = offset + count; // < echo_length ? echo_length - 1 : offset + count ;
+        uint8_t result = read_buffer[j - 1];
         if (read_buffer.size() > j) {
             lock_buffer_.lock();
             auto it = read_buffer.begin() + j;
@@ -241,8 +241,8 @@ MessageProcessor::processEcho(int echo_length) {
 }
 
 bool
-MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
-        int offset, int& count, bool is_echo) {
+MessageProcessor::processMessage(const std::vector<uint8_t>& read_buffer,
+        uint32_t offset, int& count, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::shared_ptr<InsteonMessage> insteon_message
             = std::make_shared<InsteonMessage>();
@@ -270,10 +270,10 @@ MessageProcessor::processMessage(const std::vector<unsigned char>& read_buffer,
 }
 
 void
-MessageProcessor::readData(std::vector<unsigned char>& return_buffer,
-        int bytes_expected, bool is_echo) {
+MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
+        uint32_t bytes_expected, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    std::vector<unsigned char> read_buffer;
+    std::vector<uint8_t> read_buffer;
     io_port_->recv_with_timeout(read_buffer, 250);
 
     if (is_echo && read_buffer.size() > 0 && read_buffer[0] == 0x15) {
@@ -284,7 +284,7 @@ MessageProcessor::readData(std::vector<unsigned char>& return_buffer,
 
     if (bytes_expected > 0) {
 
-        int count = 0;
+        uint32_t count = 0;
         do {
             if (read_buffer.size() < bytes_expected) {
                 // try one more time
@@ -312,8 +312,8 @@ MessageProcessor::readData(std::vector<unsigned char>& return_buffer,
 }
 
 EchoStatus
-MessageProcessor::send(std::vector<unsigned char> send_buffer,
-        bool retry_on_nak, int echo_length) {
+MessageProcessor::send(std::vector<uint8_t> send_buffer,
+        bool retry_on_nak, uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::lock_guard<std::mutex>_(lock_data_processor_);
     std::ostringstream oss;
@@ -321,7 +321,7 @@ MessageProcessor::send(std::vector<unsigned char> send_buffer,
 
     EchoStatus status = EchoStatus::None;
     send_buffer.insert(send_buffer.begin(), 0x02);
-    int retry = 0;
+    uint32_t retry = 0;
     do {
         if (retry == 0) {
             utils::Logger::Instance().Info("%s\n\t - sending %d bytes: {%s}\n",
@@ -363,7 +363,7 @@ MessageProcessor::send(std::vector<unsigned char> send_buffer,
  * @return 
  */
 EchoStatus
-MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
+MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
         bool retry_on_nak) {
     return trySend(send_buffer, retry_on_nak, send_buffer.size());
 }
@@ -376,8 +376,8 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
  * @return 
  */
 EchoStatus
-MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
-        bool retry_on_nak, int echo_length) {
+MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
+        bool retry_on_nak, uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     // force other sending threads to wait for us to finish
     //std::lock_guard<std::mutex>lock(lock_io_);
@@ -418,8 +418,8 @@ MessageProcessor::trySend(const std::vector<unsigned char>& send_buffer,
  * @return Returns EchoStatus value, ie: ACK or NAK
  */
 EchoStatus
-MessageProcessor::trySendReceive(const std::vector<unsigned char>& send_buffer,
-        int triesLeft, unsigned char receive_message_id, PropertyKeys&
+MessageProcessor::trySendReceive(const std::vector<uint8_t>& send_buffer,
+        uint32_t triesLeft, uint8_t receive_message_id, PropertyKeys&
         properties) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 

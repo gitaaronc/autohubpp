@@ -27,11 +27,13 @@
 #ifndef INSTEONCONTROLLERGROUPCOMMANDS_H
 #define	INSTEONCONTROLLERGROUPCOMMANDS_H
 
+#include <cstdint>
+
 namespace ace {
     namespace insteon {
         // A set of commands that can be sent to all INSTEON devices linked to a controller
         // in the specified group
-        enum class InsteonControllerGroupCommands : unsigned char {
+        enum class InsteonControllerGroupCommands : uint8_t {
             On = 0x11,
             FastOn = 0x12,
             Off = 0x13,

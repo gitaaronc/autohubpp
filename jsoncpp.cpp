@@ -863,7 +863,7 @@ bool Reader::decodeString(Token& token, JSONCPP_STRING& decoded) {
         decoded += '\t';
         break;
       case 'u': {
-        unsigned int unicode;
+        uint32_t unicode;
         if (!decodeUnicodeCodePoint(token, current, end, unicode))
           return false;
         decoded += codePointToUTF8(unicode);
@@ -892,7 +892,7 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
           "additional six characters expected to parse unicode surrogate pair.",
           token,
           current);
-    unsigned int surrogatePair;
+    uint32_t surrogatePair;
     if (*(current++) == '\\' && *(current++) == 'u') {
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
@@ -1869,7 +1869,7 @@ bool OurReader::decodeString(Token& token, JSONCPP_STRING& decoded) {
         decoded += '\t';
         break;
       case 'u': {
-        unsigned int unicode;
+        uint32_t unicode;
         if (!decodeUnicodeCodePoint(token, current, end, unicode))
           return false;
         decoded += codePointToUTF8(unicode);
@@ -1898,7 +1898,7 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
           "additional six characters expected to parse unicode surrogate pair.",
           token,
           current);
-    unsigned int surrogatePair;
+    uint32_t surrogatePair;
     if (*(current++) == '\\' && *(current++) == 'u') {
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
@@ -2525,7 +2525,7 @@ static inline char* duplicateStringValue(const char* value,
  */
 static inline char* duplicateAndPrefixStringValue(
     const char* value,
-    unsigned int length)
+    uint32_t length)
 {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
@@ -4157,7 +4157,7 @@ JSONCPP_STRING valueToString(UInt value) {
 
 #endif // # if defined(JSON_HAS_INT64)
 
-JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision) {
+JSONCPP_STRING valueToString(double value, bool useSpecialFloats, uint32_t precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
@@ -4860,7 +4860,7 @@ struct BuiltStyledStreamWriter : public StreamWriter
       JSONCPP_STRING const& nullSymbol,
       JSONCPP_STRING const& endingLineFeedSymbol,
       bool useSpecialFloats,
-      unsigned int precision);
+      uint32_t precision);
   int write(Value const& root, JSONCPP_OSTREAM* sout) JSONCPP_OVERRIDE;
 private:
   void writeValue(Value const& value);
@@ -4879,7 +4879,7 @@ private:
 
   ChildValues childValues_;
   JSONCPP_STRING indentString_;
-  unsigned int rightMargin_;
+  uint32_t rightMargin_;
   JSONCPP_STRING indentation_;
   CommentStyle::Enum cs_;
   JSONCPP_STRING colonSymbol_;
@@ -4888,7 +4888,7 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
-  unsigned int precision_;
+  uint32_t precision_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       JSONCPP_STRING const& indentation,
@@ -4897,7 +4897,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       JSONCPP_STRING const& nullSymbol,
       JSONCPP_STRING const& endingLineFeedSymbol,
       bool useSpecialFloats,
-      unsigned int precision)
+      uint32_t precision)
   : rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
@@ -5152,7 +5152,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool(); 
-  unsigned int pre = settings_["precision"].asUInt();
+  uint32_t pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
     cs = CommentStyle::All;

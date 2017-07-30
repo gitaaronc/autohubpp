@@ -33,6 +33,7 @@
 
 #include <memory>
 #include <condition_variable>
+#include <cstdint>
 
 #include <boost/asio.hpp>
 
@@ -64,11 +65,11 @@ namespace ace {
             void saveDevices();
             Json::Value serializeJson(int device_id = 0);
             void internalReceiveCommand(std::string json);
-            void internalRawCommand(std::vector<unsigned char> buffer);
+            void internalRawCommand(std::vector<uint8_t> buffer);
             void set_update_handler(
                     std::function<void(Json::Value json) > callback);
             void set_houselinc_tx(
-                    std::function<void(std::vector<unsigned char> buffer) > callback);
+                    std::function<void(std::vector<uint8_t> buffer) > callback);
 
         protected:
             friend class InsteonController;
@@ -99,7 +100,7 @@ namespace ace {
             std::shared_ptr<MessageProcessor> msg_proc_;
             // pointer to callback function, executed when updates occur
             std::function<void(Json::Value) > on_update;
-            std::function<void(std::vector<unsigned char>) > houselinc_tx;
+            std::function<void(std::vector<uint8_t>) > houselinc_tx;
 
             YAML::Node config_;
         };

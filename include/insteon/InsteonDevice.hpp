@@ -34,9 +34,12 @@
 #include <vector>
 #include <mutex>
 
+#include "InsteonAddress.h"
 #include "InsteonMessageType.hpp"
 #include "InsteonDeviceCommands.hpp"
 #include "PropertyKey.hpp"
+
+#include <cstdint>
 
 #include <boost/asio.hpp>
 
@@ -54,6 +57,7 @@ namespace insteon
 {
 class InsteonMessage;
 class MessageProcessor;
+class InsteonAddress;
 
 namespace detail
 {
@@ -83,21 +87,21 @@ public:
     void set_update_handler(
                             std::function<void(Json::Value json) > callback);
     /* member variables, setters and getters */
-    int insteon_address(); // returns insteon address assigned to this device
+    uint32_t insteon_address(); // returns insteon address assigned to this device
     std::string device_name(); // returns the name assigned to this device
     bool device_disabled();
 
-    bool command(InsteonDeviceCommand command, unsigned char command_two);
-    void internalReceiveCommand(std::string command, unsigned char command_two);
-    void writeDeviceProperty(const std::string key, const unsigned int value);
-    unsigned char readDeviceProperty(const std::string key);
+    bool command(InsteonDeviceCommand command, uint8_t command_two);
+    void internalReceiveCommand(std::string command, uint8_t command_two);
+    void writeDeviceProperty(const std::string key, const uint16_t value);
+    uint8_t readDeviceProperty(const std::string key);
 
 protected:
-    bool tryCommand(unsigned char command, unsigned char value);
+    bool tryCommand(uint8_t command, uint8_t value);
     bool tryGetExtendedInformation();
     bool tryReadWriteALDB();
     bool tryLightStatusRequest();
-    void statusUpdate(unsigned char status);
+    void statusUpdate(uint8_t status);
     //boost::asio::io_service& io_service_;
     boost::asio::io_service::strand io_strand_;
 
@@ -110,28 +114,30 @@ private:
 
     std::function<void(Json::Value) > onStatusUpdate;
 
-    InsteonMessageType last_action_;
     void ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im);
-    void BuildDirectStandardMessage(std::vector<unsigned char>& send_buffer,
-                                    unsigned char cmd1, unsigned char cmd2);
-    void BuildDirectExtendedMessage(std::vector<unsigned char>& send_buffer,
-                                    unsigned char cmd1, unsigned char cmd2,
-                                    unsigned char d1 = 0, unsigned char d2 = 0, unsigned char d3 = 0,
-                                    unsigned char d4 = 0, unsigned char d5 = 0, unsigned char d6 = 0,
-                                    unsigned char d7 = 0, unsigned char d8 = 0, unsigned char d9 = 0,
-                                    unsigned char d10 = 0, unsigned char d11 = 0, unsigned char d12 = 0,
-                                    unsigned char d13 = 0);
+    void BuildDirectStandardMessage(std::vector<uint8_t>& send_buffer,
+                                    uint8_t cmd1, uint8_t cmd2);
+    void BuildDirectExtendedMessage(std::vector<uint8_t>& send_buffer,
+                                    uint8_t cmd1, uint8_t cmd2,
+                                    uint8_t d1 = 0, uint8_t d2 = 0, uint8_t d3 = 0,
+                                    uint8_t d4 = 0, uint8_t d5 = 0, uint8_t d6 = 0,
+                                    uint8_t d7 = 0, uint8_t d8 = 0, uint8_t d9 = 0,
+                                    uint8_t d10 = 0, uint8_t d11 = 0, uint8_t d12 = 0,
+                                    uint8_t d13 = 0);
 
     void device_name(std::string device_name);
     void device_disabled(bool disabled);
-
+    std::string device_name_;
+    bool device_disabled_;
+    
+    InsteonAddress insteon_address_;
     PropertyKeys device_properties_; // properties of this device
     std::mutex property_lock_; // mutex lock for access to device_properties
 
     void loadProperties(); // loads properties of this devices from config
     YAML::Node config_; // YAML node used to store configuration of this device
 
-    unsigned char direct_cmd_; // the last command sent by/to this device
+    uint8_t direct_cmd_; // the last command sent by/to this device
 };
 
 typedef std::map<int, std::shared_ptr<InsteonDevice >> InsteonDeviceMap;

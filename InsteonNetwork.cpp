@@ -233,7 +233,7 @@ InsteonNetwork::internalReceiveCommand(std::string json) {
     Json::Reader reader;
     Json::Value root;
     std::string command;
-    unsigned char command_two = 0x00;
+    uint8_t command_two = 0x00;
 
     reader.parse(json, root);
 
@@ -276,7 +276,7 @@ InsteonNetwork::onUpdateDevice(Json::Value json) {
 void
 InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    int insteon_address = 0;
+    uint32_t insteon_address = 0;
 
     if (houselinc_tx) {
         houselinc_tx(im->raw_message);
@@ -334,12 +334,12 @@ InsteonNetwork::set_update_handler(
 
 void
 InsteonNetwork::set_houselinc_tx(
-        std::function<void(std::vector<unsigned char>) > callback) {
+        std::function<void(std::vector<uint8_t>) > callback) {
     houselinc_tx = callback;
 }
 
 void
-InsteonNetwork::internalRawCommand(std::vector<unsigned char> buffer) {
+InsteonNetwork::internalRawCommand(std::vector<uint8_t> buffer) {
     io_strand_.post([ = ](){
         msg_proc_->trySend(buffer, false);
     });
