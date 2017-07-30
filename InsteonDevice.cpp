@@ -26,7 +26,9 @@
  */
 #include "include/insteon/InsteonDevice.hpp"
 #include "include/insteon/InsteonMessage.hpp"
-#include "include/insteon/detail/InsteonDeviceImpl.hpp"
+#include "include/insteon/EchoStatus.hpp"
+#include "include/insteon/MessageProcessor.hpp"
+
 #include "include/Logger.h"
 #include "include/utils/utils.hpp"
 
@@ -40,9 +42,8 @@ namespace ace
 namespace insteon
 {
 
-InsteonDevice::InsteonDevice(int insteon_address,
+InsteonDevice::InsteonDevice(uint32_t insteon_address,
         boost::asio::io_service::strand& io_strand, YAML::Node config) :
-pImpl(new detail::InsteonDeviceImpl(this, insteon_address)),
 io_strand_(io_strand), config_(config), direct_cmd_(0x19),
 device_disabled_(false) {
 

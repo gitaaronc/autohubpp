@@ -51,7 +51,7 @@ namespace ace {
             void Reset(); // sets the state of the event to nonsignaled, causing threads to block
             
             bool WaitOne(); // blocks the current thread until the current wait handle receives a signal
-            bool WaitOne(int milliseconds); /*
+            bool WaitOne(uint32_t milliseconds); /*
                                              * blocks the current thread until 
                                              * the current wait handle receives 
                                              * a signal or time interval has expired

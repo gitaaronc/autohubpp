@@ -28,6 +28,8 @@
 #ifndef INSTEONMESSAGETYPE_HPP
 #define	INSTEONMESSAGETYPE_HPP
 
+#include <cstdint>
+
 namespace ace {
     namespace insteon {
 

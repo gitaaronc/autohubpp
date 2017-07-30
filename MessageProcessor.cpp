@@ -178,7 +178,7 @@ MessageProcessor::processData() {
 }
 
 EchoStatus
-MessageProcessor::processEcho(int echo_length) {
+MessageProcessor::processEcho(uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     EchoStatus status = EchoStatus::None;
 
@@ -242,7 +242,7 @@ MessageProcessor::processEcho(int echo_length) {
 
 bool
 MessageProcessor::processMessage(const std::vector<uint8_t>& read_buffer,
-        uint32_t offset, int& count, bool is_echo) {
+        uint32_t offset, uint32_t& count, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::shared_ptr<InsteonMessage> insteon_message
             = std::make_shared<InsteonMessage>();
@@ -419,7 +419,7 @@ MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
  */
 EchoStatus
 MessageProcessor::trySendReceive(const std::vector<uint8_t>& send_buffer,
-        uint32_t triesLeft, uint8_t receive_message_id, PropertyKeys&
+        uint8_t triesLeft, uint8_t receive_message_id, PropertyKeys&
         properties) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 

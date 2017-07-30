@@ -44,11 +44,11 @@ namespace ace {
             InsteonProtocol();
             ~InsteonProtocol();
             bool processMessage(const std::vector<uint8_t>& data, uint32_t offset,
-                    int& count, std::shared_ptr<InsteonMessage>& insteon_message);
+                    uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message);
 
             bool
             processEcho(const std::vector<uint8_t>& data, uint32_t offset,
-                    int& count) {
+                    uint32_t& count) {
                 return true;
             }
 
@@ -66,11 +66,11 @@ namespace ace {
                     uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
             bool deviceLinkRecordMessage(const std::vector<uint8_t>& data,
-                    uint32_t offset, int& count,
+                    uint32_t offset, uint32_t& count,
                     std::shared_ptr<InsteonMessage>& insteon_message);
 
             bool deviceLinkCleanupMessage(const std::vector<uint8_t>& data,
-                    uint32_t offset, int& count,
+                    uint32_t offset, uint32_t& count,
                     std::shared_ptr<InsteonMessage>& insteon_message);
 
             bool getIMConfiguration(const std::vector<uint8_t>& data, uint32_t offset,
@@ -81,7 +81,7 @@ namespace ace {
 
             bool getAddressProperty(std::string key,
                     const std::vector<uint8_t>& data, uint32_t offset,
-                    int& count, PropertyKeys& properties);
+                    uint32_t& count, PropertyKeys& properties);
 
             bool getMessageFlagProperty(const std::vector<uint8_t>& data,
                     uint32_t offset, uint32_t &count, PropertyKeys& properties);
@@ -93,7 +93,7 @@ namespace ace {
                     uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
             bool directMessage(const std::vector<uint8_t>& data,
-                    uint32_t offset, int& count,
+                    uint32_t offset, uint32_t& count,
                     std::shared_ptr<InsteonMessage>& insteon_message);
         };
     } // namespace insteon

@@ -87,7 +87,7 @@ namespace ace {
          * True if event was signaled by call to Set
          * False if event was signaled by timed wait
          */
-        bool AutoResetEvent::WaitOne(int milliseconds){
+        bool AutoResetEvent::WaitOne(uint32_t milliseconds){
             std::unique_lock<std::mutex>lock(mutex_);
             flag_ = false;
             return signal_.wait_for(lock, std::chrono::milliseconds(milliseconds), 

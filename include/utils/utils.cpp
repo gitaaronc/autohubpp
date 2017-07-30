@@ -61,7 +61,7 @@ GetI2CS(const std::vector<uint8_t>& data, uint32_t first_byte,
     uint8_t count = last_byte - first_byte;
     uint8_t i2cs = 0;
     if ((data.size() < count) || (count <= 0)) return 0;
-    for (int i = first_byte; i < last_byte; i++) {
+    for (uint32_t i = first_byte; i < last_byte; i++) {
         i2cs += data[i];
     }
     i2cs = (~(i2cs) + 1) & 0xFF;
@@ -73,10 +73,10 @@ ByteArrayToStringStream(
         const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
     std::stringstream strStream;
     strStream.str("");
-    for (int i = offset; i < offset + count; ++i) {
+    for (uint64_t i = offset; i < offset + count; ++i) {
         if (i < data.size()) {
             strStream << std::hex << std::setw(2) << std::setfill('0')
-                    << (unsigned int) data[i];
+                    << (uint16_t) data[i];
         }
     }
     return strStream.str();

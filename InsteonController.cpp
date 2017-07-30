@@ -80,13 +80,13 @@ InsteonController::~InsteonController() {
 }
 
 void
-InsteonController::setAddress(int address) {
+InsteonController::setAddress(uint32_t address) {
     pImpl_->insteon_address_.address_high_ = address >> 16 & 0xFF;
     pImpl_->insteon_address_.address_middle_ = address >> 8 & 0xFF;
     pImpl_->insteon_address_.address_low_ = address & 0xFF;
 }
 
-int
+uint32_t
 InsteonController::getAddress() {
     return pImpl_->insteon_address_.address_high_ << 16 |
             pImpl_->insteon_address_.address_middle_ << 8 |

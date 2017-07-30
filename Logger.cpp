@@ -49,7 +49,7 @@ Logger::ByteArrayToStringStream(
         const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
     std::stringstream strStream;
     std::cout << FUNCTION_NAME << std::endl;
-    for (int i = offset; i < offset + count; ++i) {
+    for (auto i = offset; i < offset + count; ++i) {
         if (i < data.size()) {
             strStream << std::hex << std::setw(2) << std::setfill('0')
                     << (unsigned int) data[i];

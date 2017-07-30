@@ -108,7 +108,7 @@ Timer::Stop() {
 }
 
 void
-Timer::Reset(int milliseconds) {
+Timer::Reset(uint32_t milliseconds) {
     {
         std::lock_guard<std::mutex>lock(lock_);
         timer_event_ = true;

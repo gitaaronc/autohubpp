@@ -98,9 +98,9 @@ private:
                                         data,
                                         uint32_t offset, uint32_t count);
 
-    EchoStatus processEcho(int echo_length);
+    EchoStatus processEcho(uint32_t echo_length);
     bool processMessage(const std::vector<uint8_t>& read_buffer,
-                        uint32_t offset, int& count, bool is_echo = false);
+                        uint32_t offset, uint32_t& count, bool is_echo = false);
 
     void readData(std::vector<uint8_t>& return_buffer,
                   uint32_t bytes_expected,

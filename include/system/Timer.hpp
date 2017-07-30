@@ -52,7 +52,7 @@ namespace ace {
                 _timerCallback = callback;
             }
             void Stop();
-            void Reset(int milliseconds);
+            void Reset(uint32_t milliseconds);
             void Shutdown();
         private:
             void OnTimer();

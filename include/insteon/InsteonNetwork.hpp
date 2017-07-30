@@ -63,7 +63,7 @@ namespace ace {
             bool connect();
             void loadDevices();
             void saveDevices();
-            Json::Value serializeJson(int device_id = 0);
+            Json::Value serializeJson(uint32_t device_id = 0);
             void internalReceiveCommand(std::string json);
             void internalRawCommand(std::vector<uint8_t> buffer);
             void set_update_handler(
@@ -74,15 +74,15 @@ namespace ace {
         protected:
             friend class InsteonController;
             // adds a device to insteon_device_list
-            std::shared_ptr<InsteonDevice> addDevice(int insteon_address);
-            std::shared_ptr<InsteonDevice> getDevice(int insteon_address);
+            std::shared_ptr<InsteonDevice> addDevice(uint32_t insteon_address);
+            std::shared_ptr<InsteonDevice> getDevice(uint32_t insteon_address);
 
             void
             disconnect() {
             };
 
             bool
-            deviceExists(int insteon_address);
+            deviceExists(uint32_t insteon_address);
 
             void onMessage(std::shared_ptr<InsteonMessage> im);
             void onUpdateDevice(Json::Value json);

@@ -43,7 +43,7 @@ namespace ace {
             InsteonMessage() {
             };
 
-            InsteonMessage(int message_id, InsteonMessageType message_type,
+            InsteonMessage(uint32_t message_id, InsteonMessageType message_type,
                     PropertyKeys properties)
             : message_id_(message_id), message_type_(message_type), 
             properties_(properties) {

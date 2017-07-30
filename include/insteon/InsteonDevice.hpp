@@ -59,18 +59,13 @@ class InsteonMessage;
 class MessageProcessor;
 class InsteonAddress;
 
-namespace detail
-{
-class InsteonDeviceImpl;
-}
-
 // Implements Insteon Device functions and stores attributes
 
 class InsteonDevice {
     typedef InsteonDevice type;
 public:
     InsteonDevice() = delete;
-    InsteonDevice(int insteon_address,
+    InsteonDevice(uint32_t insteon_address,
                   boost::asio::io_service::strand& io_strand,
                   YAML::Node config);
     InsteonDevice(const InsteonDevice& rhs) = delete;
@@ -108,8 +103,6 @@ protected:
     std::map<std::string, InsteonDeviceCommand> command_map_;
 
 private:
-    friend class detail::InsteonDeviceImpl;
-    std::unique_ptr<detail::InsteonDeviceImpl> pImpl;
     std::shared_ptr<MessageProcessor> msgProc_;
 
     std::function<void(Json::Value) > onStatusUpdate;

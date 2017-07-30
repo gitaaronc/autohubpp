@@ -70,7 +70,7 @@ InsteonNetwork::~InsteonNetwork() {
  */
 
 std::shared_ptr<InsteonDevice>
-InsteonNetwork::addDevice(int insteon_address) {
+InsteonNetwork::addDevice(uint32_t insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
     auto it = device_list_.find(insteon_address);
@@ -177,7 +177,7 @@ InsteonNetwork::connect() {
  * @return bool True/False
  */
 bool
-InsteonNetwork::deviceExists(int insteon_address) {
+InsteonNetwork::deviceExists(uint32_t insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     auto it = device_list_.find(insteon_address);
     return it != device_list_.end();
@@ -192,7 +192,7 @@ InsteonNetwork::deviceExists(int insteon_address) {
  * @return Returns a ptr to shared<InsteonDevice> object.
  */
 std::shared_ptr<InsteonDevice>
-InsteonNetwork::getDevice(int insteon_address) {
+InsteonNetwork::getDevice(uint32_t insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::shared_ptr<InsteonDevice>device;
     auto it = device_list_.find(insteon_address);
@@ -211,7 +211,7 @@ InsteonNetwork::getDevice(int insteon_address) {
  * @return 
  */
 Json::Value
-InsteonNetwork::serializeJson(int device_id) {
+InsteonNetwork::serializeJson(uint32_t device_id) {
     Json::Value root;
     if (device_id == 0) {
         Json::Value devices;

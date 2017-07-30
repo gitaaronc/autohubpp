@@ -84,7 +84,7 @@ namespace ace {
             void processDatabaseRecord(
                     std::shared_ptr<insteon::InsteonMessage> im);
 
-            void setAddress(int address);
+            void setAddress(uint32_t address);
 
             bool tryEnterLinkMode(InsteonLinkMode mode, uint8_t group);
 

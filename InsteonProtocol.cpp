@@ -41,7 +41,7 @@ InsteonProtocol::~InsteonProtocol() {
 
 bool
 InsteonProtocol::getAddressProperty(const std::string key,
-        const std::vector<uint8_t>&data, uint32_t offset, int& count,
+        const std::vector<uint8_t>&data, uint32_t offset, uint32_t& count,
         PropertyKeys& properties) {
     if (data.size() < offset + 3)
         return false;
@@ -53,7 +53,7 @@ InsteonProtocol::getAddressProperty(const std::string key,
 
 bool
 InsteonProtocol::getMessageFlagProperty(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, PropertyKeys& properties) {
+        uint32_t offset, uint32_t& count, PropertyKeys& properties) {
     if (data.size() < offset + 1)
         return false;
 
@@ -146,7 +146,7 @@ InsteonProtocol::getMessageType(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::processMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
     count = 1;
     switch (data[offset]) {
         case 0x50: // receive standard message
@@ -265,7 +265,7 @@ InsteonProtocol::processMessage(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::standardMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count,
+        uint32_t offset, uint32_t& count,
         std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 9)
@@ -303,7 +303,7 @@ InsteonProtocol::standardMessage(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::extendedMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (!standardMessage(data, offset, count, insteon_message))
         return false;
@@ -346,7 +346,7 @@ InsteonProtocol::extendedMessage(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::deviceLinkMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < count + offset + 8)
         return false;
@@ -378,7 +378,7 @@ InsteonProtocol::deviceLinkMessage(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::imSetButtonEvent(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 1) return false;
 
@@ -403,7 +403,7 @@ InsteonProtocol::imSetButtonEvent(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::deviceLinkRecordMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + 8)
         return false;
@@ -436,7 +436,7 @@ InsteonProtocol::deviceLinkRecordMessage(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::deviceLinkCleanupMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 1)
         return false;
@@ -461,7 +461,7 @@ InsteonProtocol::deviceLinkCleanupMessage(const std::vector<uint8_t>& data,
  * @return 
  */
 bool InsteonProtocol::aldbRecord(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 2)
         return false;
@@ -491,7 +491,7 @@ bool InsteonProtocol::aldbRecord(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::getIMInfo(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count,
+        uint32_t offset, uint32_t& count,
         std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 6) return false;
@@ -521,7 +521,7 @@ InsteonProtocol::getIMInfo(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::getIMConfiguration(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
 
     if (data.size() < offset + count + 3) return false;
     uint8_t message_id = data[offset];
@@ -547,7 +547,7 @@ InsteonProtocol::getIMConfiguration(const std::vector<uint8_t>& data,
  */
 bool
 InsteonProtocol::directMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, int& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
     if (data.size() < offset + count + 7) return false;
     uint8_t message_id = data[offset];
     
