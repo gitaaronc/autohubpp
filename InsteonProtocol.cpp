@@ -45,9 +45,8 @@ InsteonProtocol::getAddressProperty(const std::string key,
         PropertyKeys& properties) {
     if (data.size() < offset + 3)
         return false;
-    uint32_t address = data[offset] << 16 | data[offset + 1] << 8 | data[offset + 2];
+    uint32_t address = data[offset + count++] << 16 | data[offset + count++] << 8 | data[offset + count++];
     properties[key] = address;
-    count += 3;
     return true;
 }
 
@@ -57,7 +56,7 @@ InsteonProtocol::getMessageFlagProperty(const std::vector<uint8_t>& data,
     if (data.size() < offset + 1)
         return false;
 
-    uint8_t messageFlags = data[offset];
+    uint8_t messageFlags = data[offset + count++];
 
     properties["message_flags_max_hops"] = messageFlags & 0b00000011;
     properties["message_flags_hops_remaining"] =
@@ -71,7 +70,6 @@ InsteonProtocol::getMessageFlagProperty(const std::vector<uint8_t>& data,
     properties["message_flags_broadcast"] =
             (messageFlags & 0b10000000) >> 7; //
 
-    count += 1;
     return true;
 }
 
@@ -81,7 +79,7 @@ InsteonProtocol::getMessageFlagProperty(const std::vector<uint8_t>& data,
  * eg: Broadcast, All Linking, ACK, NAK
  */
 InsteonMessageType
-InsteonProtocol::getMessageType(const std::vector<uint8_t>& data,
+InsteonProtocol::getStandardMessageType(const std::vector<uint8_t>& data,
         uint32_t offset, PropertyKeys& properties) {
     //0250/26deeb/000001/cb/14/00
 
@@ -162,7 +160,9 @@ InsteonProtocol::processMessage(const std::vector<uint8_t>& data,
         case 0x58: // receive all link cleanup response
             return deviceLinkCleanupMessage(data, offset, count, insteon_message);
         case 0x59: // receive database record found
-            return aldbRecord(data, offset, count, insteon_message);
+            if (!aldbRecord(data, offset, count, insteon_message)) return false;
+            if (!decodeLinkRecord(data, offset, count, insteon_message->properties_)) return false;
+            return true;
         case 0x60: // get insteon modem info
             return getIMInfo(data, offset, count, insteon_message);
         case 0x61:
@@ -173,7 +173,7 @@ InsteonProtocol::processMessage(const std::vector<uint8_t>& data,
             return directMessage(data, offset, count, insteon_message);
         case 0x63:
             if (data.size() < offset + count + 2) return false;
-            count+=2;
+            count += 2;
             return true;
         case 0x64:
             if (data.size() < offset + count + 2) return false;
@@ -186,50 +186,50 @@ InsteonProtocol::processMessage(const std::vector<uint8_t>& data,
             count += 3;
             return true;
         case 0x67:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x68:
             if (data.size() < offset + count + 1) return false;
             count += 1;
             return true;
         case 0x69:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x6A:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x6B: // TODO set IM configuration 
             if (data.size() < offset + count + 1) return false;
             count += 1;
             return true;
         case 0x6C:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x6D:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x6E:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x6F:
             if (data.size() < offset + count + 9) return false;
-            count+=9;
+            count += 9;
             return true;
         case 0x70:
             if (data.size() < offset + count + 1) return false;
-            count+=1;
+            count += 1;
             return true;
         case 0x71:
             if (data.size() < offset + count + 2) return false;
-            count+=2;
+            count += 2;
             return true;
         case 0x72:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x73: // get insteon modem configuration
             return getIMConfiguration(data, offset, count, insteon_message);
         case 0x74:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x75: // TODO Read 8 bytes from database
             if (data.size() < offset + count + 2) return false;
@@ -240,17 +240,17 @@ InsteonProtocol::processMessage(const std::vector<uint8_t>& data,
             count += 10;
             return true;
         case 0x77:
-            if (data.size() < offset + count ) return false;
+            if (data.size() < offset + count) return false;
             return true;
         case 0x78:
             if (data.size() < offset + count + 1) return false;
-            count+=1;
+            count += 1;
             return true;
         case 0x79:
             if (data.size() < offset + count + 3) return false;
-            count+=3;
+            count += 3;
             return true;
-            
+
     }
     return false;
 }
@@ -274,20 +274,19 @@ InsteonProtocol::standardMessage(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    getAddressProperty("from_address", data, offset + 1, count, properties);
-    getMessageFlagProperty(data, offset + 7, count, properties);
+    getAddressProperty("from_address", data, offset, count, properties);
+    getMessageFlagProperty(data, offset, count, properties);
     if (properties.find("message_flags_group")->second
             == 0) {
-        getAddressProperty("to_address", data, offset + 4, count,
+        getAddressProperty("to_address", data, offset, count,
                 properties);
     } else {
         count += 3;
     }
-    properties["command_one"] = data[offset + 8];
-    properties["command_two"] = data[offset + 9];
-    count += 2;
+    properties["command_one"] = data[offset + count++];
+    properties["command_two"] = data[offset + count++];
 
-    InsteonMessageType message_type = getMessageType(data, offset, properties);
+    InsteonMessageType message_type = getStandardMessageType(data, offset, properties);
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
     return true;
 
@@ -309,29 +308,32 @@ InsteonProtocol::extendedMessage(const std::vector<uint8_t>& data,
         return false;
 
     if (data.size() < offset + count + 14) return false;
-    insteon_message->properties_["data_one"] = data[offset + 10];
-    insteon_message->properties_["data_two"] = data[offset + 11];
-    insteon_message->properties_["data_three"] = data[offset + 12];
-    insteon_message->properties_["data_four"] = data[offset + 13];
-    insteon_message->properties_["data_five"] = data[offset + 14];
-    insteon_message->properties_["data_six"] = data[offset + 15];
-    insteon_message->properties_["data_seven"] = data[offset + 16];
-    count += 7;
-    if (insteon_message->message_type_ == InsteonMessageType::DirectMessage
-            && insteon_message->properties_["command_one"] == 0x2F) {
-        getAddressProperty("ext_link_address", data, offset + 17, count,
-                insteon_message->properties_);
-    } else {
-        insteon_message->properties_["data_eight"] = data[offset + 17];
-        insteon_message->properties_["data_nine"] = data[offset + 18];
-        insteon_message->properties_["data_ten"] = data[offset + 19];
-        count += 3;
+    insteon_message->properties_["data_one"] = data[offset + count++];
+    insteon_message->properties_["data_two"] = data[offset + count++];
+    switch (insteon_message->properties_["command_one"]) {
+        case 0x2f:
+            if (aldbRecord(data, offset, count, insteon_message)) {
+                insteon_message->properties_["data_five"] = data[offset + count++];
+                if (!decodeLinkRecord(data, offset, count, 
+                        insteon_message->properties_)) return false;
+                insteon_message->properties_["data_thirteen"] = data[offset + count++];
+                insteon_message->properties_["data_fourteen"] = data[offset + count++];
+                return true;
+            }
+            return false;
     }
-    insteon_message->properties_["data_eleven"] = data[offset + 20];
-    insteon_message->properties_["data_twelve"] = data[offset + 21];
-    insteon_message->properties_["data_thirteen"] = data[offset + 22];
-    insteon_message->properties_["data_fourteen"] = data[offset + 23];
-    count += 4;
+    insteon_message->properties_["data_three"] = data[offset + count++];
+    insteon_message->properties_["data_four"] = data[offset + count++];
+    insteon_message->properties_["data_five"] = data[offset + count++];
+    insteon_message->properties_["data_six"] = data[offset + count++];
+    insteon_message->properties_["data_seven"] = data[offset + count++];
+    insteon_message->properties_["data_eight"] = data[offset + count++];
+    insteon_message->properties_["data_nine"] = data[offset + count++];
+    insteon_message->properties_["data_ten"] = data[offset + count++];
+    insteon_message->properties_["data_eleven"] = data[offset + count++];
+    insteon_message->properties_["data_twelve"] = data[offset + count++];
+    insteon_message->properties_["data_thirteen"] = data[offset + count++];
+    insteon_message->properties_["data_fourteen"] = data[offset + count++];
 
     return true;
 }
@@ -354,14 +356,7 @@ InsteonProtocol::deviceLinkMessage(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    properties["link_type"] = data[offset + 1];
-    properties["link_group"] = data[offset + 2];
-    count += 2;
-    getAddressProperty("address", data, offset + 3, count, properties);
-    properties["device_category"] = data[offset + 6];
-    properties["device_subcategory"] = data[offset + 7];
-    properties["device_firmware_version"] = data[offset + 8];
-    count += 3;
+    if (!decodeLinkRecord(data, offset, count, properties)) return false;
 
     InsteonMessageType message_type = InsteonMessageType::DeviceLink;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
@@ -385,8 +380,7 @@ InsteonProtocol::imSetButtonEvent(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    properties["im_set_button_event"] = data[offset + 1];
-    count += 1;
+    properties["im_set_button_event"] = data[offset + count++];
 
     InsteonMessageType message_type = InsteonMessageType::SetButtonPressed;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
@@ -411,15 +405,15 @@ InsteonProtocol::deviceLinkRecordMessage(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    properties["link_record_flags"] = data[offset + 1];
-    properties["link_group"] = data[offset + 2];
-    count += 2;
-    if (!getAddressProperty("link_address", data, offset + 3, count, properties))
+    if (!decodeLinkRecord(data, offset, count, properties)) return false;
+    
+    /*properties["link_record_flags"] = data[offset + count++];
+    properties["link_group"] = data[offset + count++];
+    if (!getAddressProperty("link_address", data, offset, count, properties))
         return false; // count += 3
-    properties["link_data_one"] = data[offset + 6];
-    properties["link_data_two"] = data[offset + 7];
-    properties["link_data_three"] = data[offset + 8];
-    count += 3;
+    properties["link_data_one"] = data[offset + count++];
+    properties["link_data_two"] = data[offset + count++];
+    properties["link_data_three"] = data[offset + count++];*/
 
     InsteonMessageType message_type = InsteonMessageType::DeviceLinkRecord;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
@@ -444,8 +438,7 @@ InsteonProtocol::deviceLinkCleanupMessage(const std::vector<uint8_t>& data,
     PropertyKeys properties;
     uint8_t message_id = data[offset];
 
-    properties["link_status"] = data[offset + 1];
-    count += 1;
+    properties["link_status"] = data[offset + count++];
 
     InsteonMessageType message_type = InsteonMessageType::DeviceLinkCleanup;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
@@ -468,16 +461,24 @@ bool InsteonProtocol::aldbRecord(const std::vector<uint8_t>& data,
 
     PropertyKeys properties;
     uint8_t message_id = data[offset];
-    properties["db_address_MSB"] = data[offset + 1];
-    properties["db_address_LSB"] = data[offset + 2];
-    count += 2;
-    if (!deviceLinkRecordMessage(data, offset + 2, count, insteon_message))
-        return false;
-    for (const auto& it : insteon_message->properties_) {
-        properties[it.first] = it.second;
-    }
+    properties["db_address_MSB"] = data[offset + count++];
+    properties["db_address_LSB"] = data[offset + count++];
+
     InsteonMessageType message_type = InsteonMessageType::ALDBRecord;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
+    return true;
+}
+
+bool
+InsteonProtocol::decodeLinkRecord(const std::vector<uint8_t>& data, uint32_t offset,
+        uint32_t& count, PropertyKeys& properties) {
+    if (data.size() < offset + count + 8) return false;
+    properties["link_type"] = data[offset + count++];
+    properties["link_group"] = data[offset + count++];
+    getAddressProperty("address", data, offset, count, properties);
+    properties["link_data_one"] = data[offset + count++];
+    properties["link_data_two"] = data[offset + count++];
+    properties["link_data_three"] = data[offset + count++];
     return true;
 }
 
@@ -499,12 +500,11 @@ InsteonProtocol::getIMInfo(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    properties["address"] = data[offset + 1] << 16 | data[offset + 2]
-            << 8 | data[offset + 3];
-    properties["device_category"] = data[offset + 4];
-    properties["device_subcategory"] = data[offset + 5];
-    properties["device_firmware_version"] = data[offset + 6];
-    count += 6;
+    properties["address"] = data[offset + 1] << 16 | data[offset + count++]
+            << 8 | data[offset + count++];
+    properties["device_category"] = data[offset + count++];
+    properties["device_subcategory"] = data[offset + count++];
+    properties["device_firmware_version"] = data[offset + count++];
 
     InsteonMessageType message_type = InsteonMessageType::GetIMInfo;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
@@ -527,10 +527,9 @@ InsteonProtocol::getIMConfiguration(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    properties["im_configuration_flags"] = data[offset + 1];
-    properties["spare_one"] = data[offset + 2];
-    properties["spare_two"] = data[offset + 3];
-    count += 3;
+    properties["im_configuration_flags"] = data[offset + count++];
+    properties["spare_one"] = data[offset + count++];
+    properties["spare_two"] = data[offset + count++];
 
     InsteonMessageType message_type = InsteonMessageType::GetIMConfiguration;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
@@ -550,16 +549,18 @@ InsteonProtocol::directMessage(const std::vector<uint8_t>& data,
         uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
     if (data.size() < offset + count + 7) return false;
     uint8_t message_id = data[offset];
-    
+
     PropertyKeys properties;
-    getAddressProperty("from_address", data, offset + 1, count, properties);
-    getMessageFlagProperty(data, offset + 4, count, properties);
-    properties["command_one"] = data[offset + 5];
-    properties["command_two"] = data[offset + 6];
     
-    count += 2;
+    if (!getAddressProperty("from_address", data, offset, count, properties))
+        return false;
     
-    if (properties.find("message_flags_extended")->second == 1){
+    if (!getMessageFlagProperty(data, offset, count, properties)) return false;
+    
+    properties["command_one"] = data[offset + count++];
+    properties["command_two"] = data[offset + count++];
+
+    if (properties.find("message_flags_extended")->second == 1) {
         if (data.size() < offset + count + 14) return false;
         properties["data_one"] = data[offset + count++];
         properties["data_two"] = data[offset + count++];
@@ -576,7 +577,7 @@ InsteonProtocol::directMessage(const std::vector<uint8_t>& data,
         properties["data_thirteen"] = data[offset + count++];
         properties["data_fourteen"] = data[offset + count++];
     }
-    
+
     InsteonMessageType message_type = InsteonMessageType::DirectMessage;
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
     return true;

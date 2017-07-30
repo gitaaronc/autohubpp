@@ -35,68 +35,73 @@
 #include <vector>
 #include <cstdint>
 
-namespace ace {
-    namespace insteon {
-        class InsteonMessage;
+namespace ace
+{
+namespace insteon
+{
+class InsteonMessage;
 
-        class InsteonProtocol {
-        public:
-            InsteonProtocol();
-            ~InsteonProtocol();
-            bool processMessage(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message);
+class InsteonProtocol {
+public:
+    InsteonProtocol();
+    ~InsteonProtocol();
+    bool processMessage(const std::vector<uint8_t>& data, uint32_t offset,
+                        uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool
-            processEcho(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t& count) {
-                return true;
-            }
+    bool
+    processEcho(const std::vector<uint8_t>& data, uint32_t offset,
+                uint32_t& count) {
+        return true;
+    }
 
-        private:
-            bool standardMessage(const std::vector<uint8_t>& data, uint32_t offset,
+private:
+    bool standardMessage(const std::vector<uint8_t>& data, uint32_t offset,
+                         uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
+    bool extendedMessage(const std::vector<uint8_t>& data, uint32_t offset,
+                         uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+
+    bool aldbRecord(const std::vector<uint8_t>& data, uint32_t offset,
                     uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool extendedMessage(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+    bool decodeLinkRecord(const std::vector<uint8_t>& data, uint32_t offset,
+                          uint32_t& count, PropertyKeys& properties);
 
-            bool aldbRecord(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+    bool deviceLinkMessage(const std::vector<uint8_t>& data, uint32_t offset,
+                           uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool deviceLinkMessage(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+    bool deviceLinkRecordMessage(const std::vector<uint8_t>& data,
+                                 uint32_t offset, uint32_t& count,
+                                 std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool deviceLinkRecordMessage(const std::vector<uint8_t>& data,
-                    uint32_t offset, uint32_t& count,
-                    std::shared_ptr<InsteonMessage>& insteon_message);
+    bool deviceLinkCleanupMessage(const std::vector<uint8_t>& data,
+                                  uint32_t offset, uint32_t& count,
+                                  std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool deviceLinkCleanupMessage(const std::vector<uint8_t>& data,
-                    uint32_t offset, uint32_t& count,
-                    std::shared_ptr<InsteonMessage>& insteon_message);
+    bool getIMConfiguration(const std::vector<uint8_t>& data, uint32_t offset,
+                            uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool getIMConfiguration(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+    bool getIMInfo(const std::vector<uint8_t>& data, uint32_t offset,
+                   uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool getIMInfo(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
+    bool getAddressProperty(std::string key,
+                            const std::vector<uint8_t>& data, uint32_t offset,
+                            uint32_t& count, PropertyKeys& properties);
 
-            bool getAddressProperty(std::string key,
-                    const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t& count, PropertyKeys& properties);
+    bool getMessageFlagProperty(const std::vector<uint8_t>& data,
+                                uint32_t offset, uint32_t &count, PropertyKeys& properties);
 
-            bool getMessageFlagProperty(const std::vector<uint8_t>& data,
-                    uint32_t offset, uint32_t &count, PropertyKeys& properties);
+    InsteonMessageType getStandardMessageType(const std::vector<uint8_t>& data,
+                                              uint32_t offset, PropertyKeys& properties);
 
-            InsteonMessageType getMessageType(const std::vector<uint8_t>& data,
-                    uint32_t offset, PropertyKeys& properties);
+    bool imSetButtonEvent(const std::vector<uint8_t>& data, uint32_t offset,
+                          uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
 
-            bool imSetButtonEvent(const std::vector<uint8_t>& data, uint32_t offset,
-                    uint32_t &count, std::shared_ptr<InsteonMessage>& insteon_message);
-
-            bool directMessage(const std::vector<uint8_t>& data,
-                    uint32_t offset, uint32_t& count,
-                    std::shared_ptr<InsteonMessage>& insteon_message);
-        };
-    } // namespace insteon
+    bool directMessage(const std::vector<uint8_t>& data,
+                       uint32_t offset, uint32_t& count,
+                       std::shared_ptr<InsteonMessage>& insteon_message);
+};
+} // namespace insteon
 } // namespace ace
 #endif /* INSTEONPROTOCOL_HPP */
 

@@ -295,12 +295,12 @@ InsteonNetwork::onMessage(std::shared_ptr<InsteonMessage> im) {
 
     // automatically add devices found in other device databases
     // or devices found by linking.
-    if (im->properties_.count("ext_link_address")) {
+    /*if (im->properties_.count("ext_link_address")) {
         insteon_address = im->properties_["ext_link_address"];
         if (!deviceExists(insteon_address)) {
             addDevice(insteon_address);
         }
-    }
+    }*/
 
     // route messages to appropriate device or controller
     if (im->properties_.count("from_address")) { // route to device

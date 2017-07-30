@@ -276,6 +276,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             utils::Logger::Instance().Debug("Direct Message Received");
             direct_cmd_ = command_one;
             break;
+        case InsteonMessageType::ALDBRecord:
+            utils::Logger::Instance().Debug("ALDB record received");
+            break;
         default:
             utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"
                     "\t  - for device %s{%s}", FUNCTION_NAME_CSTR, device_name().c_str(),
@@ -405,7 +408,7 @@ InsteonDevice::tryLightStatusRequest() {
 bool
 InsteonDevice::tryReadWriteALDB() {
     std::vector<uint8_t> send_buffer;
-    BuildDirectExtendedMessage(send_buffer, 0x2F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+    BuildDirectExtendedMessage(send_buffer, 0x2F, 0x00, 0x01, 0x0F, 0xFF, 0x00, 0x00);
     PropertyKeys properties;
     EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
