@@ -316,7 +316,7 @@ InsteonProtocol::extendedMessage(const std::vector<uint8_t>& data,
                 insteon_message->properties_["data_five"] = data[offset + count++];
                 if (!decodeLinkRecord(data, offset, count, 
                         insteon_message->properties_)) return false;
-                insteon_message->properties_["data_thirteen"] = data[offset + count++];
+                //insteon_message->properties_["data_thirteen"] = data[offset + count++];
                 insteon_message->properties_["data_fourteen"] = data[offset + count++];
                 return true;
             }
