@@ -26,7 +26,6 @@
  */
 #include "include/insteon/InsteonDevice.hpp"
 #include "include/insteon/InsteonMessage.hpp"
-#include "include/insteon/detail/InsteonDeviceImpl.hpp"
 #include "include/Logger.h"
 #include "include/utils/utils.hpp"
 

@@ -61,7 +61,7 @@ namespace ace {
                 close();
             }
 
-            bool open(const std::string host, int) override;
+            bool open(const std::string host, uint32_t port) override;
 
             void async_read_some() override;
 
