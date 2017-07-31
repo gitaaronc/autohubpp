@@ -49,7 +49,7 @@ device_disabled_(false) {
 
     insteon_address_.setAddress(insteon_address);
     device_name_ = ace::utils::int_to_hex<int>(insteon_address);
-    
+
     device_properties_["light_status"] = 0;
     command_map_["ping"] = InsteonDeviceCommand::Ping;
     command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
@@ -150,11 +150,29 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
             writeDeviceProperty("device_engine_version", recvCmdTwo);
             break;
         case InsteonDeviceCommand::GetOperatingFlags:
+        {
             writeDeviceProperty("enable_programming_lock", recvCmdTwo & 0x01);
             writeDeviceProperty("enable_blink_on_traffic", recvCmdTwo & 0x02);
             writeDeviceProperty("enable_resume_dim", recvCmdTwo & 0x04);
             writeDeviceProperty("enable_led", recvCmdTwo & 0x08);
             writeDeviceProperty("enable_load_sense", recvCmdTwo & 0x0a);
+        }
+            break;
+        case InsteonDeviceCommand::Dim:
+        {
+            uint16_t oValue = readDeviceProperty("light_status");
+            uint16_t nValue = round(oValue / 8) * 8;
+            nValue -= nValue - 7 > 0 ? 7 : nValue;
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
+        }
+            break;
+        case InsteonDeviceCommand::Brighten:
+        {
+            uint16_t oValue = readDeviceProperty("light_status");
+            uint16_t nValue = round(oValue / 8) * 8;
+            nValue = nValue > 255 ? 255 : nValue + 7;
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
+        }
             break;
         case InsteonDeviceCommand::Off:
         case InsteonDeviceCommand::FastOff:
@@ -167,8 +185,10 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, 0xFF));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
+        {
             writeDeviceProperty("link_database_delta", recvCmdOne);
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, recvCmdTwo));
+        }
             break;
         default:
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, recvCmdTwo));
@@ -339,13 +359,13 @@ InsteonDevice::command(InsteonDeviceCommand command,
             return tryReadWriteALDB();
         case InsteonDeviceCommand::LightStatusRequest:
             return tryLightStatusRequest();
-        case InsteonDeviceCommand::Brighten:
-        case InsteonDeviceCommand::Dim:
         case InsteonDeviceCommand::On:
             return tryCommand(static_cast<uint8_t> (command), command_two);
         case InsteonDeviceCommand::FastOn:
             return tryCommand(static_cast<uint8_t> (command), 0xFF);
         case InsteonDeviceCommand::Off:
+        case InsteonDeviceCommand::Brighten:
+        case InsteonDeviceCommand::Dim:
         case InsteonDeviceCommand::FastOff:
             return tryCommand(static_cast<uint8_t> (command), 0x00);
     }

@@ -39,6 +39,52 @@ InsteonProtocol::~InsteonProtocol() {
 
 }
 
+/**
+ * ExtendedMessage 0x51
+ * @param data
+ * @param offset
+ * @param count
+ * @param insteon_message
+ * @return 
+ */
+bool
+InsteonProtocol::extendedMessage(const std::vector<uint8_t>& data,
+        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
+
+    if (!standardMessage(data, offset, count, insteon_message))
+        return false;
+
+    if (data.size() < offset + count + 14) return false;
+    insteon_message->properties_["data_one"] = data[offset + count++];
+    insteon_message->properties_["data_two"] = data[offset + count++];
+    switch (insteon_message->properties_["command_one"]) {
+        case 0x2f:
+            if (aldbRecord(data, offset, count, insteon_message)) {
+                insteon_message->properties_["data_five"] = data[offset + count++];
+                if (!decodeLinkRecord(data, offset, count, 
+                        insteon_message->properties_)) return false;
+                //insteon_message->properties_["data_thirteen"] = data[offset + count++];
+                insteon_message->properties_["data_fourteen"] = data[offset + count++];
+                return true;
+            }
+            return false;
+    }
+    insteon_message->properties_["data_three"] = data[offset + count++];
+    insteon_message->properties_["data_four"] = data[offset + count++];
+    insteon_message->properties_["data_five"] = data[offset + count++];
+    insteon_message->properties_["data_six"] = data[offset + count++];
+    insteon_message->properties_["data_seven"] = data[offset + count++];
+    insteon_message->properties_["data_eight"] = data[offset + count++];
+    insteon_message->properties_["data_nine"] = data[offset + count++];
+    insteon_message->properties_["data_ten"] = data[offset + count++];
+    insteon_message->properties_["data_eleven"] = data[offset + count++];
+    insteon_message->properties_["data_twelve"] = data[offset + count++];
+    insteon_message->properties_["data_thirteen"] = data[offset + count++];
+    insteon_message->properties_["data_fourteen"] = data[offset + count++];
+
+    return true;
+}
+
 bool
 InsteonProtocol::getAddressProperty(const std::string key,
         const std::vector<uint8_t>&data, uint32_t offset, uint32_t& count,
@@ -274,15 +320,12 @@ InsteonProtocol::standardMessage(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    getAddressProperty("from_address", data, offset, count, properties);
-    getMessageFlagProperty(data, offset, count, properties);
-    if (properties.find("message_flags_group")->second
-            == 0) {
-        getAddressProperty("to_address", data, offset, count,
-                properties);
-    } else {
-        count += 3;
-    }
+    if (!getAddressProperty("from_address", data, offset, count, properties))
+        return false;
+    if (!getAddressProperty("to_address", data, offset, count, properties))
+        return false;
+    if (!getMessageFlagProperty(data, offset, count, properties)) return false;
+    
     properties["command_one"] = data[offset + count++];
     properties["command_two"] = data[offset + count++];
 
@@ -290,52 +333,6 @@ InsteonProtocol::standardMessage(const std::vector<uint8_t>& data,
     insteon_message.reset(new InsteonMessage(message_id, message_type, properties));
     return true;
 
-}
-
-/**
- * ExtendedMessage 0x51
- * @param data
- * @param offset
- * @param count
- * @param insteon_message
- * @return 
- */
-bool
-InsteonProtocol::extendedMessage(const std::vector<uint8_t>& data,
-        uint32_t offset, uint32_t& count, std::shared_ptr<InsteonMessage>& insteon_message) {
-
-    if (!standardMessage(data, offset, count, insteon_message))
-        return false;
-
-    if (data.size() < offset + count + 14) return false;
-    insteon_message->properties_["data_one"] = data[offset + count++];
-    insteon_message->properties_["data_two"] = data[offset + count++];
-    switch (insteon_message->properties_["command_one"]) {
-        case 0x2f:
-            if (aldbRecord(data, offset, count, insteon_message)) {
-                insteon_message->properties_["data_five"] = data[offset + count++];
-                if (!decodeLinkRecord(data, offset, count, 
-                        insteon_message->properties_)) return false;
-                //insteon_message->properties_["data_thirteen"] = data[offset + count++];
-                insteon_message->properties_["data_fourteen"] = data[offset + count++];
-                return true;
-            }
-            return false;
-    }
-    insteon_message->properties_["data_three"] = data[offset + count++];
-    insteon_message->properties_["data_four"] = data[offset + count++];
-    insteon_message->properties_["data_five"] = data[offset + count++];
-    insteon_message->properties_["data_six"] = data[offset + count++];
-    insteon_message->properties_["data_seven"] = data[offset + count++];
-    insteon_message->properties_["data_eight"] = data[offset + count++];
-    insteon_message->properties_["data_nine"] = data[offset + count++];
-    insteon_message->properties_["data_ten"] = data[offset + count++];
-    insteon_message->properties_["data_eleven"] = data[offset + count++];
-    insteon_message->properties_["data_twelve"] = data[offset + count++];
-    insteon_message->properties_["data_thirteen"] = data[offset + count++];
-    insteon_message->properties_["data_fourteen"] = data[offset + count++];
-
-    return true;
 }
 
 /**
@@ -460,6 +457,9 @@ bool InsteonProtocol::aldbRecord(const std::vector<uint8_t>& data,
         return false;
 
     PropertyKeys properties;
+    for (const auto& it : insteon_message->properties_)
+        properties[it.first] = it.second;
+    
     uint8_t message_id = data[offset];
     properties["db_address_MSB"] = data[offset + count++];
     properties["db_address_LSB"] = data[offset + count++];
@@ -475,7 +475,7 @@ InsteonProtocol::decodeLinkRecord(const std::vector<uint8_t>& data, uint32_t off
     if (data.size() < offset + count + 8) return false;
     properties["link_type"] = data[offset + count++];
     properties["link_group"] = data[offset + count++];
-    getAddressProperty("address", data, offset, count, properties);
+    getAddressProperty("link_address", data, offset, count, properties);
     properties["link_data_one"] = data[offset + count++];
     properties["link_data_two"] = data[offset + count++];
     properties["link_data_three"] = data[offset + count++];
