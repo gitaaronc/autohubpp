@@ -88,7 +88,7 @@ public:
 
     bool command(InsteonDeviceCommand command, uint8_t command_two);
     void internalReceiveCommand(std::string command, uint8_t command_two);
-    void writeDeviceProperty(const std::string key, const uint16_t value);
+    void writeDeviceProperty(const std::string key, const uint32_t value);
     uint8_t readDeviceProperty(const std::string key);
 
 protected:
