@@ -162,7 +162,7 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
         {
             float oValue = readDeviceProperty("light_status");
             float nValue = round(oValue / 8) - 1;
-            nValue = nValue < 1 ? 0 : (nValue * 8) - 1;
+            nValue = nValue < 1 ? 0 : (nValue * 8);
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
         }
             break;
@@ -170,7 +170,7 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
         {
             float oValue = readDeviceProperty("light_status");
             float nValue = round(oValue / 8) + 1;
-            nValue = nValue > 31 ? 255 : (nValue * 8) - 1;
+            nValue = nValue > 31 ? 255 : (nValue * 8);
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
         }
             break;
