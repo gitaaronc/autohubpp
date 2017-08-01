@@ -160,16 +160,16 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
             break;
         case InsteonDeviceCommand::Dim:
         {
-            uint16_t oValue = readDeviceProperty("light_status");
-            uint16_t nValue = round(oValue / 8) * 8;
+            float oValue = readDeviceProperty("light_status");
+            float nValue = round(oValue / 8) * 8;
             nValue -= nValue - 7 > 0 ? 7 : nValue;
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
         }
             break;
         case InsteonDeviceCommand::Brighten:
         {
-            uint16_t oValue = readDeviceProperty("light_status");
-            uint16_t nValue = round(oValue / 8) * 8;
+            float oValue = readDeviceProperty("light_status");
+            float nValue = round(oValue / 8) * 8;
             nValue = nValue > 255 ? 255 : nValue + 7;
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
         }
