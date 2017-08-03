@@ -162,7 +162,7 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
         {
             float oValue = readDeviceProperty("light_status");
             float nValue = round(oValue / 8) - 1;
-            nValue = nValue < 1 ? 0 : (nValue * 8);
+            nValue = nValue < 1 ? 0 : (nValue * 8) - 1;
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
         }
             break;
@@ -170,7 +170,7 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
         {
             float oValue = readDeviceProperty("light_status");
             float nValue = round(oValue / 8) + 1;
-            nValue = nValue > 31 ? 255 : (nValue * 8);
+            nValue = nValue > 31 ? 255 : (nValue * 8) - 1;
             io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, nValue));
         }
             break;
@@ -300,7 +300,7 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             utils::Logger::Instance().Debug("ALDB record received");
             break;
         default:
-            utils::Logger::Instance().Debug("%s\n\t - unknown message type received\n"
+            utils::Logger::Instance().Debug("%s\n\t  - unknown message type received\n"
                     "\t  - for device %s{%s}", FUNCTION_NAME_CSTR, device_name().c_str(),
                     utils::int_to_hex(insteon_address()).c_str());
             break;
@@ -360,7 +360,8 @@ InsteonDevice::command(InsteonDeviceCommand command,
         case InsteonDeviceCommand::LightStatusRequest:
             return tryLightStatusRequest();
         case InsteonDeviceCommand::On:
-            return tryCommand(static_cast<uint8_t> (command), command_two);
+            return tryCommand(static_cast<uint8_t> (command), 
+                    command_two > 0 ? command_two : 0xFF);
         case InsteonDeviceCommand::FastOn:
             return tryCommand(static_cast<uint8_t> (command), 0xFF);
         case InsteonDeviceCommand::Off:
