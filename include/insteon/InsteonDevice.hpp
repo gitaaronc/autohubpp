@@ -89,7 +89,8 @@ public:
     bool command(InsteonDeviceCommand command, uint8_t command_two);
     void internalReceiveCommand(std::string command, uint8_t command_two);
     void writeDeviceProperty(const std::string key, const uint32_t value);
-    uint8_t readDeviceProperty(const std::string key);
+    uint32_t readDeviceProperty(const std::string key,
+                               uint32_t default_value = 0);
 
 protected:
     bool tryCommand(uint8_t command, uint8_t value);
@@ -122,7 +123,7 @@ private:
     void device_disabled(bool disabled);
     std::string device_name_;
     bool device_disabled_;
-    
+
     InsteonAddress insteon_address_;
     PropertyKeys device_properties_; // properties of this device
     std::mutex property_lock_; // mutex lock for access to device_properties
