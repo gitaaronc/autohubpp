@@ -500,7 +500,7 @@ InsteonProtocol::getIMInfo(const std::vector<uint8_t>& data,
     uint8_t message_id = data[offset];
 
     PropertyKeys properties;
-    properties["address"] = data[offset + 1] << 16 | data[offset + count++]
+    properties["address"] = data[offset + count++] << 16 | data[offset + count++]
             << 8 | data[offset + count++];
     properties["device_category"] = data[offset + count++];
     properties["device_subcategory"] = data[offset + count++];
