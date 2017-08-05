@@ -97,7 +97,12 @@ SocketPort::open(const std::string com_port_name, uint32_t port = 9761) {
     async_read_some();
     return true;
 }
-
+/**
+ * 
+ * 
+ * 
+ * 
+ */
 void
 SocketPort::close() {
     if (socket_port_) {

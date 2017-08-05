@@ -62,7 +62,7 @@ MessageProcessor::connect() {
 
     std::string plm_type = config_["type"].as<std::string>("serial");
     std::string host;
-    uint32_t port = 0;
+    uint16_t port = 0;
     std::unique_ptr<io::IOPort> io;
 
     std::transform(plm_type.begin(), plm_type.end(),
@@ -72,12 +72,12 @@ MessageProcessor::connect() {
         io = std::move(std::unique_ptr<io::IOPort>(
                 new io::SocketPort(io_service_)));
         host = config_["hub_ip"].as<std::string>("127.0.0.1");
-        port = config_["hub_port"].as<int>(9761);
+        port = config_["hub_port"].as<uint16_t>(9761);
     } else {
         io = std::move(std::unique_ptr<io::IOPort>(
                 new io::SerialPort(io_service_)));
         host = config_["serial_port"].as<std::string>("/dev/ttyUSB0");
-        port = config_["baud_rate"].as<int>(9600);
+        port = config_["baud_rate"].as<uint16_t>(19200);
     }
 
     io_port_ = std::move(io);
