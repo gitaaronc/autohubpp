@@ -227,7 +227,6 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
     uint8_t command_two = keys["command_two"];
     uint8_t set_level = readDeviceProperty("button_on_level",0);
     uint8_t current_level = readDeviceProperty("light_status",0);
-    device_disabled(false);
 
     if (im->properties_.size() > 0) {
         std::ostringstream oss;
@@ -359,29 +358,38 @@ InsteonDevice::command(InsteonDeviceCommand command,
         uint8_t command_two) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     if (device_disabled()) {
-        io_strand_.get_io_service().post(std::bind(&type::statusUpdate, this, 
-                command_two));
+        std::ostringstream oss;
+        oss << "This device {" << device_name() << "} is in a disabled state.\n"
+                "\t  Please verify the device exists and is operational.\n"
+                "\t  Command aborted!\n";
+        utils::Logger::Instance().Debug(oss.str().c_str());
         return false; // device disabled, stop here and return
     }
     switch (command) {
         case InsteonDeviceCommand::ExtendedGetSet:
-            return tryGetExtendedInformation();
+            device_disabled(!tryGetExtendedInformation());
+            break;
         case InsteonDeviceCommand::ALDBReadWrite:
-            return tryReadWriteALDB();
+            device_disabled(!tryReadWriteALDB());
+            break;
         case InsteonDeviceCommand::LightStatusRequest:
-            return tryLightStatusRequest();
+            device_disabled(!tryLightStatusRequest());
+            break;
         case InsteonDeviceCommand::On:
-            return tryCommand(static_cast<uint8_t> (command), 
-                    command_two ? command_two : 0xFF);
+            device_disabled(!tryCommand(static_cast<uint8_t> (command), 
+                    command_two ? command_two : 0xFF));
+            break;
         case InsteonDeviceCommand::FastOn:
-            return tryCommand(static_cast<uint8_t> (command), 0xFF);
+            device_disabled(!tryCommand(static_cast<uint8_t> (command), 0xFF));
+            break;
         case InsteonDeviceCommand::Off:
         case InsteonDeviceCommand::Brighten:
         case InsteonDeviceCommand::Dim:
         case InsteonDeviceCommand::FastOff:
-            return tryCommand(static_cast<uint8_t> (command), 0x00);
+            device_disabled(!tryCommand(static_cast<uint8_t> (command), 0x00));
+            break;
     }
-    return false;
+    return device_disabled();
 }
 
 /**
@@ -454,6 +462,8 @@ InsteonDevice::tryReadWriteALDB() {
 void
 InsteonDevice::statusUpdate(uint8_t status) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
+    device_disabled(false);
+    writeDeviceProperty("device_disabled", device_disabled());
     writeDeviceProperty("light_status", status);
     if (onStatusUpdate)
         onStatusUpdate(SerializeJson());

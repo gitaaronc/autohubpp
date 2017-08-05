@@ -419,7 +419,7 @@ MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
  */
 EchoStatus
 MessageProcessor::trySendReceive(const std::vector<uint8_t>& send_buffer,
-        uint8_t triesLeft, uint8_t receive_message_id, PropertyKeys&
+        int8_t triesLeft, uint8_t receive_message_id, PropertyKeys&
         properties) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 

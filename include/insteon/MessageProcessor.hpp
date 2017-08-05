@@ -87,7 +87,7 @@ public:
     EchoStatus trySend(const std::vector<uint8_t>& send_buffer,
                        bool retry_on_nak, uint32_t echo_length);
     EchoStatus trySendReceive(const std::vector<uint8_t>&
-                              send_buffer, uint8_t triesLeft, uint8_t receive_message_id,
+                              send_buffer, int8_t triesLeft, uint8_t receive_message_id,
                               PropertyKeys& properties);
 
     void set_message_handler(msg_handler handler);
