@@ -227,7 +227,7 @@ Autohub::stop() {
 void
 Autohub::start() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-
+    
     wspp_server_.clear_access_channels(websocketpp::log::alevel::all);
     wspp_server_.clear_error_channels(websocketpp::log::elevel::all);
 
@@ -243,18 +243,6 @@ Autohub::start() {
             this, std::placeholders::_1,
             std::placeholders::_2));
 
-    try {
-        wspp_server_.listen(
-                root_node_["WEBSOCKET"]["listening_port"].as<int>(9000));
-        wspp_server_.start_accept();
-    } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
-    }
-
-    wspp_server_thread_ = std::move(std::thread(
-            std::bind(&wspp_server::run,
-            &wspp_server_)));
-
     insteon_network_->set_update_handler(bind(&type::onUpdateDevice, this,
             std::placeholders::_1));
 
@@ -267,6 +255,19 @@ Autohub::start() {
         stop();
         return;
     }
+
+    try {
+        wspp_server_.listen(
+                root_node_["WEBSOCKET"]["listening_port"].as<int>(9000));
+        wspp_server_.start_accept();
+    } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+
+    wspp_server_thread_ = std::move(std::thread(
+            std::bind(&wspp_server::run,
+            &wspp_server_)));
+
     houselinc_server_ = std::make_unique<server>(io_service_, 9761,
             bind(&type::houselincRx, this, std::placeholders::_1));
 
