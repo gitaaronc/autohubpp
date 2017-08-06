@@ -273,27 +273,31 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
         uint32_t bytes_expected, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::vector<uint8_t> read_buffer;
-    io_port_->recv_with_timeout(read_buffer, 250);
+    io_port_->recv_with_timeout(read_buffer, 500);
 
+   /*
     if (is_echo && read_buffer.size() > 0 && read_buffer[0] == 0x15) {
         for (const auto& it : read_buffer)
             return_buffer.push_back(it);
         return;
-    }
+    }*/
 
     if (bytes_expected > 0) {
 
-        uint8_t count = 0;
+        uint8_t count = 1;
         do {
             if (read_buffer.size() < bytes_expected) {
                 // try one more time
-                io_port_->recv_with_timeout(read_buffer, 250);
+                utils::Logger::Instance().Debug("\t  - expecting more data."
+                "attempt #%d", count);
+                io_port_->recv_with_timeout(read_buffer, 500);
                 count++;
             } else {
                 break;
             }
-        } while (count < 3);
+        } while (count < 4);
 
+        /*
         if (is_echo && (read_buffer.size() > 0) && (read_buffer[0] == 0x15)) {
             for (const auto& it : read_buffer)
                 return_buffer.push_back(it);
@@ -304,7 +308,7 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
             if (read_buffer.size() > 0) {
             } else {
             }
-        }
+        }*/
     }
     for (const auto& it : read_buffer)
         return_buffer.push_back(it);
