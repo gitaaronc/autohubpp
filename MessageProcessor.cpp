@@ -287,9 +287,6 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
         uint8_t count = 1;
         do {
             if (read_buffer.size() < bytes_expected) {
-                // try one more time
-                utils::Logger::Instance().Debug("\t  - expecting more data."
-                "attempt #%d", count);
                 io_port_->recv_with_timeout(read_buffer, 500);
                 count++;
             } else {
@@ -342,9 +339,11 @@ MessageProcessor::send(std::vector<uint8_t> send_buffer,
         io_port_->send_buffer(send_buffer);
         status = processEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
+            oss << "\t  - EchoStatus::ACK received\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
+            oss << "\t  - EchoStatus::NAK received, no retry selected\n";
             break;
         }
         if (status == EchoStatus::NAK) {

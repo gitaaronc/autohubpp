@@ -140,6 +140,8 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
 
     boost::system::error_code ec;
     serial_port_->cancel(ec);
+    recv_buffer(buffer);
+    
     utils::Logger::Instance().Debug("I/O cancel: %s", ec.message().c_str());
 
     std::future<std::size_t> read_result = serial_port_->async_read_some(
@@ -161,11 +163,6 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
             data.resize(rVal);
             for (const auto& it : data)
                 buffer.push_back(it);
-            utils::Logger::Instance().Debug("%s\n\t  - the future is now!\n"
-                    "\t  - %d bytes available. {0x%s}\n"
-                    "\t  - success!!", FUNCTION_NAME_CSTR, buffer.size(),
-                    utils::ByteArrayToStringStream(buffer,0, 
-                    buffer.size()).c_str());
             break;
         } else if (status == std::future_status::deferred) {
             utils::Logger::Instance().Debug("%s\n\t - deferred waiting",

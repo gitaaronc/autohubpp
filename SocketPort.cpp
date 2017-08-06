@@ -26,6 +26,7 @@
  */
 #include "include/io/SocketPort.h"
 #include "include/Logger.h"
+#include "include/utils/utils.hpp"
 
 #include <chrono>
 #include <thread>
@@ -139,6 +140,8 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
 
     boost::system::error_code ec;
     socket_port_->cancel(ec);
+    recv_buffer(buffer);
+    
     utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
     
     std::future<std::size_t> read_result = socket_port_->async_read_some(
@@ -160,9 +163,6 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
             data.resize(rVal);
             for (const auto& it : data)
                 buffer.push_back(it);
-            utils::Logger::Instance().Debug("%s\n\t  - the future is now!\n"
-                    "\t  - %d bytes transferred.\n"
-                    "\t  - success!!", FUNCTION_NAME_CSTR, rVal);
             break;
         } else if (status == std::future_status::deferred) {
             utils::Logger::Instance().Debug("%s\n\t - deferred waiting",
