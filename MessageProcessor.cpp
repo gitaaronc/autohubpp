@@ -204,14 +204,13 @@ MessageProcessor::processEcho(uint32_t echo_length) {
     while (offset < read_buffer.size())
         if (read_buffer[offset++] == 0x02)
             break;
-    if (offset >= read_buffer.size()) {
-        return EchoStatus::Unknown;
-    }
+    
+    if (offset >= read_buffer.size()) return EchoStatus::Unknown;
 
     if (offset > 1) {
         utils::Logger::Instance().Info(
                 "%s\n\t  - skipping bytes between: [last:offset][%d:%d] {%s}\n",
-                FUNCTION_NAME_CSTR, offset, utils::ByteArrayToStringStream(
+                FUNCTION_NAME_CSTR, 0, offset, utils::ByteArrayToStringStream(
                 read_buffer, 0, offset - 1).c_str()
                 );
     }

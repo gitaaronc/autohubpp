@@ -26,6 +26,7 @@
  */
 #include "include/io/SerialPort.h"
 #include "include/Logger.h"
+#include "include/utils/utils.hpp"
 
 #include <chrono>
 #include <thread>
@@ -139,7 +140,7 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
 
     boost::system::error_code ec;
     serial_port_->cancel(ec);
-    utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
+    utils::Logger::Instance().Debug("I/O cancel: %s", ec.message().c_str());
 
     std::future<std::size_t> read_result = serial_port_->async_read_some(
             boost::asio::buffer(data), boost::asio::use_future);
@@ -152,7 +153,7 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
                     "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
             
             serial_port_->cancel();
-            utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
+            utils::Logger::Instance().Debug("IO cancel: %s", ec.message().c_str());
             
             break;
         } else if (status == std::future_status::ready) {
@@ -161,8 +162,10 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
             for (const auto& it : data)
                 buffer.push_back(it);
             utils::Logger::Instance().Debug("%s\n\t  - the future is now!\n"
-                    "\t  - %d bytes available.\n"
-                    "\t  - success!!", FUNCTION_NAME_CSTR, buffer.size());
+                    "\t  - %d bytes available. {0x%s}\n"
+                    "\t  - success!!", FUNCTION_NAME_CSTR, buffer.size(),
+                    utils::ByteArrayToStringStream(buffer,0, 
+                    buffer.size()).c_str());
             break;
         } else if (status == std::future_status::deferred) {
             utils::Logger::Instance().Debug("%s\n\t - deferred waiting",
