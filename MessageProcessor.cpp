@@ -284,11 +284,11 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
 
     if (bytes_expected > 0) {
 
-        uint32_t count = 0;
+        uint8_t count = 0;
         do {
             if (read_buffer.size() < bytes_expected) {
                 // try one more time
-                io_port_->recv_with_timeout(read_buffer, 50);
+                io_port_->recv_with_timeout(read_buffer, 250);
                 count++;
             } else {
                 break;
@@ -321,7 +321,7 @@ MessageProcessor::send(std::vector<uint8_t> send_buffer,
 
     EchoStatus status = EchoStatus::None;
     send_buffer.insert(send_buffer.begin(), 0x02);
-    uint32_t retry = 0;
+    uint8_t retry = 0;
     do {
         if (retry == 0) {
             utils::Logger::Instance().Info("%s\n\t - sending %d bytes: {%s}\n",
