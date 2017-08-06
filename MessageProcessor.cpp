@@ -275,12 +275,12 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
     std::vector<uint8_t> read_buffer;
     io_port_->recv_with_timeout(read_buffer, 500);
 
-   /*
+   
     if (is_echo && read_buffer.size() > 0 && read_buffer[0] == 0x15) {
         for (const auto& it : read_buffer)
             return_buffer.push_back(it);
         return;
-    }*/
+    }
 
     if (bytes_expected > 0) {
 
@@ -294,14 +294,14 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
             }
         } while (count < 4);
 
-        /*
+        
         if (is_echo && (read_buffer.size() > 0) && (read_buffer[0] == 0x15)) {
             for (const auto& it : read_buffer)
                 return_buffer.push_back(it);
             return;
         }
 
-        if (read_buffer.size() < bytes_expected) {
+        /*if (read_buffer.size() < bytes_expected) {
             if (read_buffer.size() > 0) {
             } else {
             }
