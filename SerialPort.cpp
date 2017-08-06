@@ -26,7 +26,6 @@
  */
 #include "include/io/SerialPort.h"
 #include "include/Logger.h"
-#include "include/utils/utils.hpp"
 
 #include <chrono>
 #include <thread>
