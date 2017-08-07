@@ -139,7 +139,8 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
 
     boost::system::error_code ec;
     socket_port_->cancel(ec);
-    recv_buffer(buffer);
+    if (recv_buffer_has_data_) recv_buffer(buffer);
+
     
     utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
     
@@ -154,6 +155,7 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
                     "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
             
             socket_port_->cancel(ec);
+            if (recv_buffer_has_data_) recv_buffer(buffer);
             utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
             
             break;

@@ -139,7 +139,7 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
 
     boost::system::error_code ec;
     serial_port_->cancel(ec);
-    recv_buffer(buffer);
+    if (recv_buffer_has_data_) recv_buffer(buffer);
     
     utils::Logger::Instance().Debug("I/O cancel: %s", ec.message().c_str());
 
@@ -154,6 +154,7 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
                     "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
             
             serial_port_->cancel();
+            if (recv_buffer_has_data_) recv_buffer(buffer);
             utils::Logger::Instance().Debug("IO cancel: %s", ec.message().c_str());
             
             break;
