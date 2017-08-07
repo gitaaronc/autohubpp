@@ -26,6 +26,7 @@
  */
 #include "include/io/SocketPort.h"
 #include "include/Logger.h"
+#include "include/utils/utils.hpp"
 
 #include <chrono>
 #include <thread>
@@ -141,7 +142,6 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
     socket_port_->cancel(ec);
     if (recv_buffer_has_data_) recv_buffer(buffer);
 
-    
     utils::Logger::Instance().Debug("ERROR %s", ec.message().c_str());
     
     std::future<std::size_t> read_result = socket_port_->async_read_some(
@@ -174,6 +174,12 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
                     FUNCTION_NAME_CSTR);
         }
     } while (status != std::future_status::ready);
+
+    utils::Logger::Instance().Debug("%s\n\t  - aquired the following\n"
+            "\t  - {0x%s}", FUNCTION_NAME_CSTR, 
+            utils::ByteArrayToStringStream(buffer, 0,
+                    buffer.size()).c_str());
+
     return rVal;
 }
 

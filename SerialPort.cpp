@@ -26,6 +26,7 @@
  */
 #include "include/io/SerialPort.h"
 #include "include/Logger.h"
+#include "include/utils/utils.hpp"
 
 #include <chrono>
 #include <thread>
@@ -153,7 +154,7 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
                     "%d ms timeout expired.\n"
                     "\t  - canceling async_read_some.", FUNCTION_NAME_CSTR, msTimeout);
             
-            serial_port_->cancel();
+            serial_port_->cancel(ec);
             if (recv_buffer_has_data_) recv_buffer(buffer);
             utils::Logger::Instance().Debug("IO cancel: %s", ec.message().c_str());
             
@@ -173,6 +174,12 @@ SerialPort::recv_with_timeout(std::vector<uint8_t>& buffer,
                     FUNCTION_NAME_CSTR);
         }
     } while (status != std::future_status::ready);
+
+    utils::Logger::Instance().Debug("%s\n\t  - aquired the following\n"
+            "\t  - {0x%s}", FUNCTION_NAME_CSTR, 
+            utils::ByteArrayToStringStream(buffer, 0,
+                    buffer.size()).c_str());
+    
     return rVal;
 }
 

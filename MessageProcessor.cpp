@@ -184,6 +184,11 @@ MessageProcessor::processEcho(uint32_t echo_length) {
 
     std::vector<uint8_t> read_buffer;
     readData(read_buffer, echo_length, true);
+    utils::Logger::Instance().Debug("%s\n\t  - WHAT THE FOX\n"
+            "\t  - {0x%s}", FUNCTION_NAME_CSTR, 
+            utils::ByteArrayToStringStream(read_buffer, 0,
+                    read_buffer.size()).c_str());
+    
     if (read_buffer.size() == 0) {
         return EchoStatus::None;
     }
@@ -339,15 +344,15 @@ MessageProcessor::send(std::vector<uint8_t> send_buffer,
         io_port_->send_buffer(send_buffer);
         status = processEcho(echo_length + 2); // +2 because the STX is not included
         if (status == EchoStatus::ACK) {
-            oss << "\t  - EchoStatus::ACK received\n";
+            oss << "\t  - PLM: ACK received\n";
             break;
         }
         if (status == EchoStatus::NAK && !retry_on_nak) {
-            oss << "\t  - EchoStatus::NAK received, no retry selected\n";
+            oss << "\t  - PLM: NAK received, no retry selected\n";
             break;
         }
         if (status == EchoStatus::NAK) {
-            oss << "\t  - EchoStatus::NAK received, sleeping for 240ms\n";
+            oss << "\t  - PLM: NAK received, sleeping for 240ms\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(240));
         }
         retry++;
