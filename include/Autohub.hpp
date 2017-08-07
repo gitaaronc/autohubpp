@@ -37,7 +37,6 @@
 #include <websocketpp/server.hpp>
 #include <websocketpp/common/thread.hpp>
 
-#include <restbed>
 #include <yaml-cpp/yaml.h>
 
 typedef websocketpp::server<websocketpp::config::asio> wspp_server;
@@ -108,18 +107,6 @@ namespace ace {
         std::mutex wspp_connections_mutex_;
         std::thread wspp_server_thread_;
         uint32_t wspp_next_id_;
-
-        restbed::Service restbed_;
-        void startRestbed();
-        void restEvents(const std::shared_ptr<restbed::Session> session);
-        void restGetDevice(const std::shared_ptr<restbed::Session> session);
-        void restGetDevices(const std::shared_ptr<restbed::Session> session);
-        void restGetHtmlHandler(const std::shared_ptr<restbed::Session> session);
-        void restGetAuthToken(const std::shared_ptr<restbed::Session> session);
-        void restPostCommand(const std::shared_ptr<restbed::Session> session);
-        void restProcessJson(const std::shared_ptr<restbed::Session> session,
-                const restbed::Bytes& body);
-        std::map<std::string, std::shared_ptr<restbed::Session> > rest_sessions_;
 
         std::unique_ptr<server> houselinc_server_;
         void houselincRx(std::vector<uint8_t> buffer);

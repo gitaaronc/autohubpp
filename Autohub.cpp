@@ -37,9 +37,6 @@
 
 #include <iostream>
 #include <fstream>
-//#include <corvusoft/restbed/service.hpp>
-//#include <corvusoft/restbed/status_code.hpp>
-//#include <corvusoft/restbed/session.hpp>
 
 namespace ace
 {
@@ -164,15 +161,6 @@ Autohub::onUpdateDevice(Json::Value json) {
         });
 
     }
-    std::ostringstream ss;
-    Json::FastWriter fw;
-    ss << "data: " << fw.write(json) << "\n\n";
-    for (const auto& it : rest_sessions_) {
-        it.second->yield(ss.str(), [ ](
-                const std::shared_ptr< restbed::Session > session) {
-
-        });
-    }
 }
 
 void
@@ -221,7 +209,6 @@ Autohub::stop() {
         wspp_server_thread_.join();
     }
     dynamicLibraryMap_.clear();
-    restbed_.stop();
 }
 
 void
@@ -272,199 +259,6 @@ Autohub::start() {
             bind(&type::houselincRx, this, std::placeholders::_1));
 
     TestPlugin();
-    startRestbed(); // running in this thread
-}
-
-void
-Autohub::startRestbed() {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
-    auto resource = std::make_shared< restbed::Resource >();
-    resource->set_path("/static/{filename: [a-z]*\\.html}");
-    resource->set_method_handler("GET",
-            std::bind(&Autohub::restGetHtmlHandler, this,
-            std::placeholders::_1));
-    restbed_.publish(resource);
-
-    auto resource_api = std::make_shared<restbed::Resource>();
-    resource_api->set_path("/api/v2/oauth2/token/");
-    resource_api->set_method_handler("POST",
-            std::bind(&Autohub::restGetAuthToken, this, std::placeholders::_1));
-    restbed_.publish(resource_api);
-
-    auto devices = std::make_shared<restbed::Resource>();
-    devices->set_path("/api/v2/devices/");
-    devices->set_method_handler("GET",
-            std::bind(&Autohub::restGetDevices, this, std::placeholders::_1));
-    restbed_.publish(devices);
-
-    auto device = std::make_shared<restbed::Resource>();
-    device->set_path("/api/v2/devices/{device: .*}");
-    device->set_method_handler("GET",
-            std::bind(&Autohub::restGetDevice, this, std::placeholders::_1));
-    restbed_.publish(device);
-
-    auto commands = std::make_shared<restbed::Resource>();
-    commands->set_path("/api/v2/commands");
-    commands->set_method_handler("POST",
-            std::bind(&Autohub::restPostCommand, this, std::placeholders::_1));
-    restbed_.publish(commands);
-
-    auto events = std::make_shared<restbed::Resource>();
-    events->set_path("/api/v2/events");
-    events->set_method_handler("GET",
-            std::bind(&Autohub::restEvents, this, std::placeholders::_1));
-    restbed_.publish(events);
-
-    /*auto ssl_settings = std::make_shared<restbed::SSLSettings>();
-    ssl_settings->set_http_disabled(true);
-    ssl_settings->set_private_key(Uri("file://server.key"));
-    ssl_settings->set_certificate(Uri("file://server.crt"));
-    ssl_settings->set_temporary_diffie_hellman(Uri("file:://dh768.pem"));*/
-
-    auto settings = std::make_shared< restbed::Settings >();
-    settings->set_port(root_node_["RESTBED"]["listening_port"].as<int>(8000));
-    //settings->set_ssl_settings(ssl_settings);
-
-    restbed_.start(settings);
-}
-
-void
-Autohub::restEvents(const std::shared_ptr<restbed::Session> session) {
-    rest_sessions_[session->get_origin()] = session;
-    utils::Logger::Instance().Debug(session->get_origin().c_str());
-    const std::multimap<std::string, std::string> headers{
-        { "Content-Type", "text/event-stream"},
-        { "Cache-Control", "no-cache"},
-        { "Connection", "keep-alive"}
-    };
-    std::ostringstream ss;
-    ss << "event: device_update\n"
-            << "data: This is an update\n\n";
-
-    session->yield(restbed::OK, ss.str(), headers, [ ](
-            const std::shared_ptr< restbed::Session > session) {
-
-    });
-}
-
-void
-Autohub::restGetDevice(const std::shared_ptr<restbed::Session> session) {
-    const auto request = session->get_request();
-    const std::string device = request->get_path_parameter("device");
-    uint32_t device_id = 0;
-    device_id = std::stoi(device);
-    Json::Value root;
-    root = insteon_network_->serializeJson(device_id);
-    const std::multimap<std::string, std::string> headers{
-        { "Content-Type", "text/html"},
-        { "Cache-Control", "no-store"},
-        { "Pragma", "no-cache"},
-        { "Content-Length", std::to_string(root.toStyledString().length())}
-
-    };
-    session->close(restbed::OK, root.toStyledString(), headers);
-}
-
-void
-Autohub::restGetDevices(const std::shared_ptr<restbed::Session> session) {
-    Json::Value root;
-    root = insteon_network_->serializeJson();
-    const std::multimap<std::string, std::string> headers{
-        { "Content-Type", "text/html"},
-        { "Cache-Control", "no-store"},
-        { "Pragma", "no-cache"},
-        { "Content-Length", std::to_string(root.toStyledString().length())}
-
-    };
-    session->close(restbed::OK, root.toStyledString(), headers);
-}
-
-void
-Autohub::restGetHtmlHandler(const std::shared_ptr<restbed::Session> session) {
-    const auto request = session->get_request();
-    const std::string filename = request->get_path_parameter("filename");
-
-    std::ifstream stream("/var/www/html/" + filename, std::ifstream::in);
-
-    if (stream.is_open()) {
-        const std::string body = std::string(
-                std::istreambuf_iterator< char >(stream),
-                std::istreambuf_iterator< char >());
-
-        const std::multimap< std::string, std::string > headers{
-            { "Content-Type", "text/html"},
-            { "Content-Length", std::to_string(body.length())}
-        };
-
-        session->close(restbed::OK, body, headers);
-    } else {
-        session->close(restbed::NOT_FOUND);
-    }
-}
-
-void
-Autohub::restGetAuthToken(const std::shared_ptr<restbed::Session> session) {
-    std::ostringstream ss;
-    ss << "{\r\n"
-            "\"access_token\" : \"test\",\r\n"
-            "\"refresh_token\" : \"test\",\r\n"
-            "\"token_type\" : \"Bearer\",\r\n"
-            "\"expires_in\" : \"7200\"\r\n"
-            "}\r\n";
-    const std::multimap<std::string, std::string> headers{
-        { "Content-Type", "text/html"},
-        { "Cache-Control", "no-store"},
-        { "Pragma", "no-cache"},
-        { "Content-Length", std::to_string(ss.str().length())}
-
-    };
-    session->close(restbed::OK, ss.str(), headers);
-}
-
-void
-Autohub::restPostCommand(const std::shared_ptr<restbed::Session> session) {
-    {
-        const auto request = session->get_request();
-        const auto headers = request->get_headers();
-        for (const auto& it : headers) {
-            utils::Logger::Instance().Debug(it.second.c_str());
-        }
-        uint32_t content_length = 0;
-        request->get_header("Content-Length", content_length);
-        session->fetch(content_length, std::bind(&Autohub::restProcessJson, this,
-                std::placeholders::_1, std::placeholders::_2));
-    }
-    std::ostringstream oss;
-    oss << "{\r\n"
-            "\"id\" : 123,\r\n"
-            "\"status\" : \"succeeded\",\r\n"
-            "\"link\" : \"/api/v2/commands/123\"\r\n"
-            "}\r\n";
-    const std::multimap<std::string, std::string> headers{
-        { "Content-Type", "application/json"},
-        { "Cache-Control", "no-store"},
-        { "Pragma", "no-cache"},
-        { "Content-Length", std::to_string(oss.str().length())}
-
-    };
-    session->close(restbed::ACCEPTED, oss.str(), headers);
-}
-
-void
-Autohub::restProcessJson(const std::shared_ptr<restbed::Session> session,
-        const restbed::Bytes& body) {
-    std::string test(body.begin(), body.end());
-    Json::Value root;
-    Json::Reader reader;
-    bool parsed = reader.parse(test.c_str(), root);
-    if (!parsed) {
-        utils::Logger::Instance().Info("Failed to parse %s",
-                reader.getFormattedErrorMessages().c_str());
-        return;
-    }
-    strand_hub_.post(std::bind(&type::internalReceiveCommand, this,
-            test));
-    utils::Logger::Instance().Debug(root.toStyledString().c_str());
 }
 
 /*

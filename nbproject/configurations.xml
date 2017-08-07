@@ -121,7 +121,6 @@
           <standard>11</standard>
           <incDir>
             <pElem>/usr/include/websocketpp</pElem>
-            <pElem>/usr/include/restbed</pElem>
           </incDir>
           <preprocessorList>
             <Elem>BOOST_FILESYSTEM_NO_DEPRECATED</Elem>
@@ -134,7 +133,6 @@
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
-            <linkerLibLibItem>restbed</linkerLibLibItem>
             <linkerLibLibItem>crypto</linkerLibLibItem>
             <linkerLibLibItem>ssl</linkerLibLibItem>
             <linkerLibLibItem>yaml-cpp</linkerLibLibItem>
