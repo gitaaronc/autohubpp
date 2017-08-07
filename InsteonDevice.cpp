@@ -463,7 +463,7 @@ void
 InsteonDevice::statusUpdate(uint8_t status) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     device_disabled(false);
-    writeDeviceProperty("device_disabled", device_disabled());
+    config_["device_disabled_"] = device_disabled();
     writeDeviceProperty("light_status", status);
     if (onStatusUpdate)
         onStatusUpdate(SerializeJson());

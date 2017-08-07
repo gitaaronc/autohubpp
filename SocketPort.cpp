@@ -175,16 +175,6 @@ SocketPort::recv_with_timeout(std::vector<uint8_t>& buffer,
         }
     } while (status != std::future_status::ready);
 
-    if (rVal){
-    utils::Logger::Instance().Debug("%s\n\t  - acquired the following\n"
-            "\t  - {0x%s}", FUNCTION_NAME_CSTR, 
-            utils::ByteArrayToStringStream(buffer, 0,
-                    buffer.size()).c_str());
-    } else {
-        utils::Logger::Instance().Debug("%s\n\t - NO DATA AVAILABLE",
-                FUNCTION_NAME_CSTR);
-    }
-
     return rVal;
 }
 

@@ -184,11 +184,7 @@ MessageProcessor::processEcho(uint32_t echo_length) {
 
     std::vector<uint8_t> read_buffer;
     readData(read_buffer, echo_length, true);
-    utils::Logger::Instance().Debug("%s\n\t  - WHAT THE FOX\n"
-            "\t  - {0x%s}", FUNCTION_NAME_CSTR, 
-            utils::ByteArrayToStringStream(read_buffer, 0,
-                    read_buffer.size()).c_str());
-    
+
     if (read_buffer.size() == 0) {
         return EchoStatus::None;
     }
@@ -209,7 +205,7 @@ MessageProcessor::processEcho(uint32_t echo_length) {
     while (offset < read_buffer.size())
         if (read_buffer[offset++] == 0x02)
             break;
-    
+
     if (offset >= read_buffer.size()) return EchoStatus::Unknown;
 
     if (offset > 1) {
@@ -278,9 +274,9 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
         uint32_t bytes_expected, bool is_echo) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::vector<uint8_t> read_buffer;
-    io_port_->recv_with_timeout(read_buffer, 500);
+    io_port_->recv_with_timeout(read_buffer, 250);
 
-   
+
     if (is_echo && read_buffer.size() > 0 && read_buffer[0] == 0x15) {
         for (const auto& it : read_buffer)
             return_buffer.push_back(it);
@@ -292,21 +288,23 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
         uint8_t count = 1;
         do {
             if (read_buffer.size() < bytes_expected) {
-                io_port_->recv_with_timeout(read_buffer, 500);
+                io_port_->recv_with_timeout(read_buffer, 50);
+                std::this_thread::sleep_for(std::chrono::milliseconds(
+                        100 * count));
                 count++;
             } else {
                 break;
             }
         } while (count < 4);
 
-        
-        if (is_echo && (read_buffer.size() > 0) && (read_buffer[0] == 0x15)) {
+
+        /*if (is_echo && (read_buffer.size() > 0) && (read_buffer[0] == 0x15)) {
             for (const auto& it : read_buffer)
                 return_buffer.push_back(it);
             return;
         }
 
-        /*if (read_buffer.size() < bytes_expected) {
+        if (read_buffer.size() < bytes_expected) {
             if (read_buffer.size() > 0) {
             } else {
             }
@@ -386,8 +384,6 @@ EchoStatus
 MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
         bool retry_on_nak, uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    // force other sending threads to wait for us to finish
-    //std::lock_guard<std::mutex>lock(lock_io_);
     EchoStatus status = EchoStatus::None;
     io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
 
