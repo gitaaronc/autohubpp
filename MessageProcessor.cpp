@@ -215,7 +215,7 @@ MessageProcessor::processEcho(uint32_t echo_length) {
     if (offset > 1) {
         utils::Logger::Instance().Info(
                 "%s\n\t  - skipping bytes between: [last:offset][%d:%d] {%s}\n",
-                FUNCTION_NAME_CSTR, 0, offset, utils::ByteArrayToStringStream(
+                FUNCTION_NAME_CSTR, 0, offset - 2, utils::ByteArrayToStringStream(
                 read_buffer, 0, offset - 1).c_str()
                 );
     }
