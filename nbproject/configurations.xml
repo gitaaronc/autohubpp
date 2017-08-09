@@ -133,8 +133,6 @@
             <linkerLibLibItem>boost_filesystem</linkerLibLibItem>
             <linkerLibLibItem>boost_thread</linkerLibLibItem>
             <linkerLibLibItem>dl</linkerLibLibItem>
-            <linkerLibLibItem>crypto</linkerLibLibItem>
-            <linkerLibLibItem>ssl</linkerLibLibItem>
             <linkerLibLibItem>yaml-cpp</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>-pthread -rdynamic</commandLine>

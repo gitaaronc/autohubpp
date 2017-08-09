@@ -119,6 +119,7 @@ private:
                                     uint8_t d10 = 0, uint8_t d11 = 0, uint8_t d12 = 0,
                                     uint8_t d13 = 0);
 
+    void loadCommandMap();
     void device_name(std::string device_name);
     void device_disabled(bool disabled);
     std::string device_name_;

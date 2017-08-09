@@ -68,7 +68,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-lboost_system -lboost_filesystem -lboost_thread -ldl -lcrypto -lssl -lyaml-cpp
+LDLIBSOPTIONS=-lboost_system -lboost_filesystem -lboost_thread -ldl -lyaml-cpp
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

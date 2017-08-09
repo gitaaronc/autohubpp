@@ -51,18 +51,7 @@ device_disabled_(false) {
     device_name_ = ace::utils::int_to_hex<int>(insteon_address);
 
     device_properties_["light_status"] = 0;
-    command_map_["ping"] = InsteonDeviceCommand::Ping;
-    command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
-    command_map_["on"] = InsteonDeviceCommand::On;
-    command_map_["fast_on"] = InsteonDeviceCommand::FastOn;
-    command_map_["off"] = InsteonDeviceCommand::Off;
-    command_map_["fast_off"] = InsteonDeviceCommand::FastOff;
-    command_map_["brighten"] = InsteonDeviceCommand::Brighten;
-    command_map_["dim"] = InsteonDeviceCommand::Dim;
-    command_map_["dimming_start"] = InsteonDeviceCommand::StartDimming;
-    command_map_["dimming_stop"] = InsteonDeviceCommand::StopDimming;
-    command_map_["status"] = InsteonDeviceCommand::LightStatusRequest;
-    command_map_["beep"] = InsteonDeviceCommand::Beep;
+    loadCommandMap();
     loadProperties();
 }
 
@@ -85,7 +74,7 @@ InsteonDevice::internalReceiveCommand(std::string command,
                 other_cmd.begin(), ::tolower);
 
         if (other_cmd.compare("toggle") == 0) {
-            if (readDeviceProperty("light_status",0) == 0) {
+            if (readDeviceProperty("light_status", 0) == 0) {
                 io_strand_.post(std::bind(&type::command, this,
                         InsteonDeviceCommand::On, 0xFF));
             } else {
@@ -160,47 +149,66 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
             break;
         case InsteonDeviceCommand::Dim:
         {
-            float oValue = readDeviceProperty("light_status",0);
+            float oValue = readDeviceProperty("light_status", 0);
             float nValue = round(oValue / 8) - 1;
             nValue = nValue < 1 ? 0 : (nValue * 8) - 1;
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, nValue));
         }
             break;
         case InsteonDeviceCommand::Brighten:
         {
-            float oValue = readDeviceProperty("light_status",0);
+            float oValue = readDeviceProperty("light_status", 0);
             float nValue = round(oValue / 8) + 1;
             nValue = nValue > 31 ? 255 : (nValue * 8) - 1;
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, nValue));
         }
             break;
         case InsteonDeviceCommand::Off:
         case InsteonDeviceCommand::FastOff:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, 0x00));
             break;
         case InsteonDeviceCommand::On:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, recvCmdTwo));
             break;
         case InsteonDeviceCommand::FastOn:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, 0xFF));
             break;
         case InsteonDeviceCommand::LightStatusRequest:
         {
             writeDeviceProperty("link_database_delta", recvCmdOne);
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, recvCmdTwo));
         }
             break;
+        case InsteonDeviceCommand::StopDimming:
+            io_strand_.post(std::bind(&type::command, this,
+                    InsteonDeviceCommand::LightStatusRequest, 0x02));
+            break;
         default:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, recvCmdTwo));
             break;
     }
+}
+
+void InsteonDevice::loadCommandMap() {
+    command_map_["ping"] = InsteonDeviceCommand::Ping;
+    command_map_["request_id"] = InsteonDeviceCommand::IDRequest;
+    command_map_["on"] = InsteonDeviceCommand::On;
+    command_map_["fast_on"] = InsteonDeviceCommand::FastOn;
+    command_map_["off"] = InsteonDeviceCommand::Off;
+    command_map_["fast_off"] = InsteonDeviceCommand::FastOff;
+    command_map_["brighten"] = InsteonDeviceCommand::Brighten;
+    command_map_["dim"] = InsteonDeviceCommand::Dim;
+    command_map_["dimming_start"] = InsteonDeviceCommand::StartDimming;
+    command_map_["dimming_stop"] = InsteonDeviceCommand::StopDimming;
+    command_map_["status"] = InsteonDeviceCommand::LightStatusRequest;
+    command_map_["beep"] = InsteonDeviceCommand::Beep;
 }
 
 /**
@@ -225,8 +233,8 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
     PropertyKeys keys = im->properties_;
     uint8_t command_one = keys["command_one"];
     uint8_t command_two = keys["command_two"];
-    uint8_t set_level = readDeviceProperty("button_on_level",0);
-    uint8_t current_level = readDeviceProperty("light_status",0);
+    uint8_t set_level = readDeviceProperty("button_on_level", 0);
+    uint8_t current_level = readDeviceProperty("light_status", 0);
 
     if (im->properties_.size() > 0) {
         std::ostringstream oss;
@@ -265,19 +273,19 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             // device goes to set level at set ramp rate
         case InsteonMessageType::OnBroadcast:
             set_level = current_level != set_level ? set_level : 0xFF;
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, set_level));
             break;
             // go to saved on level instantly
         case InsteonMessageType::FastOnBroadcast:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, 0xFF));
             break;
             // goes to off level instantly
         case InsteonMessageType::FastOffBroadcast:
             // goes to off level at set ramp rate
         case InsteonMessageType::OffBroadcast:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate, 
+            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
                     this, 0x00));
             break;
         case InsteonMessageType::IncrementEndBroadcast:
@@ -309,8 +317,9 @@ InsteonDevice::OnMessage(std::shared_ptr<InsteonMessage> im) {
             utils::Logger::Instance().Debug("ALDB record received");
             break;
         default:
-            utils::Logger::Instance().Debug("%s\n\t  - unknown message type received\n"
-                    "\t  - for device %s{%s}", FUNCTION_NAME_CSTR, device_name().c_str(),
+            utils::Logger::Instance().Debug("%s\n\t  - unknown message type "
+                    "received\n\t  - for device %s{%s}",
+                    FUNCTION_NAME_CSTR, device_name().c_str(),
                     utils::int_to_hex(insteon_address()).c_str());
             break;
     }
@@ -376,11 +385,15 @@ InsteonDevice::command(InsteonDeviceCommand command,
             device_disabled(!tryLightStatusRequest());
             break;
         case InsteonDeviceCommand::On:
-            device_disabled(!tryCommand(static_cast<uint8_t> (command), 
+            device_disabled(!tryCommand(static_cast<uint8_t> (command),
                     command_two ? command_two : 0xFF));
             break;
         case InsteonDeviceCommand::FastOn:
             device_disabled(!tryCommand(static_cast<uint8_t> (command), 0xFF));
+            break;
+        case InsteonDeviceCommand::StartDimming:
+            device_disabled(!tryCommand(static_cast<uint8_t> (command),
+                    command_two > 0 ? 0x01 : 0x00));
             break;
         case InsteonDeviceCommand::Off:
         case InsteonDeviceCommand::Brighten:
@@ -448,10 +461,10 @@ InsteonDevice::tryLightStatusRequest() {
 bool
 InsteonDevice::tryReadWriteALDB() {
     std::vector<uint8_t> send_buffer;
-    BuildDirectExtendedMessage(send_buffer, 0x2F, 0x00, 0x01, 0x0F, 0xFF, 
+    BuildDirectExtendedMessage(send_buffer, 0x2F, 0x00, 0x01, 0x0F, 0xFF,
             0x00, 0x00);
     PropertyKeys properties;
-    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, 
+    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50,
             properties);
     if ((status == EchoStatus::ACK) && (!properties.empty())) {
         return true;
@@ -512,8 +525,8 @@ InsteonDevice::BuildDirectStandardMessage(
     send_buffer.clear();
     uint8_t max_hops = 3;
     uint8_t message_flags = 0;
-    max_hops = readDeviceProperty("message_flags_max_hops",3) > 0
-            ? readDeviceProperty("message_flags_max_hops",3) : max_hops;
+    max_hops = readDeviceProperty("message_flags_max_hops", 3) > 0
+            ? readDeviceProperty("message_flags_max_hops", 3) : max_hops;
     message_flags = (max_hops << 2) | max_hops;
     send_buffer = {0x62, insteon_address_.address_high_,
         insteon_address_.address_middle_, insteon_address_.address_low_,
@@ -531,8 +544,8 @@ InsteonDevice::BuildDirectExtendedMessage(
     send_buffer.clear();
     uint8_t max_hops = 3;
     uint8_t message_flags = 0;
-    max_hops = readDeviceProperty("message_flags_max_hops",3) > 0
-            ? readDeviceProperty("message_flags_max_hops",3) : max_hops;
+    max_hops = readDeviceProperty("message_flags_max_hops", 3) > 0
+            ? readDeviceProperty("message_flags_max_hops", 3) : max_hops;
     message_flags = 16 | (max_hops << 2) | max_hops;
     send_buffer = {0x62, insteon_address_.address_high_,
         insteon_address_.address_middle_, insteon_address_.address_low_,
