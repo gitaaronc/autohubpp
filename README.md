@@ -9,7 +9,7 @@ C++ Home Automation Hub - Insteon PLM Support
  If using a HUB it must support RAW Insteon Commands via TCP/IP. My hub is version 4.8A<br/>
  <b>NO</b> Insteon accounts are required.<br/>
  
- I have decided to open source this project for various reasons. <br/>
+ I've decided to open source this project for various reasons. <br/>
   - To increase support for Insteon hardware in the open source community.
   - Software development is vary time consuming. I simply don't have the spare time to support a project of this size by myself.
   - To attract C++ developers to the project increasing support for the project itself.
@@ -17,15 +17,13 @@ C++ Home Automation Hub - Insteon PLM Support
 
 This is the backend server software only. I currently run it on a Beaglebone Black. <br/>
 The front end used with this project is Home Assistant. https://github.com/home-assistant/home-assistant <br/>
-Any frontend GUI supporting restapi or websockets will work with this server.<br/>
+Any frontend GUI supporting websockets will work with this server.<br/>
 
 A very simple python library was written for homeassistant to communicate with this server software. <br/>
 Autohub components were also written for use with with Home Assistant.
  - Python library for autohub: https://github.com/gitaaronc/pyautohub
  - If there are any python developers willing to take part, please contact me.
  - HomeAssistant integration can be found in my homeassistant repo, branch autohub.
-
-This is the initial push to the repo, additional documentation will follow.
 
 This server supports restapi and websockets. Rest and Websockets are used for controlling devices and receiving updates.
 TODO: 
@@ -41,16 +39,9 @@ You'll also need yaml-cpp<br/>
 It's recommended to create a dev directory and clone the following repositories into it.
 ```
 -dev
---restbed
 --websocketpp
 --autohubpp
 ```
-<b>RESTBED</b><br/>
-git clone --recursive https://github.com/gitaaronc/restbed.git<br/>
-Follow the instructions for compiling and installing restbed: https://github.com/gitaaronc/restbed<br/>
-When you get to the part in the restbed instruction where you run cmake, run cmake with these options.</br>
- <b>cmake -DBUILD_SHARED=YES ..</b></br>
- 
 <b>WEBSOCKETPP</b><br/>
 git clone https://github.com/gitaaronc/websocketpp.git<br/>
 
@@ -66,10 +57,6 @@ Clone this repository.
  
  I create a softlink inside of /usr/include<br />
  ln -s /{GIT_REPO_ROOT}/websocketpp websocketpp<br />
- ln -s /{GIT_REPO_ROOT}/restbed/source restbed<br />
- 
- You will also need to create a link to the librestbed.so if the file does not exist in your /usr/lib directory.</br>
- eg: ln -s /root/github/restbed/distribution/library/librestbed.so librestbed.so</br>
  
  Once you have the dependencies in place and the symbolic links created you can run make.<br />
  The libraries created by the above dependencies will require placement into your /usr/lib folder.</br>
@@ -84,8 +71,6 @@ ex: autohubpp /etc/configuration.yaml</br>
 example yaml configuration file<br/>
 ```
 worker_threads: 20
-RESTBED:
-  listening_port: 8000
 INSTEON:
   command_delay: 1500
   DEVICES: # You don't need to populate the device section, it will autopopulate on discovery. You can modify/customize it.
@@ -246,7 +231,6 @@ Sampled Response:<br/>
 }
 
 ```
-There is also a rest API with an events service to deliver realtime updates to your application. No polling of status required.<br/>
 Documenation is still required.<br/>
 
 More C++ and Python developers required!!<br/>
