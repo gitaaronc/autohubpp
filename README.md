@@ -25,7 +25,9 @@ Autohub components were also written for use with with Home Assistant.
  - If there are any python developers willing to take part, please contact me.
  - HomeAssistant integration can be found in my homeassistant repo, branch autohub.
 
-This server supports restapi and websockets. Rest and Websockets are used for controlling devices and receiving updates.
+Websockets are used to interface and control autohubpp.</br>
+RAW Insteon commands are supported on port 9761. Therefor other programs like houselinc will work.</br>
+
 TODO: 
  - Documentation
  
