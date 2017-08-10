@@ -8,12 +8,6 @@ C++ Home Automation Hub - Insteon PLM Support
  <b>PLM's supported:</b> Serial / USB and HUB<br/>
  If using a HUB it must support RAW Insteon Commands via TCP/IP. My hub is version 4.8A<br/>
  <b>NO</b> Insteon accounts are required.<br/>
- 
- I've decided to open source this project for various reasons. <br/>
-  - To increase support for Insteon hardware in the open source community.
-  - Software development is vary time consuming. I simply don't have the spare time to support a project of this size by myself.
-  - To attract C++ developers to the project increasing support for the project itself.
-  - To learn from other C++ developers and help other C++ developers learn.
 
 This is the backend server software only. I currently run it on a Beaglebone Black. <br/>
 The front end used with this project is Home Assistant. https://github.com/home-assistant/home-assistant <br/>
