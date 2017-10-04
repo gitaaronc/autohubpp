@@ -82,11 +82,11 @@ public:
 
     bool connect();
     void onReceive();
-    EchoStatus trySend(const std::vector<uint8_t>& send_buffer,
+    PlmEcho trySend(const std::vector<uint8_t>& send_buffer,
                        bool retry_on_nak = true);
-    EchoStatus trySend(const std::vector<uint8_t>& send_buffer,
+    PlmEcho trySend(const std::vector<uint8_t>& send_buffer,
                        bool retry_on_nak, uint32_t echo_length);
-    EchoStatus trySendReceive(const std::vector<uint8_t>&
+    PlmEcho trySendReceive(const std::vector<uint8_t>&
                               send_buffer, int8_t triesLeft, uint8_t receive_message_id,
                               PropertyKeys& properties);
 
@@ -98,7 +98,7 @@ private:
                                         data,
                                         uint32_t offset, uint32_t count);
 
-    EchoStatus processEcho(uint32_t echo_length);
+    PlmEcho processEcho(uint32_t echo_length);
     bool processMessage(const std::vector<uint8_t>& read_buffer,
                         uint32_t offset, uint32_t& count, bool is_echo = false);
 
@@ -106,7 +106,7 @@ private:
                   uint32_t bytes_expected,
                   bool is_echo);
 
-    EchoStatus send(std::vector<uint8_t> send_buffer,
+    PlmEcho send(std::vector<uint8_t> send_buffer,
                     bool retry_on_nak, uint32_t echo_length);
     void updateWaitItems(const std::shared_ptr<InsteonMessage>& iMsg);
 

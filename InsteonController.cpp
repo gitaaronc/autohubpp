@@ -119,7 +119,7 @@ InsteonController::getIMConfiguration() {
 
 bool InsteonController::enableMonitorMode() {
     std::vector<uint8_t> send_buffer = {0x6B, 0x20};
-    if (insteon_network_->msg_proc_->trySend(send_buffer) == EchoStatus::ACK)
+    if (insteon_network_->msg_proc_->trySend(send_buffer) == PlmEcho::ACK)
         return true;
     return false;
 }
@@ -140,7 +140,7 @@ bool
 InsteonController::tryEnterLinkMode(InsteonLinkMode mode, uint8_t group) {
     pImpl_->LinkingMode_ = mode;
     std::vector<uint8_t> send_buffer = {0x64, (uint8_t) mode, group};
-    if (insteon_network_->msg_proc_->trySend(send_buffer) != insteon::EchoStatus
+    if (insteon_network_->msg_proc_->trySend(send_buffer) != insteon::PlmEcho
             ::ACK) {
         return false;
     }
@@ -163,7 +163,7 @@ InsteonController::tryCancelLinkMode() {
     pImpl_->LinkingMode_ = InsteonLinkMode::Contoller;
     std::vector<uint8_t> send_buffer = {0x65};
     return insteon_network_->msg_proc_->trySend(send_buffer) ==
-            insteon::EchoStatus::ACK;
+            insteon::PlmEcho::ACK;
 }
 
 void

@@ -190,8 +190,8 @@ InsteonDevice::ackOfDirectCommand(const std::shared_ptr<InsteonMessage>& im) {
                     InsteonDeviceCommand::LightStatusRequest, 0x02));
             break;
         default:
-            io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
-                    this, recvCmdTwo));
+            /*io_strand_.get_io_service().post(std::bind(&type::statusUpdate,
+                    this, recvCmdTwo));*/
             break;
     }
 }
@@ -418,8 +418,8 @@ InsteonDevice::tryCommand(uint8_t command, uint8_t value) {
     PropertyKeys properties;
 
     BuildDirectStandardMessage(send_buffer, command, value);
-    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
-    if ((status == EchoStatus::ACK) && (!properties.empty())) {
+    PlmEcho status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
+    if ((status == PlmEcho::ACK) && (!properties.empty())) {
         return true;
     }
     return false;
@@ -430,8 +430,8 @@ InsteonDevice::tryGetExtendedInformation() {
     std::vector<uint8_t> send_buffer;
     PropertyKeys properties;
     BuildDirectExtendedMessage(send_buffer, 0x2E, 0x00);
-    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x51, properties);
-    if ((status == EchoStatus::ACK) && (!properties.empty())) {
+    PlmEcho status = msgProc_->trySendReceive(send_buffer, 3, 0x51, properties);
+    if ((status == PlmEcho::ACK) && (!properties.empty())) {
         writeDeviceProperty("x10_house_code", properties["data_five"]);
         writeDeviceProperty("x10_unit_code", properties["data_six"]);
         writeDeviceProperty("button_on_ramp_rate",
@@ -449,8 +449,8 @@ InsteonDevice::tryLightStatusRequest() {
     std::vector<uint8_t> send_buffer;
     PropertyKeys properties;
     BuildDirectStandardMessage(send_buffer, 0x19, 0x02);
-    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
-    if ((status == EchoStatus::ACK) && (!properties.empty())) {
+    PlmEcho status = msgProc_->trySendReceive(send_buffer, 3, 0x50, properties);
+    if ((status == PlmEcho::ACK) && (!properties.empty())) {
         writeDeviceProperty("link_database_delta", properties["command_one"]);
         writeDeviceProperty("light_status", properties["command_two"]);
         return true;
@@ -464,9 +464,9 @@ InsteonDevice::tryReadWriteALDB() {
     BuildDirectExtendedMessage(send_buffer, 0x2F, 0x00, 0x01, 0x0F, 0xFF,
             0x00, 0x00);
     PropertyKeys properties;
-    EchoStatus status = msgProc_->trySendReceive(send_buffer, 3, 0x50,
+    PlmEcho status = msgProc_->trySendReceive(send_buffer, 3, 0x50,
             properties);
-    if ((status == EchoStatus::ACK) && (!properties.empty())) {
+    if ((status == PlmEcho::ACK) && (!properties.empty())) {
         return true;
     }
     return false;

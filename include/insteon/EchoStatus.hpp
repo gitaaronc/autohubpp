@@ -32,13 +32,13 @@
 
 namespace ace {
     namespace insteon {
-        // Represents the EchoStatus of the command sent to an Insteon PLM/IM
+        // Represents the PlmEcho of the command sent to an Insteon PLM/IM
 
-        enum class EchoStatus : uint8_t {
-            None = 0x00,
+        enum class PlmEcho : uint8_t {
+            NONE = 0x00,
                     NAK = 0x06,
                     ACK = 0x15,
-                    Unknown = 0xFF
+                    UNKNOWN = 0xFF
         };
     }
 }

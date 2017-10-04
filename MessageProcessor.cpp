@@ -177,16 +177,16 @@ MessageProcessor::processData() {
     }
 }
 
-EchoStatus
+PlmEcho
 MessageProcessor::processEcho(uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    EchoStatus status = EchoStatus::None;
+    PlmEcho status = PlmEcho::NONE;
 
     std::vector<uint8_t> read_buffer;
     readData(read_buffer, echo_length, true);
 
     if (read_buffer.size() == 0) {
-        return EchoStatus::None;
+        return PlmEcho::NONE;
     }
 
     if (read_buffer[0] == 0x15) {
@@ -198,7 +198,7 @@ MessageProcessor::processEcho(uint32_t echo_length) {
             lock_buffer_.unlock();
             processData();
         }
-        return EchoStatus::NAK;
+        return PlmEcho::NAK;
 
     }
     uint32_t offset = 0;
@@ -206,7 +206,7 @@ MessageProcessor::processEcho(uint32_t echo_length) {
         if (read_buffer[offset++] == 0x02)
             break;
 
-    if (offset >= read_buffer.size()) return EchoStatus::Unknown;
+    if (offset >= read_buffer.size()) return PlmEcho::UNKNOWN;
 
     if (offset > 1) {
         utils::Logger::Instance().Info(
@@ -228,14 +228,14 @@ MessageProcessor::processEcho(uint32_t echo_length) {
             processData();
         }
         if (result == 0x06) {
-            status = EchoStatus::ACK;
+            status = PlmEcho::ACK;
         } else if (result == 0x15) {
-            status = EchoStatus::NAK;
+            status = PlmEcho::NAK;
         } else {
-            status = EchoStatus::Unknown;
+            status = PlmEcho::UNKNOWN;
         }
     } else {
-        status = EchoStatus::Unknown;
+        status = PlmEcho::UNKNOWN;
     }
     return status;
 }
@@ -255,6 +255,7 @@ MessageProcessor::processMessage(const std::vector<uint8_t>& read_buffer,
         if (offset + count < read_buffer.size()) {
             auto response = *(read_buffer.begin() + offset + count);
             if (response == 0x06 || response == 0x15) {
+                insteon_message->properties_["plm_ack"] = response;
                 insteon_message->raw_message.push_back(response);
                 count++;
             }
@@ -314,7 +315,7 @@ MessageProcessor::readData(std::vector<uint8_t>& return_buffer,
         return_buffer.push_back(it);
 }
 
-EchoStatus
+PlmEcho
 MessageProcessor::send(std::vector<uint8_t> send_buffer,
         bool retry_on_nak, uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -322,7 +323,7 @@ MessageProcessor::send(std::vector<uint8_t> send_buffer,
     std::ostringstream oss;
     processData(); // process any remaining data
 
-    EchoStatus status = EchoStatus::None;
+    PlmEcho status = PlmEcho::NONE;
     send_buffer.insert(send_buffer.begin(), 0x02);
     uint8_t retry = 0;
     do {
@@ -341,15 +342,15 @@ MessageProcessor::send(std::vector<uint8_t> send_buffer,
         oss.str(std::string());
         io_port_->send_buffer(send_buffer);
         status = processEcho(echo_length + 2); // +2 because the STX is not included
-        if (status == EchoStatus::ACK) {
+        if (status == PlmEcho::ACK) {
             oss << "\t  - PLM: ACK received\n";
             break;
         }
-        if (status == EchoStatus::NAK && !retry_on_nak) {
+        if (status == PlmEcho::NAK && !retry_on_nak) {
             oss << "\t  - PLM: NAK received, no retry selected\n";
             break;
         }
-        if (status == EchoStatus::NAK) {
+        if (status == PlmEcho::NAK) {
             oss << "\t  - PLM: NAK received, sleeping for 240ms\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(240));
         }
@@ -367,7 +368,7 @@ MessageProcessor::send(std::vector<uint8_t> send_buffer,
  * @param retry_on_nak
  * @return 
  */
-EchoStatus
+PlmEcho
 MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
         bool retry_on_nak) {
     return trySend(send_buffer, retry_on_nak, send_buffer.size());
@@ -380,11 +381,11 @@ MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
  * @param echo_length
  * @return 
  */
-EchoStatus
+PlmEcho
 MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
         bool retry_on_nak, uint32_t echo_length) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    EchoStatus status = EchoStatus::None;
+    PlmEcho status = PlmEcho::NONE;
     io_port_->set_recv_handler(nullptr); // prevent io from calling a handler
 
     auto duration = config_["command_delay"].as<int>(500);
@@ -420,7 +421,7 @@ MessageProcessor::trySend(const std::vector<uint8_t>& send_buffer,
  * @param properties The properties of the process INSTEON message
  * @return Returns EchoStatus value, ie: ACK or NAK
  */
-EchoStatus
+PlmEcho
 MessageProcessor::trySendReceive(const std::vector<uint8_t>& send_buffer,
         int8_t triesLeft, uint8_t receive_message_id, PropertyKeys&
         properties) {
@@ -433,15 +434,16 @@ MessageProcessor::trySendReceive(const std::vector<uint8_t>& send_buffer,
         // always push to the back as IM responses should be in order of sent message
         wait_list_.push_back(item);
     }
-    EchoStatus status = trySend(send_buffer, triesLeft >= 0);
-    if (status == EchoStatus::ACK) { // got the echo
+    PlmEcho status = trySend(send_buffer, triesLeft >= 0);
+    if (status == PlmEcho::ACK) { // got the echo
         if (!item->insteon_message_) { // still need ACK
             if (item->wait_event_.WaitOne(4000)) { // wait here for ACK
-                utils::Logger::Instance().Info("%s\n\t  - ACK received",
+                utils::Logger::Instance().Info("%s\n\t  - PLM ACK received",
                         FUNCTION_NAME_CSTR);
             } else { // timeout signaled, no event
-                utils::Logger::Instance().Info("%s\n\t  - Timeout signaled: no "
-                        "ACK received\n\t  - Retrying command", FUNCTION_NAME_CSTR);
+                utils::Logger::Instance().Info("%s\n\t  - Timeout signaled: "
+                        "No ACK received from the PLM\n\t  - Retrying command", 
+                        FUNCTION_NAME_CSTR);
                 if (--triesLeft >= 0) {
                     {
                         std::lock_guard<std::mutex>lock(mutex_wait_list_);
