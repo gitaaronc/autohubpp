@@ -9,7 +9,8 @@
  * Author: Aaron
  * 
  * Initial hatchet job to support houselinc application
- * TODO: replace hatchet job with proper implementation
+ * TODO: replace hatchet job with proper implementation 
+ * or REMOVE HOUSELINC SUPPORT?
  * 
  * Created on July 16, 2017, 3:27 PM
  */

@@ -5,8 +5,6 @@
       <logicalFolder name="insteon" displayName="insteon" projectFiles="true">
         <logicalFolder name="detail" displayName="detail" projectFiles="true">
           <itemPath>include/insteon/detail/InsteonController_impl.h</itemPath>
-          <itemPath>include/insteon/detail/InsteonDeviceImpl.cpp</itemPath>
-          <itemPath>include/insteon/detail/InsteonDeviceImpl.hpp</itemPath>
         </logicalFolder>
         <itemPath>include/insteon/EchoStatus.hpp</itemPath>
         <itemPath>include/insteon/InsteonAddress.h</itemPath>
@@ -80,7 +78,6 @@
       <itemPath>InsteonProtocol.cpp</itemPath>
       <itemPath>Logger.cpp</itemPath>
       <itemPath>MessageProcessor.cpp</itemPath>
-      <itemPath>PropertyKeyNames.cpp</itemPath>
       <itemPath>SerialPort.cpp</itemPath>
       <itemPath>SocketPort.cpp</itemPath>
       <itemPath>autoapi.cpp</itemPath>

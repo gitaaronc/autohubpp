@@ -115,8 +115,14 @@ InsteonNetwork::saveDevices() {
 bool
 InsteonNetwork::connect() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    if (!msg_proc_->connect())
+    
+    PropertyKeys properties;
+    if (!msg_proc_->connect(properties)){
         return false;
+    }
+    if (!properties.empty()){
+        // TODO: do something with the properties
+    }
 
     loadDevices();
 

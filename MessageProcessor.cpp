@@ -48,7 +48,8 @@ namespace insteon
 
 MessageProcessor::MessageProcessor(boost::asio::io_service& io_service,
         YAML::Node config)
-: io_service_(io_service), io_strand_(io_service), config_(config) {
+: io_service_(io_service), io_strand_(io_service), config_(config) , 
+        found_controller_(false) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 }
 
@@ -57,7 +58,7 @@ MessageProcessor::~MessageProcessor() {
 }
 
 bool
-MessageProcessor::connect() {
+MessageProcessor::connect(PropertyKeys& properties) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
     std::string plm_type = config_["type"].as<std::string>("serial");
@@ -84,8 +85,13 @@ MessageProcessor::connect() {
     io_port_->set_recv_handler(std::bind(
             &type::onReceive, this));
 
+    std::vector<uint8_t> send_buffer = {0x60};
     if (io_port_->open(host, port)) {
-        return true;
+        PlmEcho status = trySendReceive(send_buffer, 2, 0x60, properties);
+        if ((status == PlmEcho::ACK) && (!properties.empty())) {
+            found_controller_ = true;
+            return true;
+        }
     }
     return false;
 
@@ -263,7 +269,7 @@ MessageProcessor::processMessage(const std::vector<uint8_t>& read_buffer,
             return false;
         }
         updateWaitItems(insteon_message);
-        if (msg_handler_)
+        if (msg_handler_ && found_controller_)
             io_strand_.post(std::bind(msg_handler_, insteon_message));
         return true;
     }

@@ -78,7 +78,7 @@ namespace ace {
         Autohub(boost::asio::io_service& io_service, YAML::Node root);
         ~Autohub();
         void burp(std::string burp); // plugin test
-        void start();
+        bool start();
         void stop();
     private:
         void wsppOnOpen(connection_hdl hdl);

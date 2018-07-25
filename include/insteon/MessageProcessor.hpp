@@ -80,7 +80,7 @@ public:
                               YAML::Node config);
     ~MessageProcessor();
 
-    bool connect();
+    bool connect(PropertyKeys& properties);
     void onReceive();
     PlmEcho trySend(const std::vector<uint8_t>& send_buffer,
                        bool retry_on_nak = true);
@@ -90,6 +90,12 @@ public:
                               send_buffer, int8_t triesLeft, uint8_t receive_message_id,
                               PropertyKeys& properties);
 
+    /**
+     * @param handler
+     * The handler will be invoked upon receipt of complete INSTEON messages.
+     * The handler will not be invoked if the controller hasn't been found.
+     * 
+     */
     void set_message_handler(msg_handler handler);
 protected:
 private:
@@ -125,6 +131,7 @@ private:
     std::chrono::system_clock::time_point time_of_last_command_;
 
     YAML::Node config_;
+    bool found_controller_;
 };
 } // namespace insteon
 } // namespace ace

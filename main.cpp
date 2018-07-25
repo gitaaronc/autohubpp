@@ -109,7 +109,8 @@ int main(int argc, char** argv) {
         });
     }
 
-    autohub.start();
+    bool fRet = false;
+    fRet = autohub.start();
 
     threadpool.join_all();
 
@@ -118,6 +119,6 @@ int main(int argc, char** argv) {
     ofs.close();
 
     ace::utils::Logger::Instance().Info("Autohubpp exited cleanly.");
-    return 0;
+    return fRet;
 }
 

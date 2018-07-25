@@ -211,7 +211,7 @@ Autohub::stop() {
     dynamicLibraryMap_.clear();
 }
 
-void
+bool
 Autohub::start() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
@@ -240,6 +240,7 @@ Autohub::start() {
         utils::Logger::Instance().Info("Unable to connect to PLM.\n"
                 "Shutting down now\n");
         wspp_server_.stop();
+        return false;
     } else {
 
         try {
@@ -259,6 +260,7 @@ Autohub::start() {
 
         TestPlugin();
     }
+    return true;
 }
 
 /*
