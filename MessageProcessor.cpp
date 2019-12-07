@@ -87,13 +87,19 @@ MessageProcessor::connect(PropertyKeys& properties) {
 
     std::vector<uint8_t> send_buffer = {0x60};
     if (io_port_->open(host, port)) {
+        bool rVal = false;
         PlmEcho status = trySendReceive(send_buffer, 2, 0x60, properties);
         if ((status == PlmEcho::ACK) && (!properties.empty())) {
-            found_controller_ = true;
-            return true;
+            rVal = true;
+            if (config_["enable_monitor_mode"].as<bool>(false))
+            {
+                send_buffer = {0x6B, 0x20};
+                rVal = (trySend(send_buffer) == PlmEcho::ACK);
+            }
         }
+        found_controller_ = rVal;
     }
-    return false;
+    return found_controller_;
 
 }
 

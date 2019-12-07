@@ -19,6 +19,7 @@
         <itemPath>include/insteon/InsteonProtocol.hpp</itemPath>
         <itemPath>include/insteon/MessageProcessor.hpp</itemPath>
         <itemPath>include/insteon/PropertyKey.hpp</itemPath>
+        <itemPath>include/insteon/PropertyMap.hpp</itemPath>
       </logicalFolder>
       <logicalFolder name="io" displayName="io" projectFiles="true">
         <itemPath>include/io/SerialPort.h</itemPath>
@@ -217,6 +218,8 @@
       </item>
       <item path="include/insteon/PropertyKey.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="include/insteon/PropertyMap.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="include/insteon/detail/InsteonController_impl.h"
             ex="false"
             tool="3"
@@ -389,6 +392,8 @@
             flavor2="0">
       </item>
       <item path="include/insteon/PropertyKey.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/insteon/PropertyMap.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/insteon/detail/InsteonController_impl.h"
             ex="false"

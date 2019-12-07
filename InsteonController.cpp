@@ -46,22 +46,6 @@ namespace ace
 namespace insteon
 {
 
-// TODO Move to utils
-
-std::string
-ByteArrayToStringStream(
-        const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
-    utils::Logger::Instance().Trace(FUNCTION_NAME);
-    std::stringstream strStream;
-    for (int i = offset; i < offset + count; ++i) {
-        if (i < data.size()) {
-            strStream << std::hex << std::setw(2) << std::setfill('0')
-                    << (uint16_t) data[i];
-        }
-    }
-    return strStream.str();
-}
-
 InsteonController::InsteonController(InsteonNetwork *network,
         boost::asio::io_service& io_service)
 : insteon_network_(network), is_loading_database_(false),
@@ -274,7 +258,7 @@ InsteonController::onMessage(
         default:
             utils::Logger::Instance().Info("%s\n\t - unexpected message: {%s}\n",
                     FUNCTION_NAME_CSTR,
-                    ByteArrayToStringStream(im->raw_message,
+                    utils::ByteArrayToStringStream(im->raw_message,
                     0, im->raw_message.size()).c_str()
                     );
             break;

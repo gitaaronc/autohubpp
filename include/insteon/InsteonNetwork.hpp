@@ -95,7 +95,7 @@ namespace ace {
             // pointer to Insteon Controller object
             std::unique_ptr<InsteonController> insteon_controller_;
             // list of Insteon Devices
-            InsteonDeviceMap device_list_;
+            InsteonDeviceMap device_map_;
             // pointer to message processor
             std::shared_ptr<MessageProcessor> msg_proc_;
             // pointer to callback function, executed when updates occur

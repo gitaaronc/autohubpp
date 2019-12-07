@@ -263,10 +263,6 @@ Autohub::start() {
     return true;
 }
 
-/*
- * Initial hatchet job to support houselinc application
- * TODO: replace hatchet job with proper implementation
- */
 void
 Autohub::houselincRx(std::vector<uint8_t> buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
@@ -280,10 +276,6 @@ Autohub::houselincRx(std::vector<uint8_t> buffer) {
     }));
 }
 
-/*
- * Initial hatchet job to support houselinc application
- * TODO: replace hatchet job with proper implementation
- */
 void
 Autohub::houselincTx(std::vector<uint8_t> buffer) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);

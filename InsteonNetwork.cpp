@@ -73,8 +73,8 @@ std::shared_ptr<InsteonDevice>
 InsteonNetwork::addDevice(uint32_t insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
 
-    auto it = device_list_.find(insteon_address);
-    if (it != device_list_.end())
+    auto it = device_map_.find(insteon_address);
+    if (it != device_map_.end())
         return it->second;
 
     std::shared_ptr<InsteonDevice> device = std::make_shared<InsteonDevice>
@@ -85,7 +85,7 @@ InsteonNetwork::addDevice(uint32_t insteon_address) {
     device->set_update_handler(std::bind(&type::onUpdateDevice,
             this, std::placeholders::_1));
 
-    return device_list_.insert(InsteonDeviceMapPair(insteon_address, device))
+    return device_map_.insert(InsteonDeviceMapPair(insteon_address, device))
             .first->second;
 
 }
@@ -106,8 +106,8 @@ InsteonNetwork::loadDevices() {
 void
 InsteonNetwork::saveDevices() {
     utils::Logger::Instance().Debug("%s\n\t  - %d devices total",
-            FUNCTION_NAME_CSTR, device_list_.size());
-    for (const auto& it : device_list_) {
+            FUNCTION_NAME_CSTR, device_map_.size());
+    for (const auto& it : device_map_) {
         it.second->SerializeYAML();
     }
 }
@@ -121,15 +121,10 @@ InsteonNetwork::connect() {
         return false;
     }
     if (!properties.empty()){
-        // TODO: do something with the properties
+        // TODO: HANDLE PLM Properties
     }
 
     loadDevices();
-
-    if (config_["PLM"]["enable_monitor_mode"].as<bool>(false))
-        if (insteon_controller_->enableMonitorMode())
-            utils::Logger::Instance().Info("PLM monitor mode enabled "
-                "successfully!");
 
     // start loading the ALDB from PLM
     if (config_["PLM"]["load_aldb"].as<bool>(false)) {
@@ -148,7 +143,7 @@ InsteonNetwork::connect() {
     if (config_["PLM"]["load_aldb"].as<bool>(false)) {
         utils::Logger::Instance().Info("%s\n\t  - getting aldb from known devices",
                 FUNCTION_NAME_CSTR);
-        for (const auto& it : device_list_) {
+        for (const auto& it : device_map_) {
             if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled_"].as<bool>(false)) {
                 io_strand_.post(std::bind(&InsteonDevice::command, it.second,
@@ -161,7 +156,7 @@ InsteonNetwork::connect() {
     if (config_["PLM"]["sync_device_status"].as<bool>(true)) {
         utils::Logger::Instance().Info("%s\n\t  - syncing device status",
                 FUNCTION_NAME_CSTR);
-        for (const auto& it : device_list_) {
+        for (const auto& it : device_map_) {
             if (!config_["DEVICES"][utils::int_to_hex(it.second->insteon_address())]
                     ["device_disabled_"].as<bool>(false)) {
                 io_strand_.post(std::bind(&InsteonDevice::command, it.second,
@@ -169,7 +164,6 @@ InsteonNetwork::connect() {
             }
         }
     }
-
     return true;
 }
 
@@ -185,8 +179,8 @@ InsteonNetwork::connect() {
 bool
 InsteonNetwork::deviceExists(uint32_t insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    auto it = device_list_.find(insteon_address);
-    return it != device_list_.end();
+    auto it = device_map_.find(insteon_address);
+    return it != device_map_.end();
 }
 
 /**
@@ -201,8 +195,8 @@ std::shared_ptr<InsteonDevice>
 InsteonNetwork::getDevice(uint32_t insteon_address) {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
     std::shared_ptr<InsteonDevice>device;
-    auto it = device_list_.find(insteon_address);
-    if (it != device_list_.end())
+    auto it = device_map_.find(insteon_address);
+    if (it != device_map_.end())
         return it->second;
     return device;
 }
@@ -221,7 +215,7 @@ InsteonNetwork::serializeJson(uint32_t device_id) {
     Json::Value root;
     if (device_id == 0) {
         Json::Value devices;
-        for (const auto& it : device_list_) {
+        for (const auto& it : device_map_) {
             devices.append(it.second->SerializeJson());
         }
         root["devices"] = devices;

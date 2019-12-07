@@ -72,8 +72,7 @@ std::string
 ByteArrayToStringStream(
         const std::vector<uint8_t>& data, uint32_t offset, uint32_t count) {
     std::stringstream strStream;
-    strStream.str("");
-    for (uint64_t i = offset; i < offset + count; ++i) {
+    for (int i = offset; i < offset + count; ++i) {
         if (i < data.size()) {
             strStream << std::hex << std::setw(2) << std::setfill('0')
                     << (uint16_t) data[i];
@@ -81,7 +80,6 @@ ByteArrayToStringStream(
     }
     return strStream.str();
 }
-
 }
 }
 
