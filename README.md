@@ -1,7 +1,7 @@
 # autohubpp
 C++ Home Automation Hub - Insteon PLM Support
 
-<b>Intention of Project</b><br/>
+**Intention of Project**  
 
  To create a fully customizable home automation hub.<br/>
  This server software is written in C++. It was designed to provide TCP/IP support to Insteon PLM.<br/>
@@ -227,14 +227,14 @@ Sampled Response:<br/>
 }
 
 ```
-*Autorun in Linux*<br>
+**Autorun in Linux**  
 Autohubpp will need to be started after the usb/serial adapter is reckognized by the operating system.<br>
-*Step 1*<br>
+**Step 1**  
 Create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder<br>
 ```
 KERNEL=="ttyUSB0", TAG+="systemd", ENV{SYSTEMD_WANTS}="autohubdaemon.service"
 ```
-*Step 2*<br>
+**Step 2**  
 Create a file named autohubdaemon.service in /lib/systemd/system<br>
 ```
 [Unit]
@@ -247,10 +247,10 @@ ExecStart=/usr/sbin/autohubpp /etc/autohubpp.yaml
 RemainAfterExit=yes
 Type=forking
 ```
-*Step 3*<br>
+**Step 3**  
 The compiled autohubpp executable should be placed in /usr/sbin or create a link to its physical location  
 
-further reading if interested: https://opensource.com/article/18/11/udev
+Further reading if interested: https://opensource.com/article/18/11/udev
  
 Documenation is still required.<br/>
 
