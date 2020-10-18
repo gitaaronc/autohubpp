@@ -112,8 +112,6 @@ MessageProcessor::onReceive() {
 void
 MessageProcessor::processData() {
     utils::Logger::Instance().Trace(FUNCTION_NAME);
-    // force other thread to wait
-    //std::lock_guard<std::mutex>_(lock_data_processor_);
     std::vector<uint8_t> read_buffer;
     {
         // move the object buffer to the back of local buffer
