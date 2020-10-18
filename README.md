@@ -250,10 +250,8 @@ Type=forking
 *Step 3*<br>
 The compiled autohubpp executable should be placed in /usr/sbin or create a link to its physical location  
 
-further reading if interested: https://opensource.com/article/18/11/udev<br>
-```
+further reading if interested: https://opensource.com/article/18/11/udev
  
-
 Documenation is still required.<br/>
 
 More C++ and Python developers required!!<br/>
