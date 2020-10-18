@@ -227,16 +227,15 @@ Sampled Response:<br/>
 }
 
 ```
-<HR>
- <b>Autorun in Linux</b>
+*Autorun in Linux*<br>
 Autohubpp will need to be started after the usb/serial adapter is reckognized by the operating system.<br>
- <u>Step 1</ul
-Create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder
+*Step 1*<br>
+Create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder<br>
 ```
 KERNEL=="ttyUSB0", TAG+="systemd", ENV{SYSTEMD_WANTS}="autohubdaemon.service"
 ```
- <u>Step 2</u>
-Create a file named autohubdaemon.service in /lib/systemd/system
+*Step 2*<br>
+Create a file named autohubdaemon.service in /lib/systemd/system<br>
 ```
 [Unit]
 Description=INSTEON serial to socket bridge
@@ -248,11 +247,11 @@ ExecStart=/usr/sbin/autohubpp /etc/autohubpp.yaml
 RemainAfterExit=yes
 Type=forking
 ```
-<u>Step 3</u>
-The compiled autohubpp executable should be placed in /usr/sbin or create a link to its physical location
+*Step 3*<br>
+The compiled autohubpp executable should be placed in /usr/sbin or create a link to its physical location  
 
-further reading if interested: https://opensource.com/article/18/11/udev
-<HR>
+further reading if interested: https://opensource.com/article/18/11/udev<br>
+```
  
 
 Documenation is still required.<br/>
