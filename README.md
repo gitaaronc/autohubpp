@@ -228,15 +228,15 @@ Sampled Response:<br/>
 
 ```
 <HR>
-Using udev in linux to autostart autohub when the Insteon USB Serial controller is attached
-- create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder
-- contents of file are as follows
+ <b>Autorun in Linux</b>
+Autohubpp will need to be started after the usb/serial adapter is reckognized by the operating system.<br>
+ <u>Step 1</ul
+Create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder
 ```
 KERNEL=="ttyUSB0", TAG+="systemd", ENV{SYSTEMD_WANTS}="autohubdaemon.service"
 ```
-
+ <u>Step 2</u>
 Create a file named autohubdaemon.service in /lib/systemd/system
-File contents:
 ```
 [Unit]
 Description=INSTEON serial to socket bridge
@@ -248,7 +248,7 @@ ExecStart=/usr/sbin/autohubpp /etc/autohubpp.yaml
 RemainAfterExit=yes
 Type=forking
 ```
-
+<u>Step 3</u>
 The compiled autohubpp executable should be placed in /usr/sbin or create a link to its physical location
 
 further reading if interested: https://opensource.com/article/18/11/udev
