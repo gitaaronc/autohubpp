@@ -227,6 +227,34 @@ Sampled Response:<br/>
 }
 
 ```
+<HR>
+Using udev in linux to autostart autohub when the Insteon USB Serial controller is attached
+- create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder
+- contents of file are as follows
+```
+KERNEL=="ttyUSB0", TAG+="systemd", ENV{SYSTEMD_WANTS}="autohubdaemon.service"
+```
+
+Create a file named autohubdaemon.service in /lib/systemd/system
+File contents:
+```
+[Unit]
+Description=INSTEON serial to socket bridge
+After=remote-fs.target
+After=syslog.target
+
+[Service]
+ExecStart=/usr/sbin/autohubpp /etc/autohubpp.yaml
+RemainAfterExit=yes
+Type=forking
+```
+
+The compiled autohubpp executable should be placed in /usr/sbin or create a link to its physical location
+
+further reading if interested: https://opensource.com/article/18/11/udev
+<HR>
+ 
+
 Documenation is still required.<br/>
 
 More C++ and Python developers required!!<br/>
