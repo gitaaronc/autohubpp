@@ -228,7 +228,7 @@ Sampled Response:<br/>
 
 ```
 **Autorun in Linux**  
-Autohubpp will need to be started after the usb/serial adapter is reckognized by the operating system.<br>
+Autohubpp will need to be started after the usb/serial adapter is recognized by the operating system.<br>
 **Step 1**  
 Create a file called 95-autohubdaemon.rules in /etc/udev/rules.d folder<br>
 ```
